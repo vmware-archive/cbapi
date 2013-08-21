@@ -1,0 +1,2 @@
+recursive-include src/cbapi/ *
+recursive-include example *.py *.txt
