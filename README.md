@@ -7,7 +7,7 @@ http://carbonblack.com
 
 ### Versioned 
 
-The following APIs are versioned.  Backwards compatability will be maintained for at most two major version revisions. 
+The following APIs are versioned.  Backwards compatability will be maintained for at least two major version revisions. 
 
 ``` None yet. Final APIs expected early Q413. ```
 
@@ -16,7 +16,8 @@ The following APIs are versioned.  Backwards compatability will be maintained fo
 The following APIs are *beta*.  The interfaces will change and backwards compatibility will not be supported.   The underlying data is not expected to substantially change.
 
 #### Search
-[`/api/search`](#apisearch) - Process search
+- [`/api/search`](#apisearch) - Process search
+- [`/api/search/module`](#apisearchmodule) - Binary search
 
 ## API Listing
 
@@ -24,11 +25,11 @@ The following APIs are *beta*.  The interfaces will change and backwards compati
 Process search.  Parameters passed as a query string.
 
 ##### Parameters:
-- REQUIRED `q`: Query string. Accepts the same data as the search box on the Process Search page.  `TODO`: link to query syntax doc
-- OPTIONAL `rows`: Return this many rows, 10 by default.
-- OPTIONAL `start`: Start at this row, 0 by default.
-- OPTIONAL `sort`: Sort rows by this field and order.  `last_update desc` by default.
-- OPTIONAL `facets`: Return facet results.  'false' by default, set to 'true' for facets.
+- `q`: REQUIRED Query string. Accepts the same data as the search box on the Process Search page.  `TODO`: link to query syntax doc
+- `rows`: OPTIONAL Return this many rows, 10 by default.
+- `start`: OPTIONAL Start at this row, 0 by default.
+- `sort`: OPTIONAL Sort rows by this field and order.  `last_update desc` by default.
+- `facets`: OPTIONAL Return facet results.  'false' by default, set to 'true' for facets.
 
 ##### Returns:
 JSON object with the following elements:
@@ -138,11 +139,11 @@ GET http://192.168.206.151/api/search/?q=notepad.exe
 Binary search.  Parameters passed as in URL path.
 
 ##### Parameters:
-- REQUIRED `q`: Query string. Accepts the same data as the search box on the Binary Search page.  `TODO`: link to query syntax doc
-- OPTIONAL `rows`: Return this many rows, 10 by default.
-- OPTIONAL `start`: Start at this row, 0 by default.
-- OPTIONAL `sort`: Sort rows by this field and order.  `server_added_timestamp desc` by default.  
-- OPTIONAL `facets`: Return facet results.  'false' by default, set to 'true' for facets.
+- `q`: REQUIRED Query string. Accepts the same data as the search box on the Binary Search page.  `TODO`: link to query syntax doc
+- `rows`: OPTIONAL Return this many rows, 10 by default.
+- `start`: OPTIONAL Start at this row, 0 by default.
+- `sort`: OPTIONAL Sort rows by this field and order.  `server_added_timestamp desc` by default.  
+- `facets`: OPTIONAL Return facet results.  'false' by default, set to 'true' for facets.
 
 ##### Returns:
 JSON object with the following elements:
