@@ -27,7 +27,7 @@ Process search.  Parameters passed as a query string.
 - REQUIRED `q`: Query string. Accepts the same data as the search box on the Process Search page.  `TODO`: link to query syntax doc
 - OPTIONAL `rows`: Return this many rows, 10 by default.
 - OPTIONAL `start`: Start at this row, 0 by default.
-- OPTIONAL `sort`: Sort rows by this field.  `last_update` by default.
+- OPTIONAL `sort`: Sort rows by this field and order.  `last_update desc` by default.
 - OPTIONAL `facets`: Return facet results.  'false' by default, set to 'true' for facets.
 
 ##### Returns:
@@ -48,6 +48,8 @@ JSON object with the following elements:
 A process contains the following fields:
 - `process_md5`: the md5 of the binary image backing the process
 - `process_name`: the name of the process
+- `start`: the start time of the process in remote computer's GMT time
+- `last_update`: the time of the most recently received event for this process in remote computer's GMT time
 - `hostname`: the hostname of the computer for this process
 - `modload_count`: the count of modules loaded in this process
 - `regmod_count`: the count of registry modifications in this process
@@ -89,7 +91,7 @@ Each facet result object has three values:
 A complete example:
 
 ```
-http://192.168.206.151/api/search/?q=notepad.exe
+GET http://192.168.206.151/api/search/?q=notepad.exe
 
 {
   "results": [
@@ -123,11 +125,139 @@ http://192.168.206.151/api/search/?q=notepad.exe
     {
       "name": "\\registry\\user\\s-1-5-21-2445116603-3509627529-3207332553-1000_classes\\local settings\\software\\microsoft\\windows\\shell\\muicache\\c:\\windows\\system32\\PREPREPREnotepad.exePOSTPOSTPOST", 
       "ids": [
-        "52af8b63-8fb4-e30d-0000-000000000001"
+        "cbfbc1a0-b782-e13e-0000-000000000001"
       ]
     }, 
   ]
   "tagged_pids": {  }, 
   "filtered": {}, 
+}
+```
+
+####  `/api/search/module/<query>`
+Binary search.  Parameters passed as in URL path.
+
+##### Parameters:
+- REQUIRED `q`: Query string. Accepts the same data as the search box on the Binary Search page.  `TODO`: link to query syntax doc
+- OPTIONAL `rows`: Return this many rows, 10 by default.
+- OPTIONAL `start`: Start at this row, 0 by default.
+- OPTIONAL `sort`: Sort rows by this field and order.  `server_added_timestamp desc` by default.  
+- OPTIONAL `facets`: Return facet results.  'false' by default, set to 'true' for facets.
+
+##### Returns:
+JSON object with the following elements:
+
+- `results`: a list of matching binaries (see below for binary object)
+- `terms`: a list of strings, each representing a token as parsed by the query parser
+- `total_results`: number of matching binaries
+- `start`: index of first row
+- `elapsed`: clock time elapsed resolving this request  
+- `highlights`: a list of highlight objects matching the query string.  Format the same as the process event object.
+- `facets`: a list of facet entries if requested. (see below for facet object)
+
+*Binary Object*
+
+A binary object contains the following fields:
+
+- `md5`: the md5 hash of this binary
+- `server_added_timestamp`: the first time this binary was received on the server in the server's GMT time
+- `orig_mod_len`: Filesize in bytes
+- `copied_mod_len`: Bytes copied from remote host, if file is > 25MB this will be less than `orig_mod_len`
+- `observed_filename`: The set of unique filenames this binary has been seen as
+- `is_executable_image:` 'true' or 'false' - 'true' if an EXE
+- `is_64bit`: 'true' or 'false' - 'true' if x64 
+- `product_version`: If present, Product version from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx?cs-save-lang=1&cs-lang=csharp#code-snippet-1)
+- `product_name`: If present, Product name from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx?cs-save-lang=1&cs-lang=csharp#code-snippet-1)
+- `file_Version`: If present, File version from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx?cs-save-lang=1&cs-lang=csharp#code-snippet-1)
+- `company_name`: If present, Company name from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx?cs-save-lang=1&cs-lang=csharp#code-snippet-1)
+- `internal_name`: If present, Internal name from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx?cs-save-lang=1&cs-lang=csharp#code-snippet-1)
+- `product_name`: If present, Product name from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx?cs-save-lang=1&cs-lang=csharp#code-snippet-1)
+- `legal_copyright`: If present, Legal copyright from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx?cs-save-lang=1&cs-lang=csharp#code-snippet-1)
+- `legal_trademark`: If present, Legal trademark from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx?cs-save-lang=1&cs-lang=csharp#code-snippet-1)
+- `file_desc`: If present, File description from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx?cs-save-lang=1&cs-lang=csharp#code-snippet-1)
+- `original_filename`: If present, Original filename from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx?cs-save-lang=1&cs-lang=csharp#code-snippet-1)
+- `private_build`: If present, Private build from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx?cs-save-lang=1&cs-lang=csharp#code-snippet-1)
+- `special_build`: If present, Special build from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx?cs-save-lang=1&cs-lang=csharp#code-snippet-1)
+- `signed`: Digital signature status: One of `Signed`, `Unsigned`, `Expired`, `Bad Signature`, `Invalid Signature`, `Invalid Chain`, `Untrusted Root`, `Explicit Distrust`
+- `digsig_result`: Digital signature status: One of `Signed`, `Unsigned`, `Expired`, `Bad Signature`, `Invalid Signature`, `Invalid Chain`, `Untrusted Root`, `Explicit Distrust`
+- `digsig_result_code`: HRESULT_FROM_WIN32 for the result of the digital signature operation via [WinVerifyTrust](http://msdn.microsoft.com/en-us/library/windows/desktop/aa388208)
+- `digsig_sign_time`: If signed, the timestamp of the signature in GMT
+- `digsig_publisher`: If signed and present, the publisher name
+- `digsig_prog_name`: If signed and present, the program name
+- `digsig_issuer`: If signed and present, the issuer name
+- `digsig_subject`: If signed and present, the subject
+- `alliance_score_virustotal`: If enabled and the hit count > 1, the number of (VirusTotal)[http://virustotal.com] hits for this md5
+ 
+*Facet object* 
+
+The facet object is a list of dictionaries with the following keys.  Each key is a list of facet results objects that contain the top 200 name, value and percentage for the unique set of results matching the search.  
+
+- `product_name_facet`: the top unique product names for the binaries matching the search
+- `file_version_facet`: the top unique file versions for the binaries matching the search
+- `alliance_score_virustotal`: the distribution of VirusTotal scores for binaries matching the search
+- `digsig_result`: the distribution of signature status results for binaries matching the search
+- `company_name_facet`: the top unique company names for the binaries matching the search
+- `digsig_publisher_facet`: the top unique publisher names for the binaries matching the search
+- `product_name_facet`: the top unique company anmes for the binaries matching the search
+- `digsig_sign_time`: the distribution of signature times per month for the last 48 months for binaries matching the search
+- `server_added_timestamp`: the distribution of server_added_timestamps per day for the last 30 days 
+- `observed_filename_facet`: the top unique observed filenames for the binaries matching the search
+
+The facet result objects have the same format as the process facet result objects above. 
+
+A complete example:
+
+```
+GET http://192.168.206.151/api/search/module/q=notepad.exe
+
+{
+  "total_results": 1, 
+  "facets": {}, 
+  "elapsed": 0.046832799911499023, 
+  "start": 0,
+  "results": [
+    {
+      "md5": "F2C7BB8ACC97F92E987A2D4087D021B1", 
+      "digsig_result": "Signed", 
+      "observed_filename": [
+        "c:\\windows\\system32\\notepad.exe"
+      ], 
+      "product_version": "6.1.7600.16385", 
+      "signed": "Signed", 
+      "digsig_sign_time": "2009-07-14T10:17:00Z", 
+      "orig_mod_len": 193536, 
+      "is_executable_image": true, 
+      "is_64bit": true, 
+      "digsig_publisher": "Microsoft Corporation", 
+      "file_version": "6.1.7600.16385 (win7_rtm.090713-1255)", 
+      "company_name": "Microsoft Corporation", 
+      "internal_name": "Notepad", 
+      "product_name": "Microsoft\u00ae Windows\u00ae Operating System", 
+      "digsig_result_code": "0", 
+      "timestamp": "2013-08-16T11:26:48.321Z", 
+      "copied_mod_len": 193536, 
+      "server_added_timestamp": "2013-08-16T11:26:48.321Z", 
+      "legal_copyright": "\u00a9 Microsoft Corporation. All rights reserved.", 
+      "original_filename": "NOTEPAD.EXE", 
+      "file_desc": "Notepad"
+    }
+  ],
+  "terms": [
+    "notepad.exe"
+  ],
+  "highlights": [
+    {
+      "name": "PREPREPRENOTEPAD.EXEPOSTPOSTPOST", 
+      "ids": [
+        "F2C7BB8ACC97F92E987A2D4087D021B1"
+      ]
+    }, 
+    {
+      "name": "c:\\windows\\system32\\PREPREPREnotepad.exePOSTPOSTPOST", 
+      "ids": [
+        "F2C7BB8ACC97F92E987A2D4087D021B1"
+      ]
+    }
+  ], 
 }
 ```
