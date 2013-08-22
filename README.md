@@ -187,7 +187,7 @@ A binary object contains the following fields:
 - `digsig_prog_name`: If signed and present, the program name
 - `digsig_issuer`: If signed and present, the issuer name
 - `digsig_subject`: If signed and present, the subject
-- `alliance_score_virustotal`: If enabled and the hit count > 1, the number of (VirusTotal)[http://virustotal.com] hits for this md5
+- `alliance_score_virustotal`: If enabled and the hit count > 1, the number of [VirusTotal](http://virustotal.com) hits for this md5
  
 *Facet object* 
 
