@@ -60,7 +60,7 @@ class CbApi(object):
                 - terms - a list of strings describing how the query was parsed
                 - facets - a dictionary of the facet results for this saerch
         """
-        r = requests.get("%s/api/search" % self.server, cookies=self.cookies, 
+        r = requests.get("%s/api/search/" % self.server, cookies=self.cookies, 
                          params={"q": query_string, 'cburlver': 1, 'start': start, 'rows': rows, 'sort': sort}, verify=self.ssl_verify)
         if r.status_code != 200:
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
