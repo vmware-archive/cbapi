@@ -18,6 +18,8 @@ The following APIs are *beta*.  The interfaces will change and backwards compati
 #### Search
 - [`/api/search`](#apisearch) - Process search
 - [`/api/search/module`](#apisearchmodulequery) - Binary search
+#### Process Data 
+- [`/api/process/`](#apiprocess) - Process summary data
 
 ## API Listing
 
@@ -260,5 +262,89 @@ GET http://192.168.206.151/api/search/module/q=notepad.exe
       ]
     }
   ], 
+}
+```
+
+## API Listing
+
+####  `/api/process/(id)/(segment)`
+Gets basic process information for segment (segment) of process (guid)
+
+##### Parameters:
+- `id`: the internal CB process guid, the `id` field in search results
+- `segment`: the process segment, the `segment_id` field in search results
+
+##### Returns:
+A JSON object with the following structure:
+
+- `process`: a process summary object with metadata for the selected process
+- `siblings`: a list of process summary objects for the first 15 sibiling processes
+- `children`: a list of process summary objects for each child process
+- `parent`: a process summary object with metadata for the parent process
+
+Each process summary object contains the following structure:
+
+- `process_md5`: the MD5 of the executable backing this process 
+- `sensor_id`: the sensor id of the host this process executed on
+- `group`: the sensor group the sensor was assigned to
+- `parent_id`: the process guid of the parent process
+- `process_name`: the name of this process, e.g., svchost.exe
+- `path`: the full path of the executable backing this process, e.g., c:\windows\system32\svchost.exe
+- `last_update`: the time of the last event received from this process, as recorded by the remote host
+- `start`: the start time of this process, as recorded by the remote host
+- `hostname`: the hostname of the computer this process executed on
+- `id`: the internal CB process guid of this process
+- `segment_id`: the segment id of this process
+
+
+A complete example:
+
+```
+GET http://192.168.206.154/api/process/2032659773721368929/1
+
+{
+  "process": {
+    "process_md5": "517110bd83835338c037269e603db55d", 
+    "sensor_id": 2, 
+    "group": "Default Group", 
+    "start": "2013-09-19T22:07:07Z", 
+    "process_name": "taskhost.exe", 
+    "segment_id": 1, 
+    "last_update": "2013-09-19T22:09:07Z", 
+    "cmdline": "taskhost.exe $(arg0)", 
+    "hostname": "WIN-EP7RMLTCLAJ", 
+    "parent_id": "5856845119039539348", 
+    "path": "c:\\windows\\system32\\taskhost.exe", 
+    "id": "2032659773721368929"
+  }, 
+  "siblings": [
+    {
+      "process_md5": "c78655bc80301d76ed4fef1c1ea40a7d", 
+      "sensor_id": 2, 
+      "group": "Default Group", 
+      "parent_id": "5856845119039539348", 
+      "process_name": "svchost.exe", 
+      "segment_id": 1, 
+      "last_update": "2013-09-19T22:34:49Z", 
+      "start": "2013-09-10T04:10:07Z", 
+      "hostname": "WIN-EP7RMLTCLAJ", 
+      "path": "c:\\windows\\system32\\svchost.exe", 
+      "id": "5286285292765095481"
+    }, 
+  ], 
+  "children": [], 
+  "parent": {
+    "process_md5": "24acb7e5be595468e3b9aa488b9b4fcb", 
+    "sensor_id": 2, 
+    "group": "Default Group", 
+    "parent_id": "4245649408199694328", 
+    "process_name": "services.exe", 
+    "segment_id": 1, 
+    "last_update": "2013-09-19T22:09:07Z", 
+    "start": "2013-09-10T04:09:51Z", 
+    "hostname": "WIN-EP7RMLTCLAJ", 
+    "path": "c:\\windows\\system32\\services.exe", 
+    "id": "5856845119039539348"
+  }
 }
 ```
