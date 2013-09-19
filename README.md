@@ -18,8 +18,9 @@ The following APIs are *beta*.  The interfaces will change and backwards compati
 #### Search
 - [`/api/search`](#apisearch) - Process search
 - [`/api/search/module`](#apisearchmodulequery) - Binary search
+
 #### Process Data 
-- [`/api/process/`](#apiprocess) - Process summary data
+- [`/api/process/`](#apiprocessidsegment) - Process summary data
 
 ## API Listing
 
@@ -264,8 +265,6 @@ GET http://192.168.206.151/api/search/module/q=notepad.exe
   ], 
 }
 ```
-
-## API Listing
 
 ####  `/api/process/(id)/(segment)`
 Gets basic process information for segment (segment) of process (guid)
