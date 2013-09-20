@@ -22,7 +22,7 @@ The following APIs are *beta*.  The interfaces will change and backwards compati
 #### Process Data 
 - [`/api/process/`](#apiprocessidsegment) - Process summary data
 - [`/api/events/`](#apieventsidsegment) - Events for the selected process
-- 
+ 
 ## API Listing
 
 ####  `/api/search/`
@@ -396,10 +396,10 @@ The pipe character (`|`) delimits the fields.
 "1|2013-09-16 07:11:58.000000|c:\\documents and settings\\administrator\\local settings\\temp\\hsperfdata_administrator\\3704|"
 ```
 - field 0: operation type, an integer 1, 2, 4 or 8
--- 1: Created the file
--- 2: First wrote to the file
--- 4: Deleted the file
--- 8: Last wrote to the file
+  - 1: Created the file
+  - 2: First wrote to the file
+  - 4: Deleted the file
+  - 8: Last wrote to the file
 - field 1: event time
 - field 2: file path
 - field 3: if operation type (field 0) is 8, last write, this value is the md5 of the file after the last write
@@ -417,10 +417,10 @@ The pipe character (`|`) delimits the fields.
 "2|2013-09-19 22:07:07.000000|\\registry\\user\\s-1-5-19\\software\\microsoft\\sqmclient\\reliability\\adaptivesqm\\manifestinfo\\version"
 ```
 - field 0: operation type, an integer 1, 2, 4 or 8
--- 1: Created the registry key
--- 2: First wrote to the registry key
--- 4: Deleted the key 
--- 8: Deleted the value
+  - 1: Created the registry key
+  - 2: First wrote to the registry key
+  - 4: Deleted the key 
+  - 8: Deleted the value
 - field 1: event time
 - field 3: the registry key path
  
