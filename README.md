@@ -27,6 +27,9 @@ The following APIs are *beta*.  The interfaces will change and backwards compati
 - [`/api/icon/`](#apiiconmd5) - Binary's icon
 - [`/api/module/`](#apimodulemd5) - Binary's metadata
 
+#### Sensor Data
+- [`/api/host/`](#apihostid) - Sensor details
+ 
 ## API Reference
 
 ####  `/api/search/`
@@ -498,7 +501,9 @@ Returns the icon for the binary with the provided md5
 
 ##### Returns:
 A PNG with the icon.  If the icon is not found, it returns the default Windows icon.
+
 -----
+
 ####  `/api/module/(md5)`
 Returns the metadata for the binary with the provided md5
 
@@ -575,5 +580,76 @@ GET http://192.168.206.154/api/module/1C8B787BAA52DEAD1A6FEC1502D652f0
   "digsig_publisher_facet": "Microsoft Corporation", 
   "original_filename": "MSHTML.DLL.MUI", 
   "file_desc": "Microsoft (R) HTML Viewer"
+}
+```
+
+-----
+
+####  `/api/host/(id)`
+Returns the detail for the sensor with the provided id
+
+##### Parameters:
+- `id`: REQUIRED the sensor id
+
+##### Returns:
+A structure with the following fields:
+
+- `id`: this sensor's id
+- `build_id`: the sensor version installed on this endpoint.  From the `/api/builds/` endpoint
+- `build_version_string`: Human-readable string of the host's installed sensor version
+- `uptime`: Host's uptime in seconds
+- `systemvolume_total_size`: size in bytes of the computer's system volumn
+- `systemvolume_free_size`: bytes free on the system volume
+- `os_environment_display_string`: Human-readable string of the installed OS
+- - `os_environment_id`: the operating system installed on this computer.  From the internal table.
+- `physical_memory_size`: size in bytes of physical memory
+- `computer_dns_name`: this computer's DNS name
+- `computer_name`: NetBIOS name of this computer
+- `sensor_health_message`: Human-readable string indicating sensor's self-reported status
+- `computer_sid`: Machine SID of this host
+- `event_log_flush_time`: 
+- `last_checkin_time`: Last communication with this computer in server-local time and zone
+- `network_adapters`: A pipe-delimited list list of IP,MAC pairs for each network interface
+- `sensor_health_status`: sensor's self-reported health score, from 0 to 100.  Higher numbers better
+- `registration_time`: Time this sensor originally registered in server-local time and zone
+- `next_checkin_time`: Next expected communication from this computer in server-local time and zone
+- `boot_id`: A sequential counter of boots since the sensor was installed
+- `group_id`: The sensor group id this sensor is assigned to
+- `display`: If this sensor is shown on the hosts page.  Sensors details are never deleted, just hidden.
+- `uninstall`: true if this sensor has been told to uninstall.
+- `cookie`:  
+
+A complete example:
+```
+GET http://192.168.206.154/api/host/1
+
+{
+  "systemvolume_total_size": "42939584512", 
+  "os_environment_display_string": "Windows XP Professional Service Pack 3", 
+  "sensor_uptime": "638", 
+  "physical_memory_size": "536330240", 
+  "build_id": 1, 
+  "uptime": "666", 
+  "computer_dns_name": "j-8205a0c27a0c4", 
+  "id": 1, 
+  "systemvolume_free_size": "40167079936", 
+  "sensor_health_message": "Healthy", 
+  "build_version_string": "003.002.000.30829", 
+  "computer_sid": "S-1-5-21-1715567821-507921405-682003330", 
+  "event_log_flush_time": null, 
+  "computer_name": "J-8205A0C27A0C4", 
+  "last_checkin_time": "2013-09-10 07:08:37.378860-07:00", 
+  "license_expiration": "1990-01-01 00:00:00-08:00", 
+  "network_adapters": "192.168.206.156,000c298a3613|", 
+  "sensor_health_status": 100, 
+  "registration_time": "2013-09-10 06:49:21.261157-07:00", 
+  "next_checkin_time": "2013-09-10 07:09:07.368285-07:00", 
+  "notes": null, 
+  "os_environment_id": 1, 
+  "boot_id": "5", 
+  "cookie": 1291426991, 
+  "group_id": 1, 
+  "display": true, 
+  "uninstall": false
 }
 ```
