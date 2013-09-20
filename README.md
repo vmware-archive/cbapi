@@ -23,7 +23,11 @@ The following APIs are *beta*.  The interfaces will change and backwards compati
 - [`/api/process/`](#apiprocessidsegment) - Process summary data
 - [`/api/events/`](#apieventsidsegment) - Events for the selected process
  
-## API Listing
+#### Binary Data
+- [`/api/icon/`](#apiiconmd5) - Binary's icon
+- [`/api/module/`](#apimodulemd5) - Binary's metadata
+
+## API Reference
 
 ####  `/api/search/`
 Process search.  Parameters passed as a query string.
@@ -138,7 +142,7 @@ GET http://192.168.206.151/api/search/?q=notepad.exe
   "filtered": {}, 
 }
 ```
-
+-----
 ####  `/api/search/module/<query>`
 Binary search.  Parameters passed as in URL path.
 
@@ -266,7 +270,7 @@ GET http://192.168.206.151/api/search/module/q=notepad.exe
   ], 
 }
 ```
-
+-----
 ####  `/api/process/(id)/(segment)`
 Gets basic process information for segment (segment) of process (guid)
 
@@ -348,7 +352,7 @@ GET http://192.168.206.154/api/process/2032659773721368929/1
   }
 }
 ```
-
+-----
 #### `/api/events/(id)/(segment)/`
 Gets the events for the process with id (id) and segment (segment)
 
@@ -483,5 +487,93 @@ GET http://192.168.206.154/api/events/2032659773721368929/1
   "id": "2032659773721368929"
   }, 
   "elapsed": 0.0126001834869
+}
+```
+-----
+####  `/api/icon/(md5)`
+Returns the icon for the binary with the provided md5
+
+##### Parameters:
+- `md5`: REQUIRED the md5 of the binary  
+
+##### Returns:
+A PNG with the icon.  If the icon is not found, it returns the default Windows icon.
+-----
+####  `/api/module/(md5)`
+Returns the metadata for the binary with the provided md5
+
+##### Parameters:
+- `md5`: REQUIRED the md5 of the binary  
+
+##### Returns:
+A structure with the following fields:
+
+- `md5`: the md5 hash of this binary
+- `server_added_timestamp`: the first time this binary was received on the server in the server's GMT time
+- `orig_mod_len`: Filesize in bytes
+- `copied_mod_len`: Bytes copied from remote host, if file is > 25MB this will be less than `orig_mod_len`
+- `observed_filename`: A list of strings, one per unique filename this binary has been seen as
+- `is_executable_image:` 'true' or 'false' - 'true' if an EXE
+- `is_64bit`: 'true' or 'false' - 'true' if x64 
+- `product_version`: If present, Product version from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
+- `product_name`: If present, Product name from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
+- `file_Version`: If present, File version from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
+- `company_name`: If present, Company name from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
+- `internal_name`: If present, Internal name from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
+- `product_name`: If present, Product name from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
+- `legal_copyright`: If present, Legal copyright from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
+- `legal_trademark`: If present, Legal trademark from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
+- `file_desc`: If present, File description from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
+- `original_filename`: If present, Original filename from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
+- `private_build`: If present, Private build from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
+- `special_build`: If present, Special build from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
+- `signed`: Digital signature status: One of `Signed`, `Unsigned`, `Expired`, `Bad Signature`, `Invalid Signature`, `Invalid Chain`, `Untrusted Root`, `Explicit Distrust`
+- `digsig_result`: Digital signature status: One of `Signed`, `Unsigned`, `Expired`, `Bad Signature`, `Invalid Signature`, `Invalid Chain`, `Untrusted Root`, `Explicit Distrust`
+- `digsig_result_code`: HRESULT_FROM_WIN32 for the result of the digital signature operation via [WinVerifyTrust](http://msdn.microsoft.com/en-us/library/windows/desktop/aa388208)
+- `digsig_sign_time`: If signed, the timestamp of the signature in GMT
+- `digsig_publisher`: If signed and present, the publisher name
+- `digsig_prog_name`: If signed and present, the program name
+- `digsig_issuer`: If signed and present, the issuer name
+- `digsig_subject`: If signed and present, the subject
+- `alliance_score_virustotal`: If enabled and the hit count > 1, the number of [VirusTotal](http://virustotal.com) hits for this md5
+
+A complete example:
+
+```
+GET http://192.168.206.154/api/module/1C8B787BAA52DEAD1A6FEC1502D652f0
+
+{
+  "product_version_facet": "8.00.7600.16385", 
+  "digsig_result": "Signed", 
+  "observed_filename": [
+    "c:\\windows\\system32\\mshtml.dll"
+  ], 
+  "product_version": "8.00.7600.16385", 
+  "product_name_facet": "Windows\u00ae Internet Explorer", 
+  "signed": "Signed", 
+  "digsig_sign_time": "2010-11-21T03:36:00Z", 
+  "orig_mod_len": 8988160, 
+  "is_executable_image": false, 
+  "is_64bit": true, 
+  "observed_filename_facet": [
+    "c:\\windows\\system32\\mshtml.dll"
+  ], 
+  "file_version_facet": "8.00.7600.16385 (win7_rtm.090713-1255)", 
+  "digsig_publisher": "Microsoft Corporation", 
+  "file_version": "8.00.7600.16385 (win7_rtm.090713-1255)", 
+  "company_name": "Microsoft Corporation", 
+  "internal_name": "MSHTML", 
+  "_version_": 1446430562211332096, 
+  "product_name": "Windows\u00ae Internet Explorer", 
+  "digsig_result_code": "0", 
+  "timestamp": "2013-09-17T13:14:37.636Z", 
+  "company_name_facet": "Microsoft Corporation", 
+  "copied_mod_len": 8988160, 
+  "server_added_timestamp": "2013-09-17T13:14:37.636Z", 
+  "md5": "1C8B787BAA52DEAD1A6FEC1502D652F0", 
+  "legal_copyright": "\u00a9 Microsoft Corporation. All rights reserved.", 
+  "digsig_publisher_facet": "Microsoft Corporation", 
+  "original_filename": "MSHTML.DLL.MUI", 
+  "file_desc": "Microsoft (R) HTML Viewer"
 }
 ```
