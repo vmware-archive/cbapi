@@ -21,7 +21,8 @@ The following APIs are *beta*.  The interfaces will change and backwards compati
 
 #### Process Data 
 - [`/api/process/`](#apiprocessidsegment) - Process summary data
-
+- [`/api/events/`](#apieventsidsegment) - Events for the selected process
+- 
 ## API Listing
 
 ####  `/api/search/`
@@ -270,8 +271,8 @@ GET http://192.168.206.151/api/search/module/q=notepad.exe
 Gets basic process information for segment (segment) of process (guid)
 
 ##### Parameters:
-- `id`: the internal CB process guid, the `id` field in search results
-- `segment`: the process segment, the `segment_id` field in search results
+- `id`: REQUIRED the internal CB process guid, the `id` field in search results
+- `segment`: REQUIRED the process segment, the `segment_id` field in search results.
 
 ##### Returns:
 A JSON object with the following structure:
@@ -345,5 +346,142 @@ GET http://192.168.206.154/api/process/2032659773721368929/1
     "path": "c:\\windows\\system32\\services.exe", 
     "id": "5856845119039539348"
   }
+}
+```
+
+#### `/api/events/(id)/(segment)/`
+Gets the events for the process with id (id) and segment (segment)
+
+##### Parameters
+- `id`: REQUIRED the internal CB process guid, the `id` field in search results
+- `segment`: REQUIRED the process segment, the `segment_id` field in search results.
+
+
+##### Returns:
+A JSON object with the following structure:
+
+- `process`: a process summary object with metadata and events for the selected process
+- `elapsed`: the clock time required to get this structure
+ 
+The process object may contain the following entries.
+
+- `process_md5`: the MD5 of the executable backing this process 
+- `sensor_id`: the sensor id of the host this process executed on
+- `group`: the sensor group the sensor was assigned to
+- `parent_id`: the process guid of the parent process
+- `process_name`: the name of this process, e.g., svchost.exe
+- `path`: the full path of the executable backing this process, e.g., c:\windows\system32\svchost.exe
+- `cmdline`: the command line of the process
+- `last_update`: the time of the last event received from this process, as recorded by the remote host
+- `start`: the start time of this process, as recorded by the remote host
+- `hostname`: the hostname of the computer this process executed on
+- `id`: the internal CB process guid of this process
+- `segment_id`: the segment id of this process
+- `regmod_complete`: a pipe-delimited list of regmod strings
+- `filemod_complete`: a pipe-delimited list of filemod strings
+- `modload_complete`: a pipe-delimited list of modload strings
+- `netconn_complete`: a pipe-delimited list of netconn strings
+- `childproc_complete`: a pipe-delimited list of childproc strings
+
+Each xxx_complete record is a string similar to:
+
+```
+2013-09-19 22:07:07.000000|f404e59db6a0f122ab26bf4f3e2fd0fa|c:\\windows\\system32\\dxgi.dll"
+```
+
+The pipe character (`|`) delimits the fields.  
+
+##### filemod_complete
+```
+"1|2013-09-16 07:11:58.000000|c:\\documents and settings\\administrator\\local settings\\temp\\hsperfdata_administrator\\3704|"
+```
+- field 0: operation type, an integer 1, 2, 4 or 8
+-- 1: Created the file
+-- 2: First wrote to the file
+-- 4: Deleted the file
+-- 8: Last wrote to the file
+- field 1: event time
+- field 2: file path
+- field 3: if operation type (field 0) is 8, last write, this value is the md5 of the file after the last write
+
+##### modload_complete
+```
+2013-09-19 22:07:07.000000|f404e59db6a0f122ab26bf4f3e2fd0fa|c:\\windows\\system32\\dxgi.dll"
+```
+- field 0: event time
+- field 1: MD5 of the loaded module
+- field 2: Full path of the loaded module
+
+##### regmod_complete
+```
+"2|2013-09-19 22:07:07.000000|\\registry\\user\\s-1-5-19\\software\\microsoft\\sqmclient\\reliability\\adaptivesqm\\manifestinfo\\version"
+```
+- field 0: operation type, an integer 1, 2, 4 or 8
+-- 1: Created the registry key
+-- 2: First wrote to the registry key
+-- 4: Deleted the key 
+-- 8: Deleted the value
+- field 1: event time
+- field 3: the registry key path
+ 
+##### netconn_complete
+```
+"2013-09-16 07:11:59.000000|-1979811809|80|6|dl.javafx.com|true"
+```
+- field 0: event time
+- field 1: remote IP address as a 32-bit signed long
+- field 2: remote port
+- field 3: protocol: 6 is TCP, 17 is UDP
+- field 4: domain name associated with the IP address, from the client's perspective at the time of the network connection
+- field 5: boolean "true" if the connection was outbound; "false" if the connection was inbound
+
+A complete example:
+
+```
+GET http://192.168.206.154/api/events/2032659773721368929/1
+
+{"process": 
+  {"process_md5": "517110bd83835338c037269e603db55d", 
+  "sensor_id": 2, 
+  "group": "Default Group", 
+  "start": "2013-09-19T22:07:07Z",
+  "process_name": "taskhost.exe", 
+  "segment_id": 1, 
+  "regmod_complete": [
+        "2|2013-09-19 22:07:07.000000|\\registry\\user\\s-1-5-19\\software\\microsoft\\sqmclient\\reliability\\adaptivesqm\\manifestinfo\\version", 
+        "2|2013-09-19 22:09:07.000000|\\registry\\machine\\software\\microsoft\\reliability analysis\\rac\\wmilasttime"
+        ], 
+  "parent_id": "5856845119039539348", 
+  "cmdline": "taskhost.exe $(arg0)", 
+  "filemod_complete": [
+        "2|2013-09-19 22:07:07.000000|c:\\programdata\\microsoft\\rac\\statedata\\racmetadata.dat|", 
+        "2|2013-09-19 22:07:07.000000|c:\\programdata\\microsoft\\rac\\temp\\sql4475.tmp|", 
+        "2|2013-09-19 22:07:07.000000|c:\\programdata\\microsoft\\rac\\temp\\sql4486.tmp|", 
+        "2|2013-09-19 22:09:07.000000|c:\\programdata\\microsoft\\rac\\statedata\\racwmidatabookmarks.dat|", 
+        "2|2013-09-19 22:09:07.000000|c:\\programdata\\microsoft\\rac\\publisheddata\\racwmidatabase.sdf|", 
+        "4|2013-09-19 22:09:07.000000|c:\\programdata\\microsoft\\rac\\temp\\sql4486.tmp|", 
+        "2|2013-09-19 22:09:07.000000|c:\\programdata\\microsoft\\rac\\statedata\\racdatabase.sdf|", 
+        "4|2013-09-19 22:09:07.000000|c:\\programdata\\microsoft\\rac\\temp\\sql4475.tmp|"
+        ], 
+  "hostname": "WIN-EP7RMLTCLAJ", 
+  "modload_complete": [
+        "2013-09-19 22:07:07.000000|517110bd83835338c037269e603db55d|c:\\windows\\system32\\taskhost.exe", 
+        "2013-09-19 22:07:07.000000|3556d5a8bf2cc508bdab51dec38d7c61|c:\\windows\\system32\\ntdll.dll", 
+        "2013-09-19 22:07:07.000000|7a6326d96d53048fdec542df23d875a0|c:\\windows\\system32\\kernel32.dll", 
+        "2013-09-19 22:07:07.000000|9c75cb8b98610f0cd85d99bb5876308b|c:\\windows\\system32\\sqlcese30.dll", 
+        "2013-09-19 22:07:07.000000|e5744d18c88737c6356d0a8d6d49d512|c:\\windows\\system32\\sqlceqp30.dll", 
+        "2013-09-19 22:07:07.000000|021287c2050fd5db4a8b084e2c38139c|c:\\windows\\system32\\winsatapi.dll", 
+        "2013-09-19 22:07:07.000000|f404e59db6a0f122ab26bf4f3e2fd0fa|c:\\windows\\system32\\dxgi.dll", 
+        "2013-09-19 22:07:07.000000|da1b7075260f3872585bfcdd668c648b|c:\\windows\\system32\\dwmapi.dll", 
+        "2013-09-19 22:07:07.000000|497bfeddaf3950dd909c3b0c5558a25d|c:\\windows\\winsxs\\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_1.1.7601.17514_none_2b24536c71ed437a\\gdiplus.dll", 
+        "2013-09-19 22:07:07.000000|5d8e6c95156ed1f79a63d1eade6f9ed5|c:\\windows\\system32\\setupapi.dll", 
+        "2013-09-19 22:07:07.000000|2a86e54b441ad41557f75dc5609b9793|c:\\windows\\system32\\sspicli.dll", 
+        "2013-09-19 22:07:07.000000|d6f630c1fd7f436316093ae500363b19|c:\\windows\\system32\\xmllite.dll"
+      ], 
+  "path": "c:\\windows\\system32\\taskhost.exe", 
+  "last_update": "2013-09-19T22:09:07Z", 
+  "id": "2032659773721368929"
+  }, 
+  "elapsed": 0.0126001834869
 }
 ```
