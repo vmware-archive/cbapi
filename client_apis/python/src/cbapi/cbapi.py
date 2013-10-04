@@ -11,7 +11,7 @@ class CbApi(object):
     # get metadata for all svchost.exe's not from c:\\windows
     procs = cb.processes(r"process_name:svchost.exe -path:c:\\windows\\")  
     for proc in procs['results']:
-        proc_detail = cb.process(proc['id'])
+        proc_detail = cb.process(proc['id'], proc['segment_id'])
         print proc_detail['process']['start'], proc_detail['process']['hostname'], proc_detail['process']['path']
     """
     def __init__(self, server, username, password, ssl_verify=True):
@@ -66,9 +66,9 @@ class CbApi(object):
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
         return r.json()
 
-    def process(self, id):
-        """ get the detailed metadata for a process.  Requires the 'id' field from a process
-            search result.
+    def process(self, guid, segment):
+        """ get the detailed metadata for a process.  Requires the 'id' and 'segment_id' fields 
+            from a process search result.
     
             Returns a python dictionary with the following primary fields:
                 - process - metadata for this process
@@ -76,16 +76,16 @@ class CbApi(object):
                 - children - a list of metadata structures for child processes
                 - siblings - a list of metadata structures for sibling processes
         """
-        r = requests.get("%s/api/process/%s" % (self.server, id), cookies=self.cookies, verify=self.ssl_verify)
+        r = requests.get("%s/api/process/%s/%s" % (self.server, guid, segment), cookies=self.cookies, verify=self.ssl_verify)
         if r.status_code != 200:
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
         return r.json()
 
-    def events(self, id):
-        """ get all the events (filemods, regmods, etc) for a process.  Requires the 'id' field
+    def events(self, guid, segment_id):
+        """ get all the events (filemods, regmods, etc) for a process.  Requires the 'id' and 'segment_id' fields
             from a process search result"""
 
-        r = requests.get("%s/api/events/%s" % (self.server, id), cookies=self.cookies, verify=self.ssl_verify)
+        r = requests.get("%s/api/events/%s/%s" % (self.server, guid, segment_id), cookies=self.cookies, verify=self.ssl_verify)
         if r.status_code != 200:
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
         return r.json()
