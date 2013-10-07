@@ -32,6 +32,7 @@ The following APIs are beta.  Backwards compatibility will not be supported.  Co
 
 ####  `/api/v1/process/`
 Process search.  Parameters passed as a query string.
+**SUPPORTS**: `GET`
 
 ##### Parameters:
 - `q`: REQUIRED Query string. Accepts the same data as the search box on the Process Search page.  `TODO`: link to query syntax doc
@@ -147,6 +148,7 @@ GET http://192.168.206.151/api/v1/process/?q=notepad.exe
 -----
 ####  `/api/v1/process/(id)/(segment)`
 Gets basic process information for segment (segment) of process (guid)
+**SUPPORTS**: `GET`
 
 ##### Parameters:
 - `id`: REQUIRED the internal CB process guid, the `id` field in search results
@@ -229,6 +231,7 @@ GET http://192.168.206.154/api/v1/process/2032659773721368929/1
 -----
 #### `/api/v1/process/(id)/(segment)/events`
 Gets the events for the process with id (id) and segment (segment)
+**SUPPORTS**: `GET`
 
 ##### Parameters
 - `id`: REQUIRED the internal CB process guid, the `id` field in search results
@@ -366,6 +369,7 @@ GET http://192.168.206.154/api/v1/process/2032659773721368929/1/events
 -----
 #### `/api/v1/process/(id)/(segment)/preview?q=(query)`
 Process preview.  Requires id and segment id.
+**SUPPORTS**: `GET`
 
 ##### Parameters: 
 - `id`: REQUIRED the internal CB process guid, the `id` field in search results
@@ -442,6 +446,7 @@ GET http://192.168.206.132/api/v1/process/7078511340675742078/1/preview/?q=windo
 -----
 ####  `/api/v1/binary`
 Binary search.  Parameters passed as query string.
+**SUPPORTS**: `GET`
 
 ##### Parameters:
 - `q`: REQUIRED Query string. Accepts the same data as the search box on the Binary Search page.  `TODO`: link to query syntax doc
@@ -570,6 +575,7 @@ GET http://192.168.206.151/api/binary?q=notepad.exe
 -----
 ####  `/api/v1/binary/(md5)`
 Download the binary with this md5 hash.
+**SUPPORTS**: `GET`
 
 ##### Parameters:
 - `md5`: REQUIRED the md5 hash of the binary
@@ -581,6 +587,7 @@ A zipfile with the binary bytes and a text file with metadata.
 
 ####  `/api/v1/binary/(md5)/icon`
 Returns the icon for the binary with the provided md5
+**SUPPORTS**: `GET`
 
 ##### Parameters:
 - `md5`: REQUIRED the md5 of the binary  
@@ -592,6 +599,7 @@ A PNG with the icon.  If the icon is not found, it returns the default Windows i
 
 ####  `/api/v1/binary/(md5)/summary`
 Returns the metadata for the binary with the provided md5
+**SUPPORTS**: `GET`
 
 ##### Parameters:
 - `md5`: REQUIRED the md5 of the binary  
@@ -673,6 +681,7 @@ GET http://192.168.206.154/api/binary/1C8B787BAA52DEAD1A6FEC1502D652f0/summary
 
 ####  `/api/v1/sensor/(id)?hostname=(hostname)&ip=(ipaddr)`
 Sensor / remote client details
+**SUPPORTS**: `GET` for all variations, `PUT` for `/api/v1/sensor/(id)` to update sensor 
 
 ##### Parameters:
 - `id`: OPTIONAL the sensor id
@@ -697,13 +706,13 @@ A sensor structure has the following fields:
 - `systemvolume_total_size`: size in bytes of the computer's system volumn
 - `systemvolume_free_size`: bytes free on the system volume
 - `os_environment_display_string`: Human-readable string of the installed OS
-- - `os_environment_id`: the operating system installed on this computer.  From the internal table.
+- `os_environment_id`: the operating system installed on this computer.  From the internal table.
 - `physical_memory_size`: size in bytes of physical memory
 - `computer_dns_name`: this computer's DNS name
 - `computer_name`: NetBIOS name of this computer
 - `sensor_health_message`: Human-readable string indicating sensor's self-reported status
 - `computer_sid`: Machine SID of this host
-- `event_log_flush_time`: 
+- `event_log_flush_time`: See below.
 - `last_checkin_time`: Last communication with this computer in server-local time and zone
 - `network_adapters`: A pipe-delimited list list of IP,MAC pairs for each network interface
 - `sensor_health_status`: sensor's self-reported health score, from 0 to 100.  Higher numbers better
@@ -713,7 +722,11 @@ A sensor structure has the following fields:
 - `group_id`: The sensor group id this sensor is assigned to
 - `display`: If this sensor is shown on the hosts page.  Sensors details are never deleted, just hidden.
 - `uninstall`: true if this sensor has been told to uninstall.
-- `cookie`:  
+- `cookie`:  cb internal
+ 
+If `event_log_flush_time` is set, the server will instruct the sensor to immediately send all data before this date, 
+ignoring all other throttling mechansims.  To force a host current, set this value to a value far in the future.
+When the sensor has finished sending it's queued data, this value will be null. 
 
 A complete example:
 ```
