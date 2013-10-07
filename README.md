@@ -12,7 +12,7 @@ The following APIs are versioned.  Backwards compatibility will be maintained fo
 #### Process Data 
 - [`/api/v1/process`](#apiv1process) - Process search
 - [`/api/v1/process/(id)/(segment)`](#apiv1processidsegment) - Process summary data
-- [`/api/v1/process/(id)/(segment)/events`](#apiv1processidsegmentevents) - Events for the selected process
+- [`/api/v1/process/(id)/(segment)/event`](#apiv1processidsegmentevent) - Events for the selected process
 - [`/api/v1/process/(id)/(segment)/preview`](#apiv1processidsegmentpreviewqquery) - Preview for the selected process
 
 #### Binary Data
@@ -231,7 +231,7 @@ GET http://192.168.206.154/api/v1/process/2032659773721368929/1
 }
 ```
 -----
-#### `/api/v1/process/(id)/(segment)/events`
+#### `/api/v1/process/(id)/(segment)/event`
 Gets the events for the process with id (id) and segment (segment)
 
 *Supports*:: `GET`
@@ -322,7 +322,7 @@ The pipe character (`|`) delimits the fields.
 A complete example:
 
 ```
-GET http://192.168.206.154/api/v1/process/2032659773721368929/1/events
+GET http://192.168.206.154/api/v1/process/2032659773721368929/1/event
 
 {"process": 
   {"process_md5": "517110bd83835338c037269e603db55d", 
