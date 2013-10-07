@@ -13,6 +13,7 @@ The following APIs are versioned.  Backwards compatibility will be maintained fo
 - [`/api/v1/process`](#apiv1process) - Process search
 - [`/api/v1/process/(id)/(segment)`](#apiv1processidsegment) - Process summary data
 - [`/api/v1/process/(id)/(segment)/events`](#apiv1processidsegmentevents) - Events for the selected process
+- [`/api/v1/process/(id)/(segment)/preview`](#apiv1processidsegmentpreview) - Preview for the selected process
 
 #### Binary Data
 - [`/api/v1/binary`](#apiv1binary) - Binary search
@@ -22,6 +23,13 @@ The following APIs are versioned.  Backwards compatibility will be maintained fo
  
 #### Sensor Data
 - [`/api/v1/sensor/`](#apiv1sensoridhostnamehostnameipipaddr) - Sensor details
+
+### Beta
+
+The following APIs are beta.  Backwards compatibility will not be supported.  Contents are not expected to widely change.
+
+#### Sensor Groups
+- [`/api/group`](#apigroup) - Get a list of sensor groups
 
 ## API Reference
 
@@ -359,6 +367,82 @@ GET http://192.168.206.154/api/v1/process/2032659773721368929/1/events
 }
 ```
 -----
+#### `/api/v1/process/(id)/(segment)/preview?q=(query)`
+Process preview.  Requires id and segment id.
+
+##### Parameters: 
+- `id`: REQUIRED the internal CB process guid, the `id` field in search results
+- `segment`: REQUIRED the process segment, the `segment_id` field in search results.
+- `query`: OPTIONAL a process query string.  If present, preview results will highlight matching terms
+ 
+##### Returns: 
+
+A process preview structure with the following fields:
+
+- `process_md5`: the MD5 of the executable backing this process 
+- `sensor_id`: the sensor id of the host this process executed on
+- `group`: the sensor group the sensor was assigned to
+- `process_name`: the name of this process, e.g., svchost.exe
+- `path`: the full path of the executable backing this process, e.g., c:\windows\system32\svchost.exe
+- `last_update`: the time of the last event received from this process, as recorded by the remote host
+- `start`: the start time of this process, as recorded by the remote host
+- `hostname`: the hostname of the computer this process executed on
+- `id`: the internal CB process guid of this process
+- `segment_id`: the segment id of this process
+- `regmod_complete`: a pipe-delimited **summary** list of regmod strings (see spec above)
+- `filemod_complete`: a pipe-delimited **summary** list of filemod strings (see spec above)
+- `modload_complete`: a pipe-delimited **summary** list of modload strings (see spec above)
+- `netconn_complete`: a pipe-delimited **summary** list of netconn strings (see spec above)
+- `childproc_complete`: a pipe-delimited list of **summary** childproc strings (see spec above)
+- `modload_count`: the **total** count of modules loaded in this process
+- `regmod_count`: the **total** count of registry modifications in this process
+- `filemod_count`: the **total** count of file modifications in this process
+- `netconn_count`: **total** count of network connections in this process
+- `childproc_count`: the **total** count of child processes launched by this process
+
+If a query string is provided, the endpoint will highlight all matching strings.  Highlighted results will 
+be surrounded with `PREPREPRE` and `POSTPOSTPOST` to designate the start and end of a matching substring.
+
+Where the full process API endpoint will return all `xxx_complete` records in the process (possibly 10s of thousands),
+the preview endpoint will have 10s of events for this process.  
+
+A complete example:
+```
+GET http://192.168.206.132/api/v1/process/7078511340675742078/1/preview/?q=windows
+{
+  "parent_name": "", 
+  "hostname": "J-8205A0C27A0C4", 
+  "group": "Default Group", 
+  "process_md5": "5e7f3968069d32b26af0d7af0ec5dd97", 
+  "netconn_count": 1, 
+  "process_name": "svchost.exe", 
+  "last_update": "2013-10-07T15:07:09Z", 
+  "cmdline": "\"c:\\docume~1\\admini~1\\locals~1\\temp\\rad17929.tmp\\svchost.exe\" ", 
+  "start": "2013-10-07T15:07:09Z", 
+  "sensor_id": 1, 
+  "modload_count": 15, 
+  "modload_complete": [
+    "2013-10-07 15:07:09.000000|27d9ed8cb8b62d1e0a8e5ace6cf52e2f|c:\\PREPREPREwindowsPOSTPOSTPOST\\system32\\ntdll.dll", 
+    "2013-10-07 15:07:09.000000|c24b983d211c34da8fcc1ac38477971d|c:\\PREPREPREwindowsPOSTPOSTPOST\\system32\\kernel32.dll", 
+    "2013-10-07 15:07:09.000000|355edbb4d412b01f1740c17e3f50fa00|c:\\PREPREPREwindowsPOSTPOSTPOST\\system32\\msvcrt.dll", 
+    "2013-10-07 15:07:09.000000|bab489a5fe26f2d0c910cf7af7e4cf92|c:\\PREPREPREwindowsPOSTPOSTPOST\\system32\\advapi32.dll", 
+    "2013-10-07 15:07:09.000000|b979d9d1c8073da21a7f80345f306a1d|c:\\PREPREPREwindowsPOSTPOSTPOST\\system32\\rpcrt4.dll", 
+    "2013-10-07 15:07:09.000000|7459c16cc3ef4651cab7c9260e43fc58|c:\\PREPREPREwindowsPOSTPOSTPOST\\system32\\secur32.dll", 
+    "2013-10-07 15:07:09.000000|67156d5a9ac356dc99d7bccb388e3316|c:\\PREPREPREwindowsPOSTPOSTPOST\\system32\\wsock32.dll", 
+    "2013-10-07 15:07:09.000000|2ccc474eb85ceaa3e1fa1726580a3e5a|c:\\PREPREPREwindowsPOSTPOSTPOST\\system32\\ws2_32.dll", 
+    "2013-10-07 15:07:09.000000|9789e95e1d88eeb4b922bf3ea7779c28|c:\\PREPREPREwindowsPOSTPOSTPOST\\system32\\ws2help.dll", 
+    "2013-10-07 15:07:09.000000|b4138e99236f0f57d4cf49bae98a0746|c:\\PREPREPREwindowsPOSTPOSTPOST\\system32\\mswsock.dll"
+  ], 
+  "path": "c:\\documents and settings\\administrator\\local settings\\temp\\rad17929.tmp\\svchost.exe", 
+  "regmod_count": 0, 
+  "filemod_count": 0, 
+  "segment": "", 
+  "id": "7078511340675742078", 
+  "unique_id": "623bec8f-8f8d-397e-0000-000000000001"
+}
+
+```
+-----
 ####  `/api/v1/binary`
 Binary search.  Parameters passed as query string.
 
@@ -600,11 +684,14 @@ Sensor / remote client details
 
 ##### Returns:
 
-- no params: list of all sensors
-- id: single sensor object
-- ?hostname=(hostname) or ip=(ipaddr) - list of all sensors matching criteria
+- With no parameters (`GET /api/v1/sensor/`) returns a list of sensor structures, one per registered sensor.
+- With a sensor id, (`GET /api/v1/sensor/12`) returns a sensor structure for the specified sensor.
+- With a query string, (`GET /api/v1/sensor?hostname=foo`) returns a list of all sensors matching criteria
 
-A structure with the following fields:
+Sensor query strings are case-sensitive substring searches, for both `hostname` and `ip` fields.  If both 
+`hostname` and `ip` fields are specified, only `ip` is used. 
+
+A sensor structure has the following fields:
 
 - `id`: this sensor's id
 - `build_id`: the sensor version installed on this endpoint.  From the `/api/builds/` endpoint
@@ -633,7 +720,7 @@ A structure with the following fields:
 
 A complete example:
 ```
-GET http://192.168.206.154/api/host/1
+GET http://192.168.206.154/api/v1/sensor/1
 
 {
   "systemvolume_total_size": "42939584512", 
@@ -664,4 +751,49 @@ GET http://192.168.206.154/api/host/1
   "display": true, 
   "uninstall": false
 }
+
+http://192.168.206.132/api/v1/sensor?hostname=A0C4
+
+[
+  {
+    "systemvolume_total_size": "42939584512", 
+    "os_environment_display_string": "Windows XP Professional Service Pack 3", 
+    "sensor_uptime": "480763", 
+    "physical_memory_size": "536330240", 
+    "build_id": 1, 
+    "uptime": "480862", 
+    "event_log_flush_time": null, 
+    "computer_dns_name": "j-8205a0c27a0c4", 
+    "id": 1, 
+    "power_state": 0, 
+    "uninstalled": null, 
+    "systemvolume_free_size": "40083230720", 
+    "status": "Online", 
+    "num_eventlog_bytes": "22717", 
+    "sensor_health_message": "Healthy", 
+    "build_version_string": "004.000.000.30910", 
+    "computer_sid": "S-1-5-21-1715567821-507921405-682003330", 
+    "next_checkin_time": "2013-10-07 07:54:36.909657-07:00", 
+    "node_id": 0, 
+    "cookie": 556463980, 
+    "computer_name": "J-8205A0C27A0C4", 
+    "license_expiration": "1990-01-01 00:00:00-08:00", 
+    "network_adapters": "192.168.206.156,000c298a3613|", 
+    "sensor_health_status": 100, 
+    "registration_time": "2013-02-04 06:40:04.632053-08:00", 
+    "restart_queued": false, 
+    "notes": null, 
+    "num_storefiles_bytes": "446464", 
+    "os_environment_id": 1, 
+    "boot_id": "8", 
+    "last_checkin_time": "2013-10-07 07:54:06.919446-07:00", 
+    "group_id": 1, 
+    "display": true, 
+    "uninstall": false
+  }
+]
 ```
+
+-----
+
+
