@@ -13,7 +13,7 @@ The following APIs are versioned.  Backwards compatibility will be maintained fo
 - [`/api/v1/process`](#apiv1process) - Process search
 - [`/api/v1/process/(id)/(segment)`](#apiv1processidsegment) - Process summary data
 - [`/api/v1/process/(id)/(segment)/events`](#apiv1processidsegmentevents) - Events for the selected process
-- [`/api/v1/process/(id)/(segment)/preview`](#apiv1processidsegmentpreview) - Preview for the selected process
+- [`/api/v1/process/(id)/(segment)/preview`](#apiv1processidsegmentpreviewqquery) - Preview for the selected process
 
 #### Binary Data
 - [`/api/v1/binary`](#apiv1binary) - Binary search
@@ -27,9 +27,6 @@ The following APIs are versioned.  Backwards compatibility will be maintained fo
 ### Beta
 
 The following APIs are beta.  Backwards compatibility will not be supported.  Contents are not expected to widely change.
-
-#### Sensor Groups
-- [`/api/group`](#apigroup) - Get a list of sensor groups
 
 ## API Reference
 
