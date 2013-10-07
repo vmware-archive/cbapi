@@ -7,32 +7,25 @@ http://carbonblack.com
 
 ### Versioned 
 
-The following APIs are versioned.  Backwards compatability will be maintained for at least two major version revisions. 
-
-``` None yet. Final APIs expected early Q413. ```
-
-### Beta
-
-The following APIs are *beta*.  The interfaces will change and backwards compatibility will not be supported.   The underlying data is not expected to substantially change.
-
-#### Search
-- [`/api/search`](#apisearch) - Process search
-- [`/api/search/module`](#apisearchmodulequery) - Binary search
+The following APIs are versioned.  Backwards compatibility will be maintained for at least two major version revisions. 
 
 #### Process Data 
-- [`/api/process/`](#apiprocessidsegment) - Process summary data
-- [`/api/events/`](#apieventsidsegment) - Events for the selected process
- 
-#### Binary Data
-- [`/api/icon/`](#apiiconmd5) - Binary's icon
-- [`/api/module/`](#apimodulemd5) - Binary's metadata
+- [`/api/v1/process`](#apiv1process) - Process search
+- [`/api/v1/process/(id)/(segment)`](#apiv1processidsegment) - Process summary data
+- [`/api/v1/process/(id)/(segment)/events`](#apiv1processidsegmentevents) - Events for the selected process
 
-#### Sensor Data
-- [`/api/host/`](#apihostid) - Sensor details
+#### Binary Data
+- [`/api/v1/binary`](#apiv1binary) - Binary search
+- [`/api/v1/binary/(md5)`](#apiv1binarymd5) - Download the binary
+- [`/api/v1/binary/(md5)/icon`](#apiv1binarymd5icon) - Binary's icon
+- [`/api/v1/binary/(md5)/summary`](#apiv1binarymd5summary) - Binary's metadata
  
+#### Sensor Data
+- [`/api/v1/sensor/`](#apiv1sensoridhostnamehostnameipipaddr) - Sensor details
+
 ## API Reference
 
-####  `/api/search/`
+####  `/api/v1/process/`
 Process search.  Parameters passed as a query string.
 
 ##### Parameters:
@@ -103,7 +96,7 @@ Each facet result object has three values:
 A complete example:
 
 ```
-GET http://192.168.206.151/api/search/?q=notepad.exe
+GET http://192.168.206.151/api/v1/process/?q=notepad.exe
 
 {
   "results": [
@@ -145,136 +138,9 @@ GET http://192.168.206.151/api/search/?q=notepad.exe
   "filtered": {}, 
 }
 ```
+
 -----
-####  `/api/search/module/<query>`
-Binary search.  Parameters passed as in URL path.
-
-##### Parameters:
-- `q`: REQUIRED Query string. Accepts the same data as the search box on the Binary Search page.  `TODO`: link to query syntax doc
-- `rows`: OPTIONAL Return this many rows, 10 by default.
-- `start`: OPTIONAL Start at this row, 0 by default.
-- `sort`: OPTIONAL Sort rows by this field and order.  `server_added_timestamp desc` by default.  
-- `facets`: OPTIONAL Return facet results.  'false' by default, set to 'true' for facets.
-
-##### Returns:
-JSON object with the following elements:
-
-- `results`: a list of matching binaries (see below for binary object)
-- `terms`: a list of strings, each representing a token as parsed by the query parser
-- `total_results`: number of matching binaries
-- `start`: index of first row
-- `elapsed`: clock time elapsed resolving this request  
-- `highlights`: a list of highlight objects matching the query string.  Format the same as the process event object.
-- `facets`: a list of facet entries if requested. (see below for facet object)
-
-*Binary Object*
-
-A binary object contains the following fields:
-
-- `md5`: the md5 hash of this binary
-- `server_added_timestamp`: the first time this binary was received on the server in the server's GMT time
-- `orig_mod_len`: Filesize in bytes
-- `copied_mod_len`: Bytes copied from remote host, if file is > 25MB this will be less than `orig_mod_len`
-- `observed_filename`: The set of unique filenames this binary has been seen as
-- `is_executable_image:` 'true' or 'false' - 'true' if an EXE
-- `is_64bit`: 'true' or 'false' - 'true' if x64 
-- `product_version`: If present, Product version from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
-- `product_name`: If present, Product name from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
-- `file_Version`: If present, File version from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
-- `company_name`: If present, Company name from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
-- `internal_name`: If present, Internal name from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
-- `product_name`: If present, Product name from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
-- `legal_copyright`: If present, Legal copyright from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
-- `legal_trademark`: If present, Legal trademark from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
-- `file_desc`: If present, File description from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
-- `original_filename`: If present, Original filename from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
-- `private_build`: If present, Private build from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
-- `special_build`: If present, Special build from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
-- `signed`: Digital signature status: One of `Signed`, `Unsigned`, `Expired`, `Bad Signature`, `Invalid Signature`, `Invalid Chain`, `Untrusted Root`, `Explicit Distrust`
-- `digsig_result`: Digital signature status: One of `Signed`, `Unsigned`, `Expired`, `Bad Signature`, `Invalid Signature`, `Invalid Chain`, `Untrusted Root`, `Explicit Distrust`
-- `digsig_result_code`: HRESULT_FROM_WIN32 for the result of the digital signature operation via [WinVerifyTrust](http://msdn.microsoft.com/en-us/library/windows/desktop/aa388208)
-- `digsig_sign_time`: If signed, the timestamp of the signature in GMT
-- `digsig_publisher`: If signed and present, the publisher name
-- `digsig_prog_name`: If signed and present, the program name
-- `digsig_issuer`: If signed and present, the issuer name
-- `digsig_subject`: If signed and present, the subject
-- `alliance_score_virustotal`: If enabled and the hit count > 1, the number of [VirusTotal](http://virustotal.com) hits for this md5
- 
-*Facet object* 
-
-The facet object is a list of dictionaries with the following keys.  Each key is a list of facet results objects that contain the top 200 name, value and percentage for the unique set of results matching the search.  
-
-- `product_name_facet`: the top unique product names for the binaries matching the search
-- `file_version_facet`: the top unique file versions for the binaries matching the search
-- `alliance_score_virustotal`: the distribution of VirusTotal scores for binaries matching the search
-- `digsig_result`: the distribution of signature status results for binaries matching the search
-- `company_name_facet`: the top unique company names for the binaries matching the search
-- `digsig_publisher_facet`: the top unique publisher names for the binaries matching the search
-- `product_name_facet`: the top unique company anmes for the binaries matching the search
-- `digsig_sign_time`: the distribution of signature times per month for the last 48 months for binaries matching the search
-- `server_added_timestamp`: the distribution of server_added_timestamps per day for the last 30 days 
-- `observed_filename_facet`: the top unique observed filenames for the binaries matching the search
-
-The facet result objects have the same format as the process facet result objects above. 
-
-A complete example:
-
-```
-GET http://192.168.206.151/api/search/module/q=notepad.exe
-
-{
-  "total_results": 1, 
-  "facets": {}, 
-  "elapsed": 0.046832799911499023, 
-  "start": 0,
-  "results": [
-    {
-      "md5": "F2C7BB8ACC97F92E987A2D4087D021B1", 
-      "digsig_result": "Signed", 
-      "observed_filename": [
-        "c:\\windows\\system32\\notepad.exe"
-      ], 
-      "product_version": "6.1.7600.16385", 
-      "signed": "Signed", 
-      "digsig_sign_time": "2009-07-14T10:17:00Z", 
-      "orig_mod_len": 193536, 
-      "is_executable_image": true, 
-      "is_64bit": true, 
-      "digsig_publisher": "Microsoft Corporation", 
-      "file_version": "6.1.7600.16385 (win7_rtm.090713-1255)", 
-      "company_name": "Microsoft Corporation", 
-      "internal_name": "Notepad", 
-      "product_name": "Microsoft\u00ae Windows\u00ae Operating System", 
-      "digsig_result_code": "0", 
-      "timestamp": "2013-08-16T11:26:48.321Z", 
-      "copied_mod_len": 193536, 
-      "server_added_timestamp": "2013-08-16T11:26:48.321Z", 
-      "legal_copyright": "\u00a9 Microsoft Corporation. All rights reserved.", 
-      "original_filename": "NOTEPAD.EXE", 
-      "file_desc": "Notepad"
-    }
-  ],
-  "terms": [
-    "notepad.exe"
-  ],
-  "highlights": [
-    {
-      "name": "PREPREPRENOTEPAD.EXEPOSTPOSTPOST", 
-      "ids": [
-        "F2C7BB8ACC97F92E987A2D4087D021B1"
-      ]
-    }, 
-    {
-      "name": "c:\\windows\\system32\\PREPREPREnotepad.exePOSTPOSTPOST", 
-      "ids": [
-        "F2C7BB8ACC97F92E987A2D4087D021B1"
-      ]
-    }
-  ], 
-}
-```
------
-####  `/api/process/(id)/(segment)`
+####  `/api/v1/process/(id)/(segment)`
 Gets basic process information for segment (segment) of process (guid)
 
 ##### Parameters:
@@ -307,7 +173,7 @@ Each process summary object contains the following structure:
 A complete example:
 
 ```
-GET http://192.168.206.154/api/process/2032659773721368929/1
+GET http://192.168.206.154/api/v1/process/2032659773721368929/1
 
 {
   "process": {
@@ -356,7 +222,7 @@ GET http://192.168.206.154/api/process/2032659773721368929/1
 }
 ```
 -----
-#### `/api/events/(id)/(segment)/`
+#### `/api/v1/process/(id)/(segment)/events`
 Gets the events for the process with id (id) and segment (segment)
 
 ##### Parameters
@@ -445,7 +311,7 @@ The pipe character (`|`) delimits the fields.
 A complete example:
 
 ```
-GET http://192.168.206.154/api/events/2032659773721368929/1
+GET http://192.168.206.154/api/v1/process/2032659773721368929/1/events
 
 {"process": 
   {"process_md5": "517110bd83835338c037269e603db55d", 
@@ -493,7 +359,146 @@ GET http://192.168.206.154/api/events/2032659773721368929/1
 }
 ```
 -----
-####  `/api/icon/(md5)`
+####  `/api/v1/binary`
+Binary search.  Parameters passed as query string.
+
+##### Parameters:
+- `q`: REQUIRED Query string. Accepts the same data as the search box on the Binary Search page.  `TODO`: link to query syntax doc
+- `rows`: OPTIONAL Return this many rows, 10 by default.
+- `start`: OPTIONAL Start at this row, 0 by default.
+- `sort`: OPTIONAL Sort rows by this field and order.  `server_added_timestamp desc` by default.  
+- `facets`: OPTIONAL Return facet results.  'false' by default, set to 'true' for facets.
+
+##### Returns:
+JSON object with the following elements:
+
+- `results`: a list of matching binaries (see below for binary object)
+- `terms`: a list of strings, each representing a token as parsed by the query parser
+- `total_results`: number of matching binaries
+- `start`: index of first row
+- `elapsed`: clock time elapsed resolving this request  
+- `highlights`: a list of highlight objects matching the query string.  Format the same as the process event object.
+- `facets`: a list of facet entries if requested. (see below for facet object)
+
+*Binary Object*
+
+A binary object contains the following fields:
+
+- `md5`: the md5 hash of this binary
+- `server_added_timestamp`: the first time this binary was received on the server in the server's GMT time
+- `orig_mod_len`: Filesize in bytes
+- `copied_mod_len`: Bytes copied from remote host, if file is > 25MB this will be less than `orig_mod_len`
+- `observed_filename`: The set of unique filenames this binary has been seen as
+- `is_executable_image:` 'true' or 'false' - 'true' if an EXE
+- `is_64bit`: 'true' or 'false' - 'true' if x64 
+- `product_version`: If present, Product version from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
+- `product_name`: If present, Product name from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
+- `file_Version`: If present, File version from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
+- `company_name`: If present, Company name from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
+- `internal_name`: If present, Internal name from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
+- `product_name`: If present, Product name from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
+- `legal_copyright`: If present, Legal copyright from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
+- `legal_trademark`: If present, Legal trademark from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
+- `file_desc`: If present, File description from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
+- `original_filename`: If present, Original filename from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
+- `private_build`: If present, Private build from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
+- `special_build`: If present, Special build from [FileVersionInformation](http://msdn.microsoft.com/en-us/library/system.diagnostics.fileversioninfo.aspx)
+- `signed`: Digital signature status: One of `Signed`, `Unsigned`, `Expired`, `Bad Signature`, `Invalid Signature`, `Invalid Chain`, `Untrusted Root`, `Explicit Distrust`
+- `digsig_result`: Digital signature status: One of `Signed`, `Unsigned`, `Expired`, `Bad Signature`, `Invalid Signature`, `Invalid Chain`, `Untrusted Root`, `Explicit Distrust`
+- `digsig_result_code`: HRESULT_FROM_WIN32 for the result of the digital signature operation via [WinVerifyTrust](http://msdn.microsoft.com/en-us/library/windows/desktop/aa388208)
+- `digsig_sign_time`: If signed, the timestamp of the signature in GMT
+- `digsig_publisher`: If signed and present, the publisher name
+- `digsig_prog_name`: If signed and present, the program name
+- `digsig_issuer`: If signed and present, the issuer name
+- `digsig_subject`: If signed and present, the subject
+- `alliance_score_virustotal`: If enabled and the hit count > 1, the number of [VirusTotal](http://virustotal.com) hits for this md5
+ 
+*Facet object* 
+
+The facet object is a list of dictionaries with the following keys.  Each key is a list of facet results objects that contain the top 200 name, value and percentage for the unique set of results matching the search.  
+
+- `product_name_facet`: the top unique product names for the binaries matching the search
+- `file_version_facet`: the top unique file versions for the binaries matching the search
+- `alliance_score_virustotal`: the distribution of VirusTotal scores for binaries matching the search
+- `digsig_result`: the distribution of signature status results for binaries matching the search
+- `company_name_facet`: the top unique company names for the binaries matching the search
+- `digsig_publisher_facet`: the top unique publisher names for the binaries matching the search
+- `product_name_facet`: the top unique company anmes for the binaries matching the search
+- `digsig_sign_time`: the distribution of signature times per month for the last 48 months for binaries matching the search
+- `server_added_timestamp`: the distribution of server_added_timestamps per day for the last 30 days 
+- `observed_filename_facet`: the top unique observed filenames for the binaries matching the search
+
+The facet result objects have the same format as the process facet result objects above. 
+
+A complete example:
+
+```
+GET http://192.168.206.151/api/binary?q=notepad.exe
+
+{
+  "total_results": 1, 
+  "facets": {}, 
+  "elapsed": 0.046832799911499023, 
+  "start": 0,
+  "results": [
+    {
+      "md5": "F2C7BB8ACC97F92E987A2D4087D021B1", 
+      "digsig_result": "Signed", 
+      "observed_filename": [
+        "c:\\windows\\system32\\notepad.exe"
+      ], 
+      "product_version": "6.1.7600.16385", 
+      "signed": "Signed", 
+      "digsig_sign_time": "2009-07-14T10:17:00Z", 
+      "orig_mod_len": 193536, 
+      "is_executable_image": true, 
+      "is_64bit": true, 
+      "digsig_publisher": "Microsoft Corporation", 
+      "file_version": "6.1.7600.16385 (win7_rtm.090713-1255)", 
+      "company_name": "Microsoft Corporation", 
+      "internal_name": "Notepad", 
+      "product_name": "Microsoft\u00ae Windows\u00ae Operating System", 
+      "digsig_result_code": "0", 
+      "timestamp": "2013-08-16T11:26:48.321Z", 
+      "copied_mod_len": 193536, 
+      "server_added_timestamp": "2013-08-16T11:26:48.321Z", 
+      "legal_copyright": "\u00a9 Microsoft Corporation. All rights reserved.", 
+      "original_filename": "NOTEPAD.EXE", 
+      "file_desc": "Notepad"
+    }
+  ],
+  "terms": [
+    "notepad.exe"
+  ],
+  "highlights": [
+    {
+      "name": "PREPREPRENOTEPAD.EXEPOSTPOSTPOST", 
+      "ids": [
+        "F2C7BB8ACC97F92E987A2D4087D021B1"
+      ]
+    }, 
+    {
+      "name": "c:\\windows\\system32\\PREPREPREnotepad.exePOSTPOSTPOST", 
+      "ids": [
+        "F2C7BB8ACC97F92E987A2D4087D021B1"
+      ]
+    }
+  ], 
+}
+```
+-----
+####  `/api/v1/binary/(md5)`
+Download the binary with this md5 hash.
+
+##### Parameters:
+- `md5`: REQUIRED the md5 hash of the binary
+
+##### Returns:
+A zipfile with the binary bytes and a text file with metadata. 
+
+-----
+
+####  `/api/v1/binary/(md5)/icon`
 Returns the icon for the binary with the provided md5
 
 ##### Parameters:
@@ -504,7 +509,7 @@ A PNG with the icon.  If the icon is not found, it returns the default Windows i
 
 -----
 
-####  `/api/module/(md5)`
+####  `/api/v1/binary/(md5)/summary`
 Returns the metadata for the binary with the provided md5
 
 ##### Parameters:
@@ -545,7 +550,7 @@ A structure with the following fields:
 A complete example:
 
 ```
-GET http://192.168.206.154/api/module/1C8B787BAA52DEAD1A6FEC1502D652f0
+GET http://192.168.206.154/api/binary/1C8B787BAA52DEAD1A6FEC1502D652f0/summary
 
 {
   "product_version_facet": "8.00.7600.16385", 
@@ -585,13 +590,20 @@ GET http://192.168.206.154/api/module/1C8B787BAA52DEAD1A6FEC1502D652f0
 
 -----
 
-####  `/api/host/(id)`
-Returns the detail for the sensor with the provided id
+####  `/api/v1/sensor/(id)?hostname=(hostname)&ip=(ipaddr)`
+Sensor / remote client details
 
 ##### Parameters:
-- `id`: REQUIRED the sensor id
+- `id`: OPTIONAL the sensor id
+- `hostname`: OPTIONAL returns the sensor record(s) with matching hostname
+- `ipaddr`: OPTIONAL returns the sensor record(s) with specified IP address
 
 ##### Returns:
+
+- no params: list of all sensors
+- id: single sensor object
+- ?hostname=(hostname) or ip=(ipaddr) - list of all sensors matching criteria
+
 A structure with the following fields:
 
 - `id`: this sensor's id
