@@ -1,4 +1,8 @@
 import sys
+
+# in the github repo, cbapi is not in the example directory
+sys.path.append('../src/cbapi')
+
 from cbapi import CbApi
 
 # if you run this in a cron job, 
@@ -10,8 +14,8 @@ from cbapi import CbApi
 CRON_INTERVAL = None
 
 class CBQuery(object):
-    def __init__(self, url, user, password):
-        self.cb = CbApi(url, user, password)
+    def __init__(self, url, token):
+        self.cb = CbApi(url, token=token)
         self.cb_url = url
 
     def report(self, ioc, type, procs):
@@ -58,17 +62,16 @@ class CBQuery(object):
                 sys.stdout.flush()
 
 if __name__ == "__main__":
-    if len(sys.argv) != 4:
-        print "Usage:  check_ioc.py [cb_url] [user] [password]"
+    if len(sys.argv) != 3:
+        print "Usage:  check_ioc.py [cb_url] [apitoken]"
         print
         print "Example:"
         print 
-        print "[irteam@localhost] python check_ioc.py http://127.0.0.1/ admin test"
+        print "[irteam@localhost] python check_ioc.py http://127.0.0.1/ 3242af3...ad"
         sys.exit(1)
 
     # setup the CbApi object
-    cb_url, user, passwd = sys.argv[1], sys.argv[2], sys.argv[3]
-    cb = CBQuery(cb_url, user, passwd)
+    cb = CBQuery(sys.argv[1], sys.argv[2])
 
     # get the IOCs to check; this is a list of strings, one indicator
     # per line.  strip off the newlines as they come in 
