@@ -93,24 +93,42 @@ class CBQuery(object):
                 sys.stdout.write(".")
                 sys.stdout.flush()
 
-if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print "Usage:  check_ioc.py [cb_url] [apitoken]"
-        print
-        print "Example:"
-        print 
-        print "[irteam@localhost] python check_ioc.py http://127.0.0.1/ 3242af3...ad"
-        sys.exit(1)
+def build_cli_parser():
+    parser = OptionParser(usage="%prog [options]", description="check Cb index for provided IOCs")
+
+    # for each supported output type, add an option
+    parser.add_option("-c", "--cburl", action="store", default=None, dest="url",
+                      help="CB server's URL.  e.g., http://127.0.0.1 ")
+    parser.add_option("-a", "--apitoken", action="store", default=None, dest="token",
+                      help="API Token for Carbon Black server")
+    parser.add_option("-f", "--file", action="store", default=None, dest="fname",
+                      help="Filename with CRLF-delimited list of IOCs")
+    parser.add_option("-t", "--type", action="store", default=None, dest="type",
+                      help="Type of IOCs in the file.  Must be one of md5, domain or ipaddr")
+    parser.add_option("-d", "--detail", action="store_true", default=False, dest="detail",
+                      help="Get full detail about each IOC hit.")
+    return parser
+
+def main(argv):
+    parser = build_cli_parser()
+    opts, args = parser.parse_args(argv)
+    if not opts.url or not opts.token or not opts.fname or not opts.type:
+        print "Missing required param."
+        sys.exit(-1)
+
+    if not opts.type in ["md5", "domain", "ipaddr"]:
+        print "Unknown type: ", opts.type
+        sys.exit(-1)
 
     # setup the CbApi object
-    cb = CBQuery(sys.argv[1], sys.argv[2])
+    cb = CBQuery(opts.url, opts.token)
 
     # get the IOCs to check; this is a list of strings, one indicator
-    # per line.  strip off the newlines as they come in 
-    domains = [domain.strip() for domain in open("data/mandiant-domains.txt", "r")]
-    md5s = [md5.strip() for md5 in open("data/mandiant-md5s.txt", "r")]
+    # per line.  strip off the newlines as they come in
+    vals = [val.strip() for val in open(opts.fname, "r")]
 
     # check each!
-    cb.check(domains, "domain") 
-    cb.check(md5s, "md5")
+    cb.check(vals, opts.type, opts.detail)
 
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
