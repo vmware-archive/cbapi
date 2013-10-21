@@ -1,4 +1,8 @@
 import sys
+import struct
+import socket
+from optparse import OptionParser
+
 
 # in the github repo, cbapi is not in the example directory
 sys.path.append('../src/cbapi')
@@ -64,7 +68,7 @@ class CBQuery(object):
             if result["process_md5"] == ioc:
                 print "%s\t%s %s" % (result["start"], result["process_md5"], result["path"])
 
-    def check(self, iocs, type):
+    def check(self, iocs, type, detail=False):
         # for each ioc, do a search for (type):(ioc)
         # e.g, 
         #   domain:bigfish.com
@@ -83,12 +87,13 @@ class CBQuery(object):
                 q = "%s:%s and last_update:-%s" % (type, ioc, CRON_INTERVAL)
             else:
                 q = "%s:%s" % (type, ioc)
+            print q
             procs = self.cb.processes(q)
 
             # if there are _any_ hits, give us the details.
             # then check the next ioc
             if len(procs["results"]) > 0:
-                self.report(ioc, type, procs)
+                self.report(ioc, type, procs, detail)
             else:
                 sys.stdout.write(".")
                 sys.stdout.flush()

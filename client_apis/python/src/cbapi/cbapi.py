@@ -88,10 +88,10 @@ class CbApi(object):
 
         # do a post request since the URL can get long
         if self.token:
-            r = requests.post("%s/api/v1/process" % self.server, headers=self.token_header,
+            r = requests.post("%s/api/v1/process/" % self.server, headers=self.token_header,
                          data=json.dumps(params), verify=self.ssl_verify)
         else:
-            r = requests.post("%s/api/v1/process" % self.server, cookies=self.cookies,
+            r = requests.post("%s/api/v1/process/" % self.server, cookies=self.cookies,
                          data=json.dumps(params), verify=self.ssl_verify)
         if r.status_code != 200:
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
@@ -119,9 +119,9 @@ class CbApi(object):
         """ get all the events (filemods, regmods, etc) for a process.  Requires the 'id' field
             from a process search result"""
         if self.token:
-            r = requests.get("%s/api/events/%s" % (self.server, id), headers=self.token_header, verify=self.ssl_verify)
+            r = requests.get("%s/api/events/%s/" % (self.server, id), headers=self.token_header, verify=self.ssl_verify)
         else:
-            r = requests.get("%s/api/events/%s" % (self.server, id), cookies=self.cookies, verify=self.ssl_verify)
+            r = requests.get("%s/api/events/%s/" % (self.server, id), cookies=self.cookies, verify=self.ssl_verify)
         if r.status_code != 200:
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
         return r.json()
@@ -148,10 +148,10 @@ class CbApi(object):
         args = {"q": query_string, "cburlver": 1, 'start': start}
         query = urllib.urlencode(args)
         if self.token:
-            r = requests.get("%s/api/search/module/%s" % (self.server, query),
+            r = requests.get("%s/api/search/module/%s/" % (self.server, query),
                              headers=self.token_header, verify=self.ssl_verify)
         else:
-            r = requests.get("%s/api/search/module/%s" % (self.server, query),
+            r = requests.get("%s/api/search/module/%s/" % (self.server, query),
                              cookies=self.cookies, verify=self.ssl_verify)
         if r.status_code != 200:
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
@@ -162,10 +162,10 @@ class CbApi(object):
 
             Returns a python dictionary with the binary metadata. """
         if self.token:
-            r = requests.get("%s/api/module/%s" % (self.server, md5),
+            r = requests.get("%s/api/module/%s/" % (self.server, md5),
                              headers=self.token_header, verify=self.ssl_verify)
         else:
-            r = requests.get("%s/api/module/%s" % (self.server, md5), cookies=self.cookies, verify=self.ssl_verify)
+            r = requests.get("%s/api/module/%s/" % (self.server, md5), cookies=self.cookies, verify=self.ssl_verify)
         if r.status_code != 200:
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
         return r.json()
@@ -175,10 +175,10 @@ class CbApi(object):
         Enumerates configured feeds on the Enterprise server.
         """
         if self.token:
-            r = requests.get("%s/api/feeds" % (self.server), headers=self.token_header,
+            r = requests.get("%s/api/feeds/" % (self.server), headers=self.token_header,
                              verify=self.ssl_verify)
         else:
-            r = requests.get("%s/api/feeds" % (self.server), cookies=self.cookies, verify=self.ssl_verify)
+            r = requests.get("%s/api/feeds/" % (self.server), cookies=self.cookies, verify=self.ssl_verify)
         if r.status_code != 200:
             raise Exception("Unexpected response from POST /api/feed endpoint: %s" % (r.status_code))
         return r.json()
@@ -199,10 +199,10 @@ class CbApi(object):
                }
 
         if self.token:
-            r = requests.post("%s/api/feed" % (self.server), data=json.dumps(data),
+            r = requests.post("%s/api/feed/" % (self.server), data=json.dumps(data),
                               headers=self.token_header, verify=self.ssl_verify)
         else:
-            r = requests.post("%s/api/feed" % (self.server), data=json.dumps(data),
+            r = requests.post("%s/api/feed/" % (self.server), data=json.dumps(data),
                               cookies=self.cookies, verify=self.ssl_verify)
         if r.status_code != 200:
             raise Exception("Unexpected response from POST /api/feed endpoint: %s" % (r.status_code))
@@ -223,10 +223,10 @@ class CbApi(object):
                }
 
         if self.token:
-            r = requests.put("%s/api/feed/%d" % (self.server, feed_id), data=json.dumps(data),
+            r = requests.put("%s/api/feed/%d/" % (self.server, feed_id), data=json.dumps(data),
                              headers=self.token_header, verify=self.ssl_verify)
         else:
-            r = requests.put("%s/api/feed/%d" % (self.server, feed_id), data=json.dumps(data),
+            r = requests.put("%s/api/feed/%d/" % (self.server, feed_id), data=json.dumps(data),
                              cookies=self.cookies, verify=self.ssl_verify)
         if r.status_code != 200:
             raise Exception("Unexpiected response from PUT /api/feed endpoint: %s" % (r.status_code))
