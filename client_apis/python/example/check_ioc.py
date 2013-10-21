@@ -18,19 +18,51 @@ class CBQuery(object):
         self.cb = CbApi(url, token=token)
         self.cb_url = url
 
-    def report(self, ioc, type, procs):
+    def report(self, ioc, type, procs, detail=False):
         for result in procs["results"]:
             # print the results to stdout. you could do anything here - 
             # log to syslog, send a SMS, fire off a siren and strobe light, etc.
-            print 
+            print
             print "Found %s IOC for %s in:" % (type, ioc)
             print
-            print "\tPath: %s"          % procs["results"]["path"]
-            print "\tHostname: %s"      % procs["results"]["hostname"]
-            print "\tStarted: %s"       % procs["results"]["start"]
-            print "\tLast Updated: %s"  % procs["results"]["last_update"]
-            print "\tDetails: http://%s/#analyze/%s" % (self.cb_url, procs["results"]["id"])
+            print "\tPath: %s"          % result["path"]
+            print "\tHostname: %s"      % result["hostname"]
+            print "\tStarted: %s"       % result["start"]
+            print "\tLast Updated: %s"  % result["last_update"]
+            print "\tDetails: %s/#analyze/%s/%s" % (self.cb_url, result["id"], result["segment_id"])
             print
+
+            if detail:
+                self.report_detail(ioc, type, result)
+
+    def report_detail(self, ioc, type, result):
+        events = self.cb.events(result["id"], result["segment_id"])
+        proc = events["process"]
+
+        if type == "domain" and proc.has_key("netconn_complete"):
+            for netconn in proc["netconn_complete"]:
+                ts, ip, port, proto, domain, dir = netconn.split("|")
+                if ioc in domain:
+                    str_ip = socket.inet_ntoa(struct.pack("!i", int(ip)))
+                    print "%s\t%s (%s:%s)" % (ts, domain, str_ip, port)
+
+        elif type == "ipaddr" and proc.has_key("netconn_complete"):
+            for netconn in proc["netconn_complete"]:
+                ts, ip, port, proto, domain, direction = netconn.split("|")
+                packed_ip = struct.unpack("!i", socket.inet_aton(ioc))[0]
+                #import code; code.interact(local=locals())
+                if packed_ip == int(ip):
+                    str_ip = socket.inet_ntoa(struct.pack("!i", int(ip)))
+                    print "%s\t%s (%s:%s)" % (ts, domain, str_ip, port)
+
+        elif type == "md5" and proc.has_key("modload_complete"):
+            for modload in proc["modload_complete"]:
+                ts, md5, path = modload.split("|")
+                if ioc in md5:
+                    print "%s\t%s %s" % (ts, md5, path)
+
+            if result["process_md5"] == ioc:
+                print "%s\t%s %s" % (result["start"], result["process_md5"], result["path"])
 
     def check(self, iocs, type):
         # for each ioc, do a search for (type):(ioc)
