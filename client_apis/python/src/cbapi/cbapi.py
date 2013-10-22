@@ -51,7 +51,7 @@ class CbApi(object):
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
         return json.loads(r.content)
     
-    def processes(self, query_string, start=0, rows=10, sort="last_update desc"):
+    def process_search(self, query_string, start=0, rows=10, sort="last_update desc"):
         """ Search for processes.  Arguments: 
 
             query_string -      The Cb query string; this is the same string used in the 
@@ -74,23 +74,24 @@ class CbApi(object):
         # setup the object to be used as the JSON object sent as a payload
         # to the endpoint
         params = {
-            'sort': ['start desc'], 
+            'sort': sort, 
             'facet': ['true', 'true'], 
-            'rows': ['10'], 
+            'rows': rows, 
             'cb.urlver': ['1'], 
             'q': [query_string], 
-            'start': ['0']}
+            'start': start}
 
         # do a post request since the URL can get long
+        # @note GET is also supported through the use of a query string
         r = requests.post("%s/api/v1/process" % self.server, headers=self.token_header,
                           data=json.dumps(params), verify=self.ssl_verify)
         if r.status_code != 200:
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
         return r.json()
 
-    def process(self, id):
+    def process_summary(self, id, segment):
         """ get the detailed metadata for a process.  Requires the 'id' field from a process
-            search result.
+            search result, as well as a segement, also found from a process search result.
     
             Returns a python dictionary with the following primary fields:
                 - process - metadata for this process
@@ -98,20 +99,20 @@ class CbApi(object):
                 - children - a list of metadata structures for child processes
                 - siblings - a list of metadata structures for sibling processes
         """
-        r = requests.post("%s/api/process/%s" % (self.server, id), headers=self.token_header, verify=self.ssl_verify)
+        r = requests.get("%s/api/v1/process/%s/%s" % (self.server, id, segment), headers=self.token_header, verify=self.ssl_verify)
         if r.status_code != 200:
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
         return r.json()
 
-    def events(self, id):
-        """ get all the events (filemods, regmods, etc) for a process.  Requires the 'id' field
+    def process_events(self, id, segment):
+        """ get all the events (filemods, regmods, etc) for a process.  Requires the 'id' and 'segment_id' fields
             from a process search result"""
-        r = requests.get("%s/api/events/%s" % (self.server, id), headers=self.token_header, verify=self.ssl_verify)
+        r = requests.get("%s/api/v1/process/%s/%s/event" % (self.server, id, segment), headers=self.token_header, verify=self.ssl_verify)
         if r.status_code != 200:
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
         return r.json()
 
-    def binaries(self, query_string, start=0):
+    def binary_search(self, query_string, start=0):
         """ Search for binaries.  Arguments: 
 
             query_string -      The Cb query string; this is the same string used in the 
@@ -130,25 +131,29 @@ class CbApi(object):
                 - terms - a list of strings describing how the query was parsed
                 - facets - a dictionary of the facet results for this saerch
         """
-        args = {"q": query_string, "cburlver": 1, 'start': start}
+        args = {"cburlver": 1, 'start': start}
+        if len(query_string) > 0:
+            args['q'] = query_string
+
         query = urllib.urlencode(args)
-        r = requests.get("%s/api/search/module/%s" % (self.server, query),
+        r = requests.get("%s/api/v1/binary?%s" % (self.server, query),
                              headers=self.token_header, verify=self.ssl_verify)
+        print "%s/api/v1/binary?%s" % (self.server, query)
         if r.status_code != 200:
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
         return r.json()
 
-    def binary(self, md5):
+    def binary_summary(self, md5):
         """ get the metadata for a binary.  Requires the md5 of the binary.
 
             Returns a python dictionary with the binary metadata. """
-        r = requests.get("%s/api/module/%s" % (self.server, md5),
+        r = requests.get("%s/api/v1/binary/%s/summary" % (self.server, md5),
                              headers=self.token_header, verify=self.ssl_verify)
         if r.status_code != 200:
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
         return r.json()
 
-    def download_binary(self, md5hash):
+    def binary(self, md5hash):
         '''
         download binary based on md5hash
         '''
@@ -177,3 +182,55 @@ class CbApi(object):
         if r.status_code != 200:
             raise Exception("Unexpected response from /api/sensor: %s" % (r.status_code))
         return r.content
+
+if __name__ == '__main__':
+
+    import unittest
+    import sys
+
+    global cb
+
+    class CbApiTestCase(unittest.TestCase):
+        def test_info(self):
+            cb.info()
+
+        def test_sensors_plain(self):
+            cb.sensors()
+
+        def test_sensors_ip_query(self):
+            cb.sensors({'ip':'255.255.255.255'})
+
+        def test_sensors_hostname_query(self):
+            cb.sensors({'hostname':'unlikely_host_name'})
+
+        def test_binary_stuff(self):
+            binaries = cb.binary_search("cmd.exe")
+            for binary in binaries['results']:
+                cb.binary_summary(binary['md5'])
+                cb.binary(binary['md5'])
+
+        def test_process_stuff(self):
+            processes = cb.process_search("cmd.exe")
+            for process in processes['results']:
+                process_summary = cb.process_summary(process['id'], process['segment_id'])
+                process_events = cb.process_events(process['id'], process['segment_id'])
+
+    if 3 != len(sys.argv):
+        print "usage   : python cbapi.py server_url api_token"
+        print "example : python cbapi.py https://cb.my.org 3ab23b1bdhjj3jdjcjhh2kl\n"
+        sys.exit(0)
+   
+    # instantiate a global CbApi object
+    # all unit tests will use this object
+    # 
+    cb = CbApi(sys.argv[1], token=sys.argv[2])
+   
+    # remove the server url and api token arguments, as unittest
+    # itself will try to interpret them
+    #
+    del sys.argv[2]
+    del sys.argv[1]
+
+    # run the unit tests
+    #
+    unittest.main()
