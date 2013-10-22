@@ -37,6 +37,20 @@ class CbApi(object):
         self.token = token
         self.token_header = {'X-Auth-Token': self.token}
 
+    def info(self):
+        """ Provide high-level information about the Carbon Black Enterprise Server.
+
+            **NOTE** This function is provided for convenience and may change in
+                     future versions of the Carbon Black API
+
+            Returns a python dictionary with the following field:
+                - version - version of the Carbon Black Enterprise Server
+        """
+        r = requests.get("%s/api/info" % self.server, headers=self.token_header, verify=self.ssl_verify)
+        if r.status_code != 200:
+            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+        return json.loads(r.content)
+    
     def processes(self, query_string, start=0, rows=10, sort="last_update desc"):
         """ Search for processes.  Arguments: 
 
