@@ -37,10 +37,6 @@ class CbApi(object):
         self.token = token
         self.token_header = {'X-Auth-Token': self.token}
 
-        # We only want to hit the api/auth endpoint if we are using actual creds.
-        if self.token is None:
-            self._login()
-
     def processes(self, query_string, start=0, rows=10, sort="last_update desc"):
         """ Search for processes.  Arguments: 
 
@@ -72,7 +68,7 @@ class CbApi(object):
             'start': ['0']}
 
         # do a post request since the URL can get long
-        r = requests.post("%s/api/v1/process/" % self.server, headers=self.token_header,
+        r = requests.post("%s/api/v1/process" % self.server, headers=self.token_header,
                           data=json.dumps(params), verify=self.ssl_verify)
         if r.status_code != 200:
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
@@ -96,7 +92,7 @@ class CbApi(object):
     def events(self, id):
         """ get all the events (filemods, regmods, etc) for a process.  Requires the 'id' field
             from a process search result"""
-        r = requests.get("%s/api/events/%s/" % (self.server, id), headers=self.token_header, verify=self.ssl_verify)
+        r = requests.get("%s/api/events/%s" % (self.server, id), headers=self.token_header, verify=self.ssl_verify)
         if r.status_code != 200:
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
         return r.json()
@@ -122,7 +118,7 @@ class CbApi(object):
         """
         args = {"q": query_string, "cburlver": 1, 'start': start}
         query = urllib.urlencode(args)
-        r = requests.get("%s/api/search/module/%s/" % (self.server, query),
+        r = requests.get("%s/api/search/module/%s" % (self.server, query),
                              headers=self.token_header, verify=self.ssl_verify)
         if r.status_code != 200:
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
@@ -132,7 +128,7 @@ class CbApi(object):
         """ get the metadata for a binary.  Requires the md5 of the binary.
 
             Returns a python dictionary with the binary metadata. """
-        r = requests.get("%s/api/module/%s/" % (self.server, md5),
+        r = requests.get("%s/api/module/%s" % (self.server, md5),
                              headers=self.token_header, verify=self.ssl_verify)
         if r.status_code != 200:
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
