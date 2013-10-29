@@ -3,6 +3,12 @@ Carbon Black Enterprise Server
 
 http://carbonblack.com
 
+These documents are for Carbon Black server v4.0.   APIs and example scripts for earlier releases can be found at:
+
+- [Cb v3.0](https://github.com/carbonblack/cbapi/tree/Cb-v3.0/) - initial API docs
+- [Cb v3.1](https://github.com/carbonblack/cbapi/tree/Cb-v3.1/) - added `segment_id`
+- [Cb v3.2](https://github.com/carbonblack/cbapi/tree/Cb-v3.1/) - no changes from v3.1
+
 ## REST API
 
 ### Versioned 
