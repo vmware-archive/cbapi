@@ -19,10 +19,10 @@ APIs and example scripts for earlier releases can be found at:
 - [Cb v3.1](https://github.com/carbonblack/cbapi/tree/Cb-v3.1/) ([zip][3]) ([tgz][4]) - added `segment_id`
 - [Cb v3.2](https://github.com/carbonblack/cbapi/tree/Cb-v3.1/) ([zip][3]) ([tgz][4]) - no changes from v3.1
 
-[1]:  https://github.com/carbonblack/cbapi/tarball/Cb-v3.0
-[2]:  https://github.com/carbonblack/cbapi/zipball/Cb-v3.0
-[3]:  https://github.com/carbonblack/cbapi/tarball/Cb-v3.1
-[4]:  https://github.com/carbonblack/cbapi/zipball/Cb-v3.1
+[1]:  https://github.com/carbonblack/cbapi/zipball/Cb-v3.0
+[2]:  https://github.com/carbonblack/cbapi/tarball/Cb-v3.0
+[3]:  https://github.com/carbonblack/cbapi/zipball/Cb-v3.1
+[4]:  https://github.com/carbonblack/cbapi/tarball/Cb-v3.1
 
 ## REST API
 
