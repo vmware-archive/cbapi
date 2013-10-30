@@ -8,8 +8,8 @@ http://carbonblack.com
 ### Current
 
 - **Version**: v4.0
-- **Download [zip](https://github.com/carbonblack/cbapi/zipball/master)**
-- **Download [tgz](https://github.com/carbonblack/cbapi/tarball/master)**
+- **Download [zip](https://github.com/carbonblack/cbapi/archive/master)**
+- **Download [tgz](https://github.com/carbonblack/cbapi/archive/master)**
 
 ### Previous 
 
