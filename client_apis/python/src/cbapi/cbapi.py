@@ -171,7 +171,9 @@ class CbApi(object):
         
         as of this writing, supported search criteria are:
           ip - any portion of an ip address
-          hostname - any portion of a hostname, case sensitive 
+          hostname - any portion of a hostname, case sensitive
+
+        returns a list of 0 or more matching sensors 
         '''
 
         url = "%s/api/v1/sensor?" % (self.server,)
@@ -182,6 +184,18 @@ class CbApi(object):
         if r.status_code != 200:
             raise Exception("Unexpected response from /api/sensor: %s" % (r.status_code))
         
+        return r.json()
+
+    def sensor(self, sensor_id):
+        '''
+        get information describing a single sensor, as specified by sensor id
+        '''
+
+        url = "%s/api/v1/sensor/%d" % (self.server, sensor_id)
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        if r.status_code != 200:
+            raise Exception("Unexpected response from %s" % (url,))
+
         return r.json()
 
 if __name__ == '__main__':
