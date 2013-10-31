@@ -181,7 +181,8 @@ class CbApi(object):
         r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
         if r.status_code != 200:
             raise Exception("Unexpected response from /api/sensor: %s" % (r.status_code))
-        return r.content
+        
+        return r.json()
 
 if __name__ == '__main__':
 
