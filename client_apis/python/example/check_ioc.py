@@ -18,8 +18,8 @@ from cbapi import CbApi
 CRON_INTERVAL = None
 
 class CBQuery(object):
-    def __init__(self, url, token):
-        self.cb = CbApi(url, token=token)
+    def __init__(self, url, token, ssl_verify):
+        self.cb = CbApi(url, token=token, ssl_verify=ssl_verify)
         self.cb_url = url
 
     def report(self, ioc, type, procs, detail=False):
@@ -40,7 +40,7 @@ class CBQuery(object):
                 self.report_detail(ioc, type, result)
 
     def report_detail(self, ioc, type, result):
-        events = self.cb.events(result["id"], result["segment_id"])
+        events = self.cb.process_events(result["id"], result["segment_id"])
         proc = events["process"]
 
         if type == "domain" and proc.has_key("netconn_complete"):
@@ -88,7 +88,7 @@ class CBQuery(object):
             else:
                 q = "%s:%s" % (type, ioc)
             print q
-            procs = self.cb.processes(q)
+            procs = self.cb.process_search(q)
 
             # if there are _any_ hits, give us the details.
             # then check the next ioc
@@ -112,6 +112,8 @@ def build_cli_parser():
                       help="Type of IOCs in the file.  Must be one of md5, domain or ipaddr")
     parser.add_option("-d", "--detail", action="store_true", default=False, dest="detail",
                       help="Get full detail about each IOC hit.")
+    parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
+                      help="Do not verify server SSL certificate.")
     return parser
 
 def main(argv):
@@ -126,7 +128,7 @@ def main(argv):
         sys.exit(-1)
 
     # setup the CbApi object
-    cb = CBQuery(opts.url, opts.token)
+    cb = CBQuery(opts.url, opts.token, ssl_verify=opts.ssl_verify)
 
     # get the IOCs to check; this is a list of strings, one indicator
     # per line.  strip off the newlines as they come in
