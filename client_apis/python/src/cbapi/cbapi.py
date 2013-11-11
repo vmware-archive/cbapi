@@ -78,8 +78,12 @@ class CbApi(object):
             'facet': ['true', 'true'], 
             'rows': rows, 
             'cb.urlver': ['1'], 
-            'q': [query_string], 
             'start': start}
+
+        # a q (query) param only needs to be specified if a query is present
+        # to search for all processes, provide an empty string for q
+        if len(query_string) > 0:
+            params['q'] = [query_string]
 
         # do a post request since the URL can get long
         # @note GET is also supported through the use of a query string
@@ -136,11 +140,10 @@ class CbApi(object):
             args['q'] = query_string
 
         query = urllib.urlencode(args)
-        r = requests.get("%s/api/v1/binary?%s" % (self.server, query),
-                             headers=self.token_header, verify=self.ssl_verify)
-        print "%s/api/v1/binary?%s" % (self.server, query)
+        url = "%s/api/v1/binary?%s" % (self.server, query)
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
         if r.status_code != 200:
-            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+            raise Exception("Unexpected response from %s: %s" % (url, r.status_code))
         return r.json()
 
     def binary_summary(self, md5):
@@ -219,13 +222,13 @@ if __name__ == '__main__':
             cb.sensors({'hostname':'unlikely_host_name'})
 
         def test_binary_stuff(self):
-            binaries = cb.binary_search("cmd.exe")
+            binaries = cb.binary_search("")
             for binary in binaries['results']:
                 cb.binary_summary(binary['md5'])
                 cb.binary(binary['md5'])
 
         def test_process_stuff(self):
-            processes = cb.process_search("cmd.exe")
+            processes = cb.process_search("")
             for process in processes['results']:
                 process_summary = cb.process_summary(process['id'], process['segment_id'])
                 process_events = cb.process_events(process['id'], process['segment_id'])
@@ -238,7 +241,7 @@ if __name__ == '__main__':
     # instantiate a global CbApi object
     # all unit tests will use this object
     # 
-    cb = CbApi(sys.argv[1], token=sys.argv[2])
+    cb = CbApi(sys.argv[1], ssl_verify=False, token=sys.argv[2])
    
     # remove the server url and api token arguments, as unittest
     # itself will try to interpret them
