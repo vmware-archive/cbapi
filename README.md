@@ -1,9 +1,20 @@
-Carbon Black Enterprise Server
+Carbon Black Enterprise Server API 
 =========================
 
 http://carbonblack.com
 
 ## REST API
+
+### Client Bindings
+
+The Carbon Black API is a RESTful API.  This means that the API can be consumed by practically any language.
+
+Example client bindings and scripts are included for reference purposes.  Both the bindings and example scripts
+are implemented in python.
+
+The core client bindings can be found at client_apis/python/src/cbapi/cbapi.py.  HTTP communication is 
+supported via the python requests library.  The client bindings require version 1.0.0 of the requests libarary,
+released 12-17-2012.  Previous versions are not compatible with cbapi as written.
 
 ### Versioned 
 
@@ -27,6 +38,9 @@ The following APIs are versioned.  Backwards compatibility will be maintained fo
 ### Beta
 
 The following APIs are beta.  Backwards compatibility will not be supported.  Contents are not expected to widely change.
+
+#### Top-level Configuration
+- [`/api/info`][#apiinfo] - top-level configuration
 
 ## API Reference
 
