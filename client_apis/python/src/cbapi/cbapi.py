@@ -138,7 +138,6 @@ class CbApi(object):
         query = urllib.urlencode(args)
         r = requests.get("%s/api/v1/binary?%s" % (self.server, query),
                              headers=self.token_header, verify=self.ssl_verify)
-        print "%s/api/v1/binary?%s" % (self.server, query)
         if r.status_code != 200:
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
         return r.json()
