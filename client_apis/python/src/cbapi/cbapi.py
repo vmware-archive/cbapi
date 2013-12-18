@@ -180,7 +180,19 @@ class CbApi(object):
         r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
         if r.status_code != 200:
             raise Exception("Unexpected response from /api/sensor: %s" % (r.status_code))
-        return r.json
+        return r.json()
+
+    def watchlists(self):
+        '''
+        get all watchlists
+        '''
+
+        url = "%s/api/watchlist" % (self.server)
+        
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        if r.status_code != 200:
+            raise Exception("Unexpected response from %s: %s" % (url, r.status_code))
+        return r.json()
 
 if __name__ == '__main__':
 
@@ -206,13 +218,16 @@ if __name__ == '__main__':
             binaries = cb.binary_search("cmd.exe")
             for binary in binaries['results']:
                 cb.binary_summary(binary['md5'])
-                cb.binary(binary['md5'])
+                # cb.binary(binary['md5'])
 
         def test_process_stuff(self):
             processes = cb.process_search("cmd.exe")
             for process in processes['results']:
                 process_summary = cb.process_summary(process['id'], process['segment_id'])
                 process_events = cb.process_events(process['id'], process['segment_id'])
+
+        def test_watchlist_stuff(self):
+            watchlists = cb.watchlists()
 
     if 3 != len(sys.argv):
         print "usage   : python cbapi.py server_url api_token"

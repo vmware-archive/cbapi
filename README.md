@@ -35,6 +35,9 @@ The following APIs are versioned.  Backwards compatibility will be maintained fo
 #### Sensor Data
 - [`/api/v1/sensor/`](#apiv1sensoridhostnamehostnameipipaddr) - Sensor details
 
+#### Watchlists
+- [`/api/v1/process`](#apiv1watchlist) - Watchlist enumeration, addition, modification, and deletion
+
 ### Beta
 
 The following APIs are beta.  Backwards compatibility will not be supported.  Contents are not expected to widely change.
@@ -83,7 +86,7 @@ A process contains the following fields:
 - `netconn_count`: count of network connections in this process
 - `childproc_count`: the count of child processes launched by this process
 - `group`: the CB Host group this sensor is assigned to 
-- `sensor_id`: the internal CB id for this computer's sensor
+- `sensor_id`: the internal CB id for the sensor on which the process executed
 - `id`: the internal CB process GUID for this process (processes are identified by this GUID and their segment id)
 - `segment_id`: the process segment id (processes are identified by this segment id and their process ID id)
 - `unique_id`: internal CB process id combining of the process GUID and segment GUID
@@ -700,6 +703,47 @@ GET http://192.168.206.154/api/binary/1C8B787BAA52DEAD1A6FEC1502D652f0/summary
 ```
 
 -----
+
+#### `/api/v1/watchlist/(id)
+Watchlist enumeration, creation, modification, and deletion
+
+*Supports*: 'GET', 'PUT', 'POST', 'DELETE'
+
+##### Parameters:
+- `id`: OPTIONAL the watchlist id
+
+##### Returns
+
+- With no id parameter (`GET /api/v1/watchlist`) returns a list of watchlists, with each list entry describing one watchlist
+- With an id parameter (`GET /api/v1/watchlist/3`) returns the watchlist record for the matching id
+- With no id parameter (`POST` /api/v1/watchlist) returns the watchlist record for the newly created watchlist
+- With an id parameter (`PUT` /api/v1/watchlist/3) returns the watchlist record for the newly updated watchlist
+
+A watchlist record has the following structure:
+
+- `id`: the id of this watchlist
+- `alliance_id`: the id of this watchlist on the Carbon Black Alliance server; see notes
+- `from_alliance`: boolean indication as to if this watchlist was provided by the Carbon Black Alliance Server
+- `date_added`: the date this watchlist was created on this Enterprise Server
+- `index_type`: the type of watchlist.  Valid values are 'modules' and 'events'; see notes
+- `last_hit`: timestamp of the last time this watchlist triggered a match
+- `last_hit_count`: count of lifetime watchlist matches
+- `name`: name of this watchlist
+- `search_query`: the raw Carbon Black query that this watchlist matches 
+
+A complete example:
+```
+GET http://192.168.206.154/api/v1/watchlist
+
+{u'alliance_id': None,
+ u'date_added': u'2013-12-11 11:36:38.476886-08:00',
+ u'from_alliance': False,
+ u'id': 4,
+ u'index_type': u'modules',
+ u'last_hit': u'2013-12-11 15:05:04.964374-08:00',
+ u'last_hit_count': 22,
+ u'name': u'Newly Loaded Modules',
+ u'search_query': u'q=is_executable_image%3Afalse&cb.urlver=1&sort=server_added_timestamp%20desc'}
 
 ####  `/api/v1/sensor/(id)?hostname=(hostname)&ip=(ipaddr)`
 Sensor / remote client details
