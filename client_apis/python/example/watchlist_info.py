@@ -18,6 +18,7 @@ def build_cli_parser():
                       help="CB server's URL.  e.g., http://127.0.0.1 ")
     parser.add_option("-a", "--apitoken", action="store", default=None, dest="token",
                       help="API Token for Carbon Black server")
+    parser.add_option("-i", "--id", action="store", default=None, dest="id")
     return parser
 
 def truncate(string, length):
@@ -28,7 +29,7 @@ def truncate(string, length):
 def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
-    if not opts.url or not opts.token:
+    if not opts.url or not opts.token or not opts.id:
         print "Missing required param; run with --help for usage"
         sys.exit(-1)
 
@@ -36,16 +37,20 @@ def main(argv):
     #
     cb = cbapi.CbApi(opts.url, token=opts.token)
 
-    # enumerate all watchlists 
+    # get record describing this watchlist  
     #
-    watchlists = cb.watchlists() 
+    watchlist = cb.watchlists(opts.id) 
 
-    print "%-4s | %-32s | %s" % ('id', 'name', 'query')
-    print "%-4s | %-32s | %s" % ('-' * 4, '-' * 32, '-' * 60)
-
-    # for each result 
-    for watchlist in watchlists:
-        print "%-4s | %-32s | %s" % (watchlist['id'], watchlist['name'], truncate(watchlist['search_query'], 57))
+    # output the details about the watchlist
+    #
+    print '%-20s | %s' % ('field', 'value')
+    print '%-20s + %s' % ('-' * 20, '-' * 60)
+    print '%-20s | %s' % ('id', watchlist['id'])
+    print '%-20s | %s' % ('name', watchlist['name'])
+    print '%-20s | %s' % ('date_added', watchlist['date_added'])
+    print '%-20s | %s' % ('last_hit', watchlist['last_hit'])
+    print '%-20s | %s' % ('last_hit_count', watchlist['last_hit_count'])
+    print '%-20s | %s' % ('search_query', watchlist['search_query'])
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

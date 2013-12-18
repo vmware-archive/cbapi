@@ -182,12 +182,14 @@ class CbApi(object):
             raise Exception("Unexpected response from /api/sensor: %s" % (r.status_code))
         return r.json()
 
-    def watchlists(self):
+    def watchlists(self, id=None):
         '''
-        get all watchlists
+        get all watchlists or a single watchlist
         '''
 
-        url = "%s/api/watchlist" % (self.server)
+        url = "%s/api/v1/watchlist" % (self.server)
+        if id is not None:
+            url = url + "/%s" % (id,)
         
         r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
         if r.status_code != 200:
