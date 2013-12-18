@@ -39,7 +39,7 @@ def main(argv):
 
     # get record describing this watchlist  
     #
-    watchlist = cb.watchlists(opts.id) 
+    watchlist = cb.watchlist(opts.id) 
 
     # output the details about the watchlist
     #

@@ -38,10 +38,10 @@ def main(argv):
 
     # enumerate all watchlists 
     #
-    watchlists = cb.watchlists() 
+    watchlists = cb.watchlist() 
 
     print "%-4s | %-32s | %s" % ('id', 'name', 'query')
-    print "%-4s | %-32s | %s" % ('-' * 4, '-' * 32, '-' * 60)
+    print "%-4s + %-32s + %s" % ('-' * 4, '-' * 32, '-' * 60)
 
     # for each result 
     for watchlist in watchlists:

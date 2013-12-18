@@ -182,7 +182,7 @@ class CbApi(object):
             raise Exception("Unexpected response from /api/sensor: %s" % (r.status_code))
         return r.json()
 
-    def watchlists(self, id=None):
+    def watchlist(self, id=None):
         '''
         get all watchlists or a single watchlist
         '''
@@ -229,7 +229,9 @@ if __name__ == '__main__':
                 process_events = cb.process_events(process['id'], process['segment_id'])
 
         def test_watchlist_stuff(self):
-            watchlists = cb.watchlists()
+            watchlists = cb.watchlist()
+            for watchlist in watchlists:
+                cb.watchlist(watchlist['id'])
 
     if 3 != len(sys.argv):
         print "usage   : python cbapi.py server_url api_token"
