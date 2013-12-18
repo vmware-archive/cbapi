@@ -3,6 +3,27 @@ Carbon Black Enterprise Server API
 
 http://carbonblack.com
 
+## Download
+
+### Current
+
+- **Version**: v4.0
+- **Download [zip](https://github.com/carbonblack/cbapi/archive/master.zip)**
+- **Download [tgz](https://github.com/carbonblack/cbapi/archive/master.tar.gz)**
+
+### Previous 
+
+APIs and example scripts for earlier releases can be found at:
+
+- [Cb v3.0](https://github.com/carbonblack/cbapi/tree/Cb-v3.0/) ([zip][1]) ([tgz][2]) - initial API docs
+- [Cb v3.1](https://github.com/carbonblack/cbapi/tree/Cb-v3.1/) ([zip][3]) ([tgz][4]) - added `segment_id`
+- [Cb v3.2](https://github.com/carbonblack/cbapi/tree/Cb-v3.1/) ([zip][3]) ([tgz][4]) - no changes from v3.1
+
+[1]:  https://github.com/carbonblack/cbapi/zipball/Cb-v3.0
+[2]:  https://github.com/carbonblack/cbapi/tarball/Cb-v3.0
+[3]:  https://github.com/carbonblack/cbapi/zipball/Cb-v3.1
+[4]:  https://github.com/carbonblack/cbapi/tarball/Cb-v3.1
+
 ## REST API
 
 ### Client Bindings
