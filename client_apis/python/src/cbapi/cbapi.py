@@ -227,7 +227,7 @@ if __name__ == '__main__':
             binaries = cb.binary_search("")
             for binary in binaries['results']:
                 cb.binary_summary(binary['md5'])
-                # cb.binary(binary['md5'])
+                cb.binary(binary['md5'])
 
         def test_process_stuff(self):
             processes = cb.process_search("")
