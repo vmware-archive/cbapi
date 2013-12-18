@@ -14,7 +14,7 @@ class CbApi(object):
     Example:
 
     import cbapi
-    cb = cbapi.CbApi("http://cb.example.com", "admin", "pa$$w0rd")
+    cb = cbapi.CbApi("http://cb.example.com", token="apitoken")
     # get metadata for all svchost.exe's not from c:\\windows
     procs = cb.processes(r"process_name:svchost.exe -path:c:\\windows\\")  
     for proc in procs['results']:
