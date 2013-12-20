@@ -82,11 +82,13 @@ class CbApi(object):
 
         # a q (query) param only needs to be specified if a query is present
         # to search for all processes, provide an empty string for q
+        #
         if len(query_string) > 0:
             params['q'] = [query_string]
 
-        # do a post request since the URL can get long
-        # @note GET is also supported through the use of a query string
+        # HTTP POST and HTTP GET are both supported for process search
+        # HTTP POST allows for longer query strings 
+        #
         r = requests.post("%s/api/v1/process" % self.server, headers=self.token_header,
                           data=json.dumps(params), verify=self.ssl_verify)
         if r.status_code != 200:
@@ -116,7 +118,7 @@ class CbApi(object):
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
         return r.json()
 
-    def binary_search(self, query_string, start=0):
+    def binary_search(self, query_string, start=0, rows=10):
         """ Search for binaries.  Arguments: 
 
             query_string -      The Cb query string; this is the same string used in the 
@@ -135,7 +137,7 @@ class CbApi(object):
                 - terms - a list of strings describing how the query was parsed
                 - facets - a dictionary of the facet results for this saerch
         """
-        args = {"cburlver": 1, 'start': start}
+        args = {"cburlver": 1, 'start': start, 'rows': rows}
         if len(query_string) > 0:
             args['q'] = query_string
 
