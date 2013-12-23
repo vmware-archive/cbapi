@@ -767,6 +767,8 @@ GET http://192.168.206.154/api/v1/watchlist
  u'search_query': u'q=is_executable_image%3Afalse&cb.urlver=1&sort=server_added_timestamp%20desc'}
 ```
 
+-----
+
 ####  `/api/v1/sensor/(id)?hostname=(hostname)&ip=(ipaddr)`
 Sensor / remote client details
 
