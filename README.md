@@ -725,7 +725,7 @@ GET http://192.168.206.154/api/binary/1C8B787BAA52DEAD1A6FEC1502D652f0/summary
 
 -----
 
-#### `/api/v1/watchlist/(id)
+#### `/api/v1/watchlist/(id)`
 Watchlist enumeration, creation, modification, and deletion
 
 *Supports*: 'GET', 'PUT', 'POST', 'DELETE'
@@ -765,6 +765,7 @@ GET http://192.168.206.154/api/v1/watchlist
  u'last_hit_count': 22,
  u'name': u'Newly Loaded Modules',
  u'search_query': u'q=is_executable_image%3Afalse&cb.urlver=1&sort=server_added_timestamp%20desc'}
+```
 
 ####  `/api/v1/sensor/(id)?hostname=(hostname)&ip=(ipaddr)`
 Sensor / remote client details
