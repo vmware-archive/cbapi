@@ -743,10 +743,10 @@ Watchlist enumeration, creation, modification, and deletion
 A watchlist record has the following structure:
 
 - `id`: the id of this watchlist
-- `alliance_id`: the id of this watchlist on the Carbon Black Alliance server; see notes
+- `alliance_id`: the id of this watchlist on the Carbon Black Alliance server; this value is internal to Carbon Black
 - `from_alliance`: boolean indication as to if this watchlist was provided by the Carbon Black Alliance Server
 - `date_added`: the date this watchlist was created on this Enterprise Server
-- `index_type`: the type of watchlist.  Valid values are 'modules' and 'events'; see notes
+- `index_type`: the type of watchlist.  Valid values are 'modules' and 'events' for binary and process watchlists, respectively
 - `last_hit`: timestamp of the last time this watchlist triggered a match
 - `last_hit_count`: count of lifetime watchlist matches
 - `name`: name of this watchlist
@@ -756,7 +756,8 @@ A complete example:
 ```
 GET http://192.168.206.154/api/v1/watchlist
 
-{u'alliance_id': None,
+{
+ u'alliance_id': None,
  u'date_added': u'2013-12-11 11:36:38.476886-08:00',
  u'from_alliance': False,
  u'id': 4,
@@ -764,7 +765,8 @@ GET http://192.168.206.154/api/v1/watchlist
  u'last_hit': u'2013-12-11 15:05:04.964374-08:00',
  u'last_hit_count': 22,
  u'name': u'Newly Loaded Modules',
- u'search_query': u'q=is_executable_image%3Afalse&cb.urlver=1&sort=server_added_timestamp%20desc'}
+ u'search_query': u'q=is_executable_image%3Afalse&cb.urlver=1&sort=server_added_timestamp%20desc'
+ }
 ```
 
 -----
