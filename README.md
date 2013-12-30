@@ -64,7 +64,7 @@ The following APIs are versioned.  Backwards compatibility will be maintained fo
 The following APIs are beta.  Backwards compatibility will not be supported.  Contents are not expected to widely change.
 
 #### Top-level Configuration
-- [`/api/info`][#apiinfo] - top-level configuration
+- `/api/info` - top-level configuration
 
 ## API Reference
 
