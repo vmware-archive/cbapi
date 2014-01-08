@@ -74,10 +74,10 @@ class CbApi(object):
         # setup the object to be used as the JSON object sent as a payload
         # to the endpoint
         params = {
-            'sort': sort, 
-            'facet': ['true', 'true'], 
-            'rows': rows, 
-            'cb.urlver': ['1'], 
+            'sort': sort,
+            'facet': ['true', 'true'],
+            'rows': rows,
+            'cb.urlver': ['1'],
             'start': start}
 
         # a q (query) param only needs to be specified if a query is present
@@ -87,7 +87,7 @@ class CbApi(object):
             params['q'] = [query_string]
 
         # HTTP POST and HTTP GET are both supported for process search
-        # HTTP POST allows for longer query strings 
+        # HTTP POST allows for longer query strings
         #
         r = requests.post("%s/api/v1/process" % self.server, headers=self.token_header,
                           data=json.dumps(params), verify=self.ssl_verify)
@@ -98,7 +98,7 @@ class CbApi(object):
     def process_summary(self, id, segment):
         """ get the detailed metadata for a process.  Requires the 'id' field from a process
             search result, as well as a segement, also found from a process search result.
-    
+
             Returns a python dictionary with the following primary fields:
                 - process - metadata for this process
                 - parent -  metadata for the parent process
@@ -119,14 +119,14 @@ class CbApi(object):
         return r.json()
 
     def binary_search(self, query_string, start=0, rows=10):
-        """ Search for binaries.  Arguments: 
+        """ Search for binaries.  Arguments:
 
-            query_string -      The Cb query string; this is the same string used in the 
+            query_string -      The Cb query string; this is the same string used in the
                                 "main search box" on the binary search page.  "Contains text..."
                                 See Cb Query Syntax for a description of options.
 
             start -             Defaulted to 0.  Will retrieve records starting at this offset.
-            rows -              Defaulted to 10. Will retrieve this many rows. 
+            rows -              Defaulted to 10. Will retrieve this many rows.
             sort -              Default to last_update desc.  Must include a field and a sort
                                 order; results will be sorted by this param.
 
@@ -169,16 +169,16 @@ class CbApi(object):
         if r.status_code != 200:
             raise Exception("Unexpected response from /api/v1/binary: %s" % (r.status_code))
         return r._content
-        
+
     def sensors(self, query_parameters={}):
         '''
         get sensors, optionally specifying searchcriteria
-        
+
         as of this writing, supported search criteria are:
           ip - any portion of an ip address
           hostname - any portion of a hostname, case sensitive
 
-        returns a list of 0 or more matching sensors 
+        returns a list of 0 or more matching sensors
         '''
 
         url = "%s/api/v1/sensor?" % (self.server,)
@@ -186,7 +186,7 @@ class CbApi(object):
             url += "%s=%s&" % (query_parameter, query_parameters[query_parameter])
 
         r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
-        if r.status_code != 200:
+        if r.status_code != 200:   
             raise Exception("Unexpected response from /api/sensor: %s" % (r.status_code))
         return r.json()
 
@@ -198,12 +198,33 @@ class CbApi(object):
         url = "%s/api/v1/watchlist" % (self.server)
         if id is not None:
             url = url + "/%s" % (id,)
-        
+
         r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
         if r.status_code != 200:
             raise Exception("Unexpected response from %s: %s" % (url, r.status_code))
-        
+
         return r.json()
+
+    def feed_synchronize(self, name):
+        '''
+        force the synchronization of a feed
+        '''
+
+        feed_request = requests.get("%s/api/v1/feed" % self.server, headers=self.token_header, verify=self.ssl_verify)
+        if feed_request.status_code != 200:
+            raise Exception("Unexpected response from /api/v1/feed: %s" % feed_request.status_code)
+
+        for feed in feed_request.json():
+            if feed['name'] == name:
+                sync_request = requests.post("%s/api/v1/feed/%s/synchronize" % (self.server, feed["id"]),
+                                             headers=self.token_header, verify=self.ssl_verify)
+                if sync_request.status_code == 200:
+                    return {"result": True}
+                elif sync_request.status_code == 409:
+                    return {"result": False, "reason": "feed disabled"}
+                else:
+                    raise Exception("Unexpected response from /api/v1/feed/%s/synchronize: %s"
+                                    % (feed['id'], sync_request.status_code))
 
 if __name__ == '__main__':
 
@@ -251,7 +272,6 @@ if __name__ == '__main__':
     # all unit tests will use this object
     # 
     cb = CbApi(sys.argv[1], ssl_verify=False, token=sys.argv[2])
-   
     # remove the server url and api token arguments, as unittest
     # itself will try to interpret them
     #
