@@ -49,6 +49,55 @@ The following APIs are versioned.  Backwards compatibility will be maintained fo
 
 The following APIs are beta.  Backwards compatibility will not be supported.  Contents are not expected to widely change.
 
+#### Watchlists
+
+- `/api/watchlist/(id)` - Get/set information for specified watchlist
+- `/api/watchlists` - Get list of watchlists
+
+#### Alliance Feeds
+
+- `/api/feeds` - Get list of configured feeds
+- `/api/feed/` - Get/create new feed
+- `/api/feed/(id)` - Get/update existing feed
+
+## API Authentication
+
+Each user in Cb has a personal API key.   To find a user's API key, log into the console as that user, then click the username in the upper right -> Profile -> API Token.   (If the API Token is missing or otherwise compromised, click "Reset" to generate a new token for that user.)
+
+For an API request to the Cb server, add this key to a custom HTTP Request Header `X-Auth-Token`.
+
+For example, to get the summary information for a binary with MD5 6D778E0F95447E6546553EEEA709D03C:
+
+```
+[root@localhost flask]# curl -H 'X-Auth-Token:15dd7c486d81899f64643d6618c47a4e5ccc5c01' http://127.0.0.1/api/v1/binary/6D778E0F95447E6546553EEEA709D03C/summary
+{
+  "digsig_result": "Signed",
+  "observed_filename": [
+    "c:\\windows\\system32\\cmd.exe"
+  ],
+  "product_version": "5.1.2600.5512",
+  "signed": "Signed",
+  "digsig_sign_time": "2008-04-14T09:07:00Z",
+  "orig_mod_len": 389120,
+  "is_executable_image": true,
+  "is_64bit": false,
+  "digsig_publisher": "Microsoft Corporation",
+  "file_version": "5.1.2600.5512 (xpsp.080413-2111)",
+  "company_name": "Microsoft Corporation",
+  "internal_name": "cmd",
+  "_version_": 1457126999526998016,
+  "product_name": "Microsoft\u00c2\u00ae Windows\u00c2\u00ae Operating System",
+  "digsig_result_code": "0",
+  "timestamp": "2014-01-13T14:49:55.189Z",
+  "copied_mod_len": 389120,
+  "server_added_timestamp": "2014-01-13T14:49:55.189Z",
+  "md5": "6D778E0F95447E6546553EEEA709D03C",
+  "legal_copyright": "\u00c2\u00a9 Microsoft Corporation. All rights reserved.",
+  "original_filename": "Cmd.Exe",
+  "file_desc": "Windows Command Processor"
+}
+```
+
 ## API Reference
 
 ####  `/api/v1/process/`
