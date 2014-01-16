@@ -118,16 +118,19 @@ class CbApi(object):
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
         return r.json()
 
-    def binary_search(self, query_string, start=0, rows=10):
-        """ Search for binaries.  Arguments:
+
+    def binary_search(self, query_string, start=0, rows=10, sort="server_added_timestamp desc"):
+        """ Search for binaries.  Arguments: 
+
 
             query_string -      The Cb query string; this is the same string used in the
                                 "main search box" on the binary search page.  "Contains text..."
                                 See Cb Query Syntax for a description of options.
 
             start -             Defaulted to 0.  Will retrieve records starting at this offset.
-            rows -              Defaulted to 10. Will retrieve this many rows.
-            sort -              Default to last_update desc.  Must include a field and a sort
+
+            rows -              Defaulted to 10. Will retrieve this many rows. 
+            sort -              Default to server_added_timestamp desc.  Must include a field and a sort
                                 order; results will be sorted by this param.
 
             Returns a python dictionary with the following primary fields:
@@ -137,15 +140,27 @@ class CbApi(object):
                 - terms - a list of strings describing how the query was parsed
                 - facets - a dictionary of the facet results for this saerch
         """
-        args = {"cburlver": 1, 'start': start, 'rows': rows}
-        if len(query_string) > 0:
-            args['q'] = query_string
 
-        query = urllib.urlencode(args)
-        url = "%s/api/v1/binary?%s" % (self.server, query)
-        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        # setup the object to be used as the JSON object sent as a payload
+        # to the endpoint
+        params = {
+            'sort': sort,
+            'facet': ['true', 'true'],
+            'rows': rows,
+            'cb.urlver': ['1'],
+            'start': start}
+
+        # a q (query) param only needs to be specified if a query is present
+        # to search for all binaries, provide an empty string for q
+        if len(query_string) > 0:
+            params['q'] = [query_string]
+
+        # do a post request since the URL can get long
+        # @note GET is also supported through the use of a query string
+        r = requests.post("%s/api/v1/binary" % self.server, headers=self.token_header,
+                          data=json.dumps(params), verify=self.ssl_verify)
         if r.status_code != 200:
-            raise Exception("Unexpected response from %s: %s" % (url, r.status_code))
+            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
         return r.json()
 
     def binary_summary(self, md5):
