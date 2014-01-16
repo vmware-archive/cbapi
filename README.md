@@ -57,7 +57,7 @@ The following APIs are versioned.  Backwards compatibility will be maintained fo
 - [`/api/v1/sensor/`](#apiv1sensoridhostnamehostnameipipaddr) - Sensor details
 
 #### Watchlists
-- [`/api/v1/process`](#apiv1watchlist) - Watchlist enumeration, addition, modification, and deletion
+- [`/api/v1/watchlist`](#apiv1watchlist) - Watchlist enumeration, addition, modification, and deletion
 
 ### Beta
 
