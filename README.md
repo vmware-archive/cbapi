@@ -7,7 +7,7 @@ http://carbonblack.com
 
 ### Current
 
-- **Version**: v4.0
+- **Version**: v4.1
 - **Download [zip](https://github.com/carbonblack/cbapi/archive/master.zip)**
 - **Download [tgz](https://github.com/carbonblack/cbapi/archive/master.tar.gz)**
 
@@ -35,11 +35,11 @@ are implemented in python.
 
 The core client bindings can be found at client_apis/python/src/cbapi/cbapi.py.  HTTP communication is 
 supported via the python requests library.  The client bindings require version 1.0.0 of the requests libarary,
-released 12-17-2012.  Previous versions are not compatible with cbapi as written.
+released 12-17-2012.  Previous versions of the requests library are not compatible with cbapi as written.
 
 ### Versioned 
 
-The following APIs are versioned.  Backwards compatibility will be maintained for at least two major version revisions. 
+The following APIs are versioned. 
 
 #### Process Data 
 - [`/api/v1/process`](#apiv1process) - Process search
@@ -54,10 +54,13 @@ The following APIs are versioned.  Backwards compatibility will be maintained fo
 - [`/api/v1/binary/(md5)/summary`](#apiv1binarymd5summary) - Binary's metadata
  
 #### Sensor Data
-- [`/api/v1/sensor/`](#apiv1sensoridhostnamehostnameipipaddr) - Sensor details
+- [`/api/v1/sensor`](#apiv1sensoridhostnamehostnameipipaddr) - Sensor details
 
 #### Watchlists
 - [`/api/v1/watchlist`](#apiv1watchlist) - Watchlist enumeration, addition, modification, and deletion
+
+#### Licensing
+- [`/api/v1/license`](#apiv1license) - Server license status, requests, and application of new license
 
 ### Beta
 
@@ -722,6 +725,30 @@ GET http://192.168.206.154/api/binary/1C8B787BAA52DEAD1A6FEC1502D652f0/summary
   "file_desc": "Microsoft (R) HTML Viewer"
 }
 ```
+
+-----
+
+#### `/api/v1/license`
+License status and application
+
+*Supports*: 'GET', 'POST'
+
+##### Parameters:
+ - None
+ - 
+##### Returns
+
+- A GET returns the current license status, as defined below:
+
+A license status dictionary has the following structure:
+
+- `license_valid`: boolean indication as to if the licence is valid.  A valid license may be expired or unexpired.
+- `license_end_date`: YYYY-MM-DD date on which the license expires
+- `licensed_sensor_count`: number of sensors that can be used with this server while staying compliant with license.
+- `server_token`: unique identifier for this particular server instance
+- `license_expired`: boolean indicator as to if the license is expired
+- `licensed_sensor_count_exceeded`: boolean indicator as to if the server is currently servicing more sensors than it is licensed for
+- `actual_sensor_count`: count of sensors serviced during previous day (midnight to midnight)
 
 -----
 
