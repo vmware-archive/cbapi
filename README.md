@@ -50,8 +50,8 @@ The following APIs are versioned.
 #### Binary Data
 - [`/api/v1/binary`](#apiv1binary) - Binary search
 - [`/api/v1/binary/(md5)`](#apiv1binarymd5) - Download the binary
-- [`/api/v1/binary/(md5)/icon`](#apiv1binarymd5icon) - Binary's icon
-- [`/api/v1/binary/(md5)/summary`](#apiv1binarymd5summary) - Binary's metadata
+- [`/api/v1/binary/(md5)/icon`](#apiv1binarymd5icon) - Icon of the binary (in PNG format) 
+- [`/api/v1/binary/(md5)/summary`](#apiv1binarymd5summary) - Binary metadata
  
 #### Sensor Data
 - [`/api/v1/sensor`](#apiv1sensoridhostnamehostnameipipaddr) - Sensor details
@@ -734,7 +734,7 @@ License status and application
 *Supports*: 'GET', 'POST'
 
 ##### Parameters:
- - None
+ - Carbon Black-provided license (POST) 
  - 
 ##### Returns
 
@@ -749,7 +749,7 @@ A license status dictionary has the following structure:
 - `license_expired`: boolean indicator as to if the license is expired
 - `licensed_sensor_count_exceeded`: boolean indicator as to if the server is currently servicing more sensors than it is licensed for
 - `actual_sensor_count`: count of sensors serviced during previous day (midnight to midnight)
-
+- `license_request_block`: an opaque request block to be provided to Carbon Black for license renewal
 -----
 
 #### `/api/v1/watchlist/(id)`

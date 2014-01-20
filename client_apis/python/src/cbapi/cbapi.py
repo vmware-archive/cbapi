@@ -59,7 +59,14 @@ class CbApi(object):
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
 
         return json.loads(r.content)
-    
+
+    def apply_license(self, license):
+        """ Apply a new license to the server
+        """
+        r = requests.post("%s/api/v1/license", (self.server,), headers=self.token_header, verify=self.ssl_verify)
+        if r.status_code != 200:
+            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+
     def process_search(self, query_string, start=0, rows=10, sort="last_update desc"):
         """ Search for processes.  Arguments: 
 
