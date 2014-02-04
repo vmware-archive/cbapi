@@ -799,8 +799,8 @@ A sensor structure has the following fields:
 - `next_checkin_time`: Next expected communication from this computer in server-local time and zone
 - `boot_id`: A sequential counter of boots since the sensor was installed
 - `group_id`: The sensor group id this sensor is assigned to
-- `display`: If this sensor is shown on the hosts page.  Sensors details are never deleted, just hidden.
-- `uninstall`: true if this sensor has been told to uninstall.
+- `display`: Deprecated
+- `uninstall`: when set, indicates sensor will be directed to uninstall on next checkin
 - `cookie`:  cb internal
  
 If `event_log_flush_time` is set, the server will instruct the sensor to immediately send all data before this date, 
