@@ -752,6 +752,7 @@ A license status dictionary has the following structure:
 - `licensed_sensor_count_exceeded`: boolean indicator as to if the server is currently servicing more sensors than it is licensed for
 - `actual_sensor_count`: count of sensors serviced during previous day (midnight to midnight)
 - `license_request_block`: an opaque request block to be provided to Carbon Black for license renewal
+
 -----
 
 #### `/api/v1/watchlist/(id)`
