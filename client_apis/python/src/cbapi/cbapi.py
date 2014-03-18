@@ -14,7 +14,7 @@ class CbApi(object):
     Example:
 
     import cbapi
-    cb = cbapi.CbApi("http://cb.example.com", "admin", "pa$$w0rd")
+    cb = cbapi.CbApi("http://cb.example.com", token="apitoken")
     # get metadata for all svchost.exe's not from c:\\windows
     procs = cb.processes(r"process_name:svchost.exe -path:c:\\windows\\")  
     for proc in procs['results']:
@@ -50,7 +50,25 @@ class CbApi(object):
         if r.status_code != 200:
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
         return json.loads(r.content)
-    
+
+    def license_status(self):
+        """ Provide a summary of the current applied license
+        """
+        r = requests.get("%s/api/v1/license" % (self.server,),  headers=self.token_header, verify=self.ssl_verify)
+        if r.status_code != 200:
+            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+
+        return json.loads(r.content)
+
+    def apply_license(self, license):
+        """ Apply a new license to the server
+        """
+        r = requests.post("%s/api/v1/license" % (self.server,), headers=self.token_header, \
+                data=json.dumps({'license': license}), \
+                verify=self.ssl_verify)
+        if r.status_code != 200:
+            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+
     def process_search(self, query_string, start=0, rows=10, sort="last_update desc"):
         """ Search for processes.  Arguments: 
 
@@ -74,19 +92,21 @@ class CbApi(object):
         # setup the object to be used as the JSON object sent as a payload
         # to the endpoint
         params = {
-            'sort': sort, 
-            'facet': ['true', 'true'], 
-            'rows': rows, 
-            'cb.urlver': ['1'], 
+            'sort': sort,
+            'facet': ['true', 'true'],
+            'rows': rows,
+            'cb.urlver': ['1'],
             'start': start}
 
         # a q (query) param only needs to be specified if a query is present
         # to search for all processes, provide an empty string for q
+        #
         if len(query_string) > 0:
             params['q'] = [query_string]
 
-        # do a post request since the URL can get long
-        # @note GET is also supported through the use of a query string
+        # HTTP POST and HTTP GET are both supported for process search
+        # HTTP POST allows for longer query strings
+        #
         r = requests.post("%s/api/v1/process" % self.server, headers=self.token_header,
                           data=json.dumps(params), verify=self.ssl_verify)
         if r.status_code != 200:
@@ -96,7 +116,7 @@ class CbApi(object):
     def process_summary(self, id, segment):
         """ get the detailed metadata for a process.  Requires the 'id' field from a process
             search result, as well as a segement, also found from a process search result.
-    
+
             Returns a python dictionary with the following primary fields:
                 - process - metadata for this process
                 - parent -  metadata for the parent process
@@ -116,16 +136,19 @@ class CbApi(object):
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
         return r.json()
 
-    def binary_search(self, query_string, start=0):
+
+    def binary_search(self, query_string, start=0, rows=10, sort="server_added_timestamp desc"):
         """ Search for binaries.  Arguments: 
 
-            query_string -      The Cb query string; this is the same string used in the 
+
+            query_string -      The Cb query string; this is the same string used in the
                                 "main search box" on the binary search page.  "Contains text..."
                                 See Cb Query Syntax for a description of options.
 
             start -             Defaulted to 0.  Will retrieve records starting at this offset.
+
             rows -              Defaulted to 10. Will retrieve this many rows. 
-            sort -              Default to last_update desc.  Must include a field and a sort
+            sort -              Default to server_added_timestamp desc.  Must include a field and a sort
                                 order; results will be sorted by this param.
 
             Returns a python dictionary with the following primary fields:
@@ -135,15 +158,27 @@ class CbApi(object):
                 - terms - a list of strings describing how the query was parsed
                 - facets - a dictionary of the facet results for this saerch
         """
-        args = {"cburlver": 1, 'start': start}
-        if len(query_string) > 0:
-            args['q'] = query_string
 
-        query = urllib.urlencode(args)
-        url = "%s/api/v1/binary?%s" % (self.server, query)
-        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        # setup the object to be used as the JSON object sent as a payload
+        # to the endpoint
+        params = {
+            'sort': sort,
+            'facet': ['true', 'true'],
+            'rows': rows,
+            'cb.urlver': ['1'],
+            'start': start}
+
+        # a q (query) param only needs to be specified if a query is present
+        # to search for all binaries, provide an empty string for q
+        if len(query_string) > 0:
+            params['q'] = [query_string]
+
+        # do a post request since the URL can get long
+        # @note GET is also supported through the use of a query string
+        r = requests.post("%s/api/v1/binary" % self.server, headers=self.token_header,
+                          data=json.dumps(params), verify=self.ssl_verify)
         if r.status_code != 200:
-            raise Exception("Unexpected response from %s: %s" % (url, r.status_code))
+            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
         return r.json()
 
     def binary_summary(self, md5):
@@ -167,16 +202,16 @@ class CbApi(object):
         if r.status_code != 200:
             raise Exception("Unexpected response from /api/v1/binary: %s" % (r.status_code))
         return r._content
-        
+
     def sensors(self, query_parameters={}):
         '''
         get sensors, optionally specifying searchcriteria
-        
+
         as of this writing, supported search criteria are:
           ip - any portion of an ip address
           hostname - any portion of a hostname, case sensitive
 
-        returns a list of 0 or more matching sensors 
+        returns a list of 0 or more matching sensors
         '''
 
         url = "%s/api/v1/sensor?" % (self.server,)
@@ -184,71 +219,44 @@ class CbApi(object):
             url += "%s=%s&" % (query_parameter, query_parameters[query_parameter])
 
         r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
-        if r.status_code != 200:
+        if r.status_code != 200:   
             raise Exception("Unexpected response from /api/sensor: %s" % (r.status_code))
-        
         return r.json()
 
-    def sensor(self, sensor_id):
+    def watchlist(self, id=None):
         '''
-        get information describing a single sensor, as specified by sensor id
+        get all watchlists or a single watchlist
         '''
 
-        url = "%s/api/v1/sensor/%d" % (self.server, sensor_id)
+        url = "%s/api/v1/watchlist" % (self.server)
+        if id is not None:
+            url = url + "/%s" % (id,)
+
         r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
         if r.status_code != 200:
-            raise Exception("Unexpected response from %s" % (url,))
+            raise Exception("Unexpected response from %s: %s" % (url, r.status_code))
 
         return r.json()
 
-if __name__ == '__main__':
+    def feed_synchronize(self, name):
+        '''
+        force the synchronization of a feed
+        '''
 
-    import unittest
-    import sys
+        feed_request = requests.get("%s/api/v1/feed" % self.server, headers=self.token_header, verify=self.ssl_verify)
+        if feed_request.status_code != 200:
+            raise Exception("Unexpected response from /api/v1/feed: %s" % feed_request.status_code)
 
-    global cb
+        for feed in feed_request.json():
+            if feed['name'] == name:
+                sync_request = requests.post("%s/api/v1/feed/%s/synchronize" % (self.server, feed["id"]),
+                                             headers=self.token_header, verify=self.ssl_verify)
+                if sync_request.status_code == 200:
+                    return {"result": True}
+                elif sync_request.status_code == 409:
+                    return {"result": False, "reason": "feed disabled"}
+                else:
+                    raise Exception("Unexpected response from /api/v1/feed/%s/synchronize: %s"
+                                    % (feed['id'], sync_request.status_code))
 
-    class CbApiTestCase(unittest.TestCase):
-        def test_info(self):
-            cb.info()
-
-        def test_sensors_plain(self):
-            cb.sensors()
-
-        def test_sensors_ip_query(self):
-            cb.sensors({'ip':'255.255.255.255'})
-
-        def test_sensors_hostname_query(self):
-            cb.sensors({'hostname':'unlikely_host_name'})
-
-        def test_binary_stuff(self):
-            binaries = cb.binary_search("")
-            for binary in binaries['results']:
-                cb.binary_summary(binary['md5'])
-                cb.binary(binary['md5'])
-
-        def test_process_stuff(self):
-            processes = cb.process_search("")
-            for process in processes['results']:
-                process_summary = cb.process_summary(process['id'], process['segment_id'])
-                process_events = cb.process_events(process['id'], process['segment_id'])
-
-    if 3 != len(sys.argv):
-        print "usage   : python cbapi.py server_url api_token"
-        print "example : python cbapi.py https://cb.my.org 3ab23b1bdhjj3jdjcjhh2kl\n"
-        sys.exit(0)
-   
-    # instantiate a global CbApi object
-    # all unit tests will use this object
-    # 
-    cb = CbApi(sys.argv[1], ssl_verify=False, token=sys.argv[2])
-   
-    # remove the server url and api token arguments, as unittest
-    # itself will try to interpret them
-    #
-    del sys.argv[2]
-    del sys.argv[1]
-
-    # run the unit tests
-    #
-    unittest.main()
+        return r.json()

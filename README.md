@@ -1,4 +1,4 @@
-Carbon Black Enterprise Server
+Carbon Black Enterprise Server API 
 =========================
 
 http://carbonblack.com
@@ -7,7 +7,7 @@ http://carbonblack.com
 
 ### Current
 
-- **Version**: v4.0
+- **Version**: v4.1
 - **Download [zip](https://github.com/carbonblack/cbapi/archive/master.zip)**
 - **Download [tgz](https://github.com/carbonblack/cbapi/archive/master.tar.gz)**
 
@@ -15,20 +15,33 @@ http://carbonblack.com
 
 APIs and example scripts for earlier releases can be found at:
 
-- [Cb v3.0](https://github.com/carbonblack/cbapi/tree/Cb-v3.0/) ([zip][1]) ([tgz][2]) - initial API docs
-- [Cb v3.1](https://github.com/carbonblack/cbapi/tree/Cb-v3.1/) ([zip][3]) ([tgz][4]) - added `segment_id`
-- [Cb v3.2](https://github.com/carbonblack/cbapi/tree/Cb-v3.1/) ([zip][3]) ([tgz][4]) - no changes from v3.1
-
+- [CB v3.0](https://github.com/carbonblack/cbapi/tree/Cb-v3.0/) ([zip][1]) ([tgz][2]) - initial API docs
+- [CB v3.1](https://github.com/carbonblack/cbapi/tree/Cb-v3.1/) ([zip][3]) ([tgz][4]) - added `segment_id`
+- [CB v3.2](https://github.com/carbonblack/cbapi/tree/Cb-v3.1/) ([zip][3]) ([tgz][4]) - no changes from v3.1
+- [CB v4.0](https://github.com/carbonblack/cbapi/tree/Cb-v4.0/) ([zip][5]) ([tgz][6]) - 
 [1]:  https://github.com/carbonblack/cbapi/zipball/Cb-v3.0
 [2]:  https://github.com/carbonblack/cbapi/tarball/Cb-v3.0
 [3]:  https://github.com/carbonblack/cbapi/zipball/Cb-v3.1
 [4]:  https://github.com/carbonblack/cbapi/tarball/Cb-v3.1
+[5]:  https://github.com/carbonblack/cbapi/zipball/Cb-v4.0
+[6]:  https://github.com/carbonblack/cbapi/tarball/Cb-v4.0
 
 ## REST API
 
+### Client Bindings
+
+The Carbon Black API is a RESTful API.  This means that the API can be consumed by practically any language.
+
+Example client bindings and scripts are included for reference purposes.  Both the bindings and example scripts
+are implemented in python.
+
+The core client bindings can be found at client_apis/python/src/cbapi/cbapi.py.  HTTP communication is 
+supported via the python requests library.  The client bindings require version 1.0.0 of the requests libarary,
+released 12-17-2012.  Previous versions of the requests library are not compatible with cbapi as written.
+
 ### Versioned 
 
-The following APIs are versioned.  Backwards compatibility will be maintained for at least two major version revisions. 
+The following APIs are versioned. 
 
 #### Process Data 
 - [`/api/v1/process`](#apiv1process) - Process search
@@ -39,15 +52,23 @@ The following APIs are versioned.  Backwards compatibility will be maintained fo
 #### Binary Data
 - [`/api/v1/binary`](#apiv1binary) - Binary search
 - [`/api/v1/binary/(md5)`](#apiv1binarymd5) - Download the binary
-- [`/api/v1/binary/(md5)/icon`](#apiv1binarymd5icon) - Binary's icon
-- [`/api/v1/binary/(md5)/summary`](#apiv1binarymd5summary) - Binary's metadata
+- [`/api/v1/binary/(md5)/icon`](#apiv1binarymd5icon) - Icon of the binary (in PNG format) 
+- [`/api/v1/binary/(md5)/summary`](#apiv1binarymd5summary) - Binary metadata
  
 #### Sensor Data
-- [`/api/v1/sensor/`](#apiv1sensoridhostnamehostnameipipaddr) - Sensor details
+- [`/api/v1/sensor`](#apiv1sensoridhostnamehostnameipipaddr) - Sensor details
+
+#### Watchlists
+- [`/api/v1/watchlist`](#apiv1watchlist) - Watchlist enumeration, addition, modification, and deletion
+
+#### Licensing
+- [`/api/v1/license`](#apiv1license) - Server license status, requests, and application of new license
 
 ### Beta
 
 The following APIs are beta.  Backwards compatibility will not be supported.  Contents are not expected to widely change.
+
+- `/api/info` - top-level configuration
 
 #### Watchlists
 
@@ -130,8 +151,8 @@ JSON object with the following elements:
 A process contains the following fields:
 - `process_md5`: the md5 of the binary image backing the process
 - `process_name`: the name of the process
-- `start`: the start time of the process in remote computer's GMT time
-- `last_update`: the time of the most recently received event for this process in remote computer's GMT time
+- `start`: the start time of the process in remote computer GMT time
+- `last_update`: the time of the most recently received event for this process in remote computer GMT time
 - `hostname`: the hostname of the computer for this process
 - `modload_count`: the count of modules loaded in this process
 - `regmod_count`: the count of registry modifications in this process
@@ -139,7 +160,7 @@ A process contains the following fields:
 - `netconn_count`: count of network connections in this process
 - `childproc_count`: the count of child processes launched by this process
 - `group`: the CB Host group this sensor is assigned to 
-- `sensor_id`: the internal CB id for this computer's sensor
+- `sensor_id`: the internal CB id for the sensor on which the process executed
 - `id`: the internal CB process GUID for this process (processes are identified by this GUID and their segment id)
 - `segment_id`: the process segment id (processes are identified by this segment id and their process ID id)
 - `unique_id`: internal CB process id combining of the process GUID and segment GUID
@@ -753,6 +774,77 @@ GET http://192.168.206.154/api/binary/1C8B787BAA52DEAD1A6FEC1502D652f0/summary
   "original_filename": "MSHTML.DLL.MUI", 
   "file_desc": "Microsoft (R) HTML Viewer"
 }
+```
+
+-----
+
+#### `/api/v1/license`
+License status and application
+
+*Supports*: 'GET', 'POST'
+
+##### Parameters:
+ - Carbon Black-provided license (POST) 
+ - 
+##### Returns
+
+- A GET returns the current license status, as defined below:
+
+A license status dictionary has the following structure:
+
+- `license_valid`: boolean indication as to if the licence is valid.  A valid license may be expired or unexpired.
+- `license_end_date`: YYYY-MM-DD date on which the license expires
+- `licensed_sensor_count`: number of sensors that can be used with this server while staying compliant with license.
+- `server_token`: unique identifier for this particular server instance
+- `license_expired`: boolean indicator as to if the license is expired
+- `licensed_sensor_count_exceeded`: boolean indicator as to if the server is currently servicing more sensors than it is licensed for
+- `actual_sensor_count`: count of sensors serviced during previous day (midnight to midnight)
+- `license_request_block`: an opaque request block to be provided to Carbon Black for license renewal
+
+-----
+
+#### `/api/v1/watchlist/(id)`
+Watchlist enumeration, creation, modification, and deletion
+
+*Supports*: 'GET', 'PUT', 'POST', 'DELETE'
+
+##### Parameters:
+- `id`: OPTIONAL the watchlist id
+
+##### Returns
+
+- With no id parameter (`GET /api/v1/watchlist`) returns a list of watchlists, with each list entry describing one watchlist
+- With an id parameter (`GET /api/v1/watchlist/3`) returns the watchlist record for the matching id
+- With no id parameter (`POST` /api/v1/watchlist) returns the watchlist record for the newly created watchlist
+- With an id parameter (`PUT` /api/v1/watchlist/3) returns the watchlist record for the newly updated watchlist
+
+A watchlist record has the following structure:
+
+- `id`: the id of this watchlist
+- `alliance_id`: the id of this watchlist on the Carbon Black Alliance server; this value is internal to Carbon Black
+- `from_alliance`: boolean indication as to if this watchlist was provided by the Carbon Black Alliance Server
+- `date_added`: the date this watchlist was created on this Enterprise Server
+- `index_type`: the type of watchlist.  Valid values are 'modules' and 'events' for binary and process watchlists, respectively
+- `last_hit`: timestamp of the last time this watchlist triggered a match
+- `last_hit_count`: count of lifetime watchlist matches
+- `name`: name of this watchlist
+- `search_query`: the raw Carbon Black query that this watchlist matches 
+
+A complete example:
+```
+GET http://192.168.206.154/api/v1/watchlist
+
+{
+ u'alliance_id': None,
+ u'date_added': u'2013-12-11 11:36:38.476886-08:00',
+ u'from_alliance': False,
+ u'id': 4,
+ u'index_type': u'modules',
+ u'last_hit': u'2013-12-11 15:05:04.964374-08:00',
+ u'last_hit_count': 22,
+ u'name': u'Newly Loaded Modules',
+ u'search_query': u'q=is_executable_image%3Afalse&cb.urlver=1&sort=server_added_timestamp%20desc'
+ }
 ```
 
 -----
