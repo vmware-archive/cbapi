@@ -70,17 +70,6 @@ The following APIs are beta.  Backwards compatibility will not be supported.  Co
 
 - `/api/info` - top-level configuration
 
-#### Watchlists
-
-- `/api/watchlist/(id)` - Get/set information for specified watchlist
-- `/api/watchlists` - Get list of watchlists
-
-#### Alliance Feeds
-
-- `/api/feeds` - Get list of configured feeds
-- `/api/feed/` - Get/create new feed
-- `/api/feed/(id)` - Get/update existing feed
-
 ## API Authentication
 
 Each user in Cb has a personal API key.   To find a user's API key, log into the console as that user, then click the username in the upper right -> Profile -> API Token.   (If the API Token is missing or otherwise compromised, click "Reset" to generate a new token for that user.)
