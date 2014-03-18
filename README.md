@@ -7,7 +7,7 @@ http://carbonblack.com
 
 ### Current
 
-- **Version**: v4.1
+- **Version**: v4.2
 - **Download [zip](https://github.com/carbonblack/cbapi/archive/master.zip)**
 - **Download [tgz](https://github.com/carbonblack/cbapi/archive/master.tar.gz)**
 
@@ -19,12 +19,13 @@ APIs and example scripts for earlier releases can be found at:
 - [CB v3.1](https://github.com/carbonblack/cbapi/tree/Cb-v3.1/) ([zip][3]) ([tgz][4]) - added `segment_id`
 - [CB v3.2](https://github.com/carbonblack/cbapi/tree/Cb-v3.1/) ([zip][3]) ([tgz][4]) - no changes from v3.1
 - [CB v4.0](https://github.com/carbonblack/cbapi/tree/Cb-v4.0/) ([zip][5]) ([tgz][6]) - 
+- [CB v4.0](https://github.com/carbonblack/cbapi/tree/Cb-v4.1/) ([zip][5]) ([tgz][6]) - 
 [1]:  https://github.com/carbonblack/cbapi/zipball/Cb-v3.0
 [2]:  https://github.com/carbonblack/cbapi/tarball/Cb-v3.0
 [3]:  https://github.com/carbonblack/cbapi/zipball/Cb-v3.1
-[4]:  https://github.com/carbonblack/cbapi/tarball/Cb-v3.1
+[4]:  https://github.com/carbonblack/cbapi/tarball/Cb-v3.2
 [5]:  https://github.com/carbonblack/cbapi/zipball/Cb-v4.0
-[6]:  https://github.com/carbonblack/cbapi/tarball/Cb-v4.0
+[6]:  https://github.com/carbonblack/cbapi/tarball/Cb-v4.1
 
 ## REST API
 
