@@ -5,7 +5,7 @@ import pprint
 import optparse 
 
 # in the github repo, cbapi is not in the example directory
-sys.path.append('../src/cbapi')
+sys.path.insert(0,'../src/cbapi')
 
 import cbapi 
 
