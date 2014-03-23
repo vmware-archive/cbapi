@@ -205,7 +205,7 @@ class CbApi(object):
 
     def sensors(self, query_parameters={}):
         '''
-        get sensors, optionally specifying searchcriteria
+        get sensors, optionally specifying search criteria
 
         as of this writing, supported search criteria are:
           ip - any portion of an ip address
