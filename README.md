@@ -65,6 +65,9 @@ The following APIs are versioned.
 #### Licensing
 - [`/api/v1/license`](#apiv1license) - Server license status, requests, and application of new license
 
+#### Server Configuration
+- [`/api/v1/settings/global/platformserver`](#apiv1settingsglobalplatformserver) - Bit9 Platform Server Integration Configuration
+
 ### Beta
 
 The following APIs are beta.  Backwards compatibility will not be supported.  Contents are not expected to widely change.
@@ -73,7 +76,7 @@ The following APIs are beta.  Backwards compatibility will not be supported.  Co
 
 ## API Authentication
 
-Each user in Cb has a personal API key.   To find a user's API key, log into the console as that user, then click the username in the upper right -> Profile -> API Token.   (If the API Token is missing or otherwise compromised, click "Reset" to generate a new token for that user.)
+Each user in Cb has a personal API key.   To find a API key corresponding with a particular Carbon Black user account, log into the console as that user, then click the username in the upper right -> Profile -> API Token.   (If the API Token is missing or otherwise compromised, click "Reset" to generate a new token for that user.)
 
 For an API request to the Cb server, add this key to a custom HTTP Request Header `X-Auth-Token`.
 
@@ -792,6 +795,22 @@ A license status dictionary has the following structure:
 - `license_request_block`: an opaque request block to be provided to Carbon Black for license renewal
 
 -----
+
+#### `/api/v1/settings/global/platformserver`
+Get and set the configuration details of the Bit9 Platform Server.  These details are used for Carbon Black Enterprise Server integration with the Bit9 Platform Server.
+
+*Supports*: 'GET', 'POST'
+
+##### Parameters, Returns
+
+- A GET returns a JSON dictionary as defined below.  A POST accepts a JSON dictionary with one or more keys as defined below.
+
+- `server_url`: OPTIONAL the base server IP or DNS name.  The protocol and the URI are not included.
+- `ssl_certificate_verify`: OPTIONAL indication as to if Carbon Black server should verify the Platform Server SSL certificate; valid values are 'true' and 'false'
+- `watchlist_export`: OPTIONAL indication as to if the Carbon Black server should export, via HTTPS POST, watchlist hits to the Platfrom Server; valid values are 'true' and 'false'
+- `auth_token`: OPTIONAL authorization token used by the Carbon Black server to authenticate against the Platform Server.
+
+The `auth_token` field is never returned via HTTP GET for security purposes.
 
 #### `/api/v1/watchlist/(id)`
 Watchlist enumeration, creation, modification, and deletion
