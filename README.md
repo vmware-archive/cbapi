@@ -56,8 +56,10 @@ The following APIs are versioned.
 - [`/api/v1/binary/(md5)/icon`](#apiv1binarymd5icon) - Icon of the binary (in PNG format) 
 - [`/api/v1/binary/(md5)/summary`](#apiv1binarymd5summary) - Binary metadata
  
-#### Sensor Data
+#### Sensors & Sensor Groups 
 - [`/api/v1/sensor`](#apiv1sensoridhostnamehostnameipipaddr) - Sensor details
+- [`/api/v1/group/<groupid>/installer/windows/exe`](#windowsexeinstaller) - Signed EXE Sensor Installer for Windows
+- [`/api/v1/group/<groupid>/installer/windows/msi`](#windowsmsiinstaller) - Signed MSI Sensor Installer for Windows
 
 #### Watchlists
 - [`/api/v1/watchlist`](#apiv1watchlist) - Watchlist enumeration, addition, modification, and deletion
@@ -988,4 +990,29 @@ http://192.168.206.132/api/v1/sensor?hostname=A0C4
 
 -----
 
+####  `/api/v1/group/<groupid>/installer/windows/exe`
+Download a zip archive including a signed Windows EXE sensor installer
+
+*Supports*: `GET` 
+
+##### Parameters:
+None
+
+##### Returns:
+
+- ZIP archive including a signed Windows EXE sensor installer and settings file  
+
+-----
+
+####  `/api/v1/group/<groupid>/installer/windows/msi`
+Download a zip archive including a signed Windows MSI sensor installer
+
+*Supports*: `GET` 
+
+##### Parameters:
+None
+
+##### Returns:
+
+- ZIP archive including a signed Windows MSI sensor installer and settings file  
 
