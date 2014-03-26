@@ -812,6 +812,8 @@ Get and set the configuration details of the Bit9 Platform Server.  These detail
 
 The `auth_token` field is never returned via HTTP GET for security purposes.
 
+-----
+
 #### `/api/v1/watchlist/(id)`
 Watchlist enumeration, creation, modification, and deletion
 
