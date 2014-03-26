@@ -1,13 +1,12 @@
 #
 # CARBON BLACK API
-# Copyright, Carbon Black, Inc 2013
-# technology-support@carbonblack.com
+# Copyright Bit9, Inc. 2014 
+# support@carbonblack.com
 #
 
-import requests
-import urllib
 import json
-from requests.auth import HTTPDigestAuth
+import urllib
+import requests
 
 class CbApi(object):
     """ Python bindings for Carbon Black API 
@@ -66,6 +65,40 @@ class CbApi(object):
         r = requests.post("%s/api/v1/license" % (self.server,), headers=self.token_header, \
                 data=json.dumps({'license': license}), \
                 verify=self.ssl_verify)
+        if r.status_code != 200:
+            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+
+    def get_platform_server_config(self):
+        """ Get Bit9 Platform Server configuration
+            This includes server address and authentication information
+
+            Must authenticate as a global administrator for this data to be available
+
+            Note: the secret is never available (via query) for remote callers, although
+                  it can be applied
+        """
+        r = requests.get("%s/api/v1/settings/global/platformserver" % (self.server,), \
+                                                                       headers=self.token_header, \
+                                                                       verify=self.ssl_verify)
+        if r.status_code != 200:
+            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+
+        return json.loads(r.content)
+
+    def set_platform_server_config(self, platform_server_config):
+        """ Sets the Bit9 Platform Server configuration
+            This includes the server address, username, and password
+
+            Must authenticate as a global administrator to have the rights to set this config
+
+            platform_server_config is expected to be a python dictionary with the following keys:
+                username : username for authentication
+                password : password for authentication
+                server   : server address
+        """
+        r = requests.post("%s/api/v1/settings/global/platformserver" % (self.server,), \
+                                                                        headers=self.token_header, \
+                                                                        data = json.dumps(platform_server_config))
         if r.status_code != 200:
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
 
