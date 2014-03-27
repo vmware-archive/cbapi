@@ -256,6 +256,35 @@ class CbApi(object):
             raise Exception("Unexpected response from /api/sensor: %s" % (r.status_code))
         return r.json()
 
+    def sensor_installer(self, type, group_id=1):
+        """
+        get sensor installer package for a specified sensor group
+
+        group_id - the group_id to download an installer for; defaults to 1 "Default Group"
+        type - the sensor installer type.  [WindowsEXE|WindowsMSI]
+        """
+
+        # set up a mapping of types to REST endpoints
+        #
+        mapping = {\
+                    'WindowsEXE': '/api/v1/group/%s/installer/windows/exe' % (group_id,),\
+                    'WindowsMSI': '/api/v1/group/%s/installer/windows/exe' % (group_id,),\
+                  }
+
+        # verify that the type parameter is a known value
+        #
+        if not mapping.has_key(type):
+            raise ValueError("Unrecognized type '%s'; should be one of 'WindowsEXE' or 'WindowsMSI'" % (type,))
+
+        # build the fully-qualified URL
+        #
+        url = "%s%s" % (self.server, mapping[type])
+        print url
+        print
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.content 
+
     def watchlist(self, id=None):
         '''
         get all watchlists or a single watchlist
@@ -268,6 +297,23 @@ class CbApi(object):
         r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
         if r.status_code != 200:
             raise Exception("Unexpected response from %s: %s" % (url, r.status_code))
+
+        return r.json()
+
+    def feed_add_from_url(self, feed_url):
+        '''
+        add a new feed to the Carbon Black server, as specified by URL
+        '''
+        request = {\
+                      'use_proxy': False,\
+                      'validate_server_cert': False,\
+                      'url': feed_url,\
+                  }
+
+        url = "%s/api/v1/feed" % (self.server,)
+
+        r = requests.post(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
 
         return r.json()
 
