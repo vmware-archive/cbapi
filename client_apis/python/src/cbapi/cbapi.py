@@ -279,10 +279,10 @@ class CbApi(object):
         # build the fully-qualified URL
         #
         url = "%s%s" % (self.server, mapping[type])
-        print url
-        print
+        
         r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
         r.raise_for_status()
+       
         return r.content 
 
     def watchlist(self, id=None):
@@ -300,19 +300,20 @@ class CbApi(object):
 
         return r.json()
 
-    def feed_add_from_url(self, feed_url):
+    def feed_add_from_url(self, feed_url, enabled, validate_server_cert, use_proxy):
         '''
         add a new feed to the Carbon Black server, as specified by URL
         '''
         request = {\
-                      'use_proxy': False,\
-                      'validate_server_cert': False,\
-                      'url': feed_url,\
+                      'use_proxy': use_proxy,\
+                      'validate_server_cert': validate_server_cert,\
+                      'feed_url': feed_url,\
+                      'enabled': enabled,\
                   }
 
         url = "%s/api/v1/feed" % (self.server,)
-
-        r = requests.post(url, headers=self.token_header, verify=self.ssl_verify)
+        
+        r = requests.post(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
         r.raise_for_status()
 
         return r.json()
