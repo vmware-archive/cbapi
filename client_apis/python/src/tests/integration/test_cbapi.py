@@ -1,7 +1,6 @@
 #
 # CARBON BLACK API TESTS
-# Copyright, Carbon Black, Inc 2013
-# technology-support@carbonblack.com
+# Copyright, Bit9, Inc 2014
 #
 
 """ These tests require CarbonBlack Enterprise Server to be installed.
@@ -38,9 +37,27 @@ class CbApiTestCase(unittest.TestCase):
 
     def test_binary_stuff(self):
         binaries = cb.binary_search("")
+        num_binaries_downloaded = 0
+        last_exception = None
         for binary in binaries['results']:
             cb.binary_summary(binary['md5'])
-            cb.binary(binary['md5'])
+            try:
+                cb.binary(binary['md5'])
+                num_binaries_downloaded = num_binaries_downloaded + 1
+            except Exception, e:
+                last_exception = e
+
+        # depending on the test environment (server configuration, etc.), it
+        # is possible that the first ten binaries retreived via the binary_search call
+        # cannot all be downloaded from the server
+        #
+        # only fail the test if none of the binaries can be downloaded
+        #
+        if 0 == num_binaries_downloaded:
+            if last_exception:
+                raise last_exception
+            else:
+                raise Exception("0 downloaded binaries!")
 
     def test_process_stuff(self):
         processes = cb.process_search("")
