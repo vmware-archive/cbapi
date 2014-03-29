@@ -728,7 +728,12 @@ A structure with the following fields:
 - `digsig_prog_name`: If signed and present, the program name
 - `digsig_issuer`: If signed and present, the issuer name
 - `digsig_subject`: If signed and present, the subject
-- `alliance_score_virustotal`: If enabled and the hit count > 1, the number of [VirusTotal](http://virustotal.com) hits for this md5
+- `alliance_score_virustotal`: If enabled and the hit count >= 1, the number of [VirusTotal](http://virustotal.com) hits for this md5
+- `alliance_score_srs`: If enabled and available, the Bit9 Software Reputation Service (SRS) score, normalized to a CB score
+- `alliance_score_tis`: If enabled and available, the Bit9 Threat Indicators Service (TIS) score, normalized to a CB score
+- `alliance_score_*`: 0 or more other scores, applied by configuring feeds.
+- `hostname`: 0 or more hostnames on which this binary was observed
+- `sensor_group`: 0 or more sensor groups in which this binary was observed
 
 A complete example:
 
