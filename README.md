@@ -911,7 +911,7 @@ A sensor structure has the following fields:
 - `group_id`: The sensor group id this sensor is assigned to
 - `display`: Deprecated
 - `uninstall`: when set, indicates sensor will be directed to uninstall on next checkin
-- `cookie`:  cb internal
+- `parity_host_id`: Bit9 Platform Agent Host Id; zero indicates Agent is not installed
  
 If `event_log_flush_time` is set, the server will instruct the sensor to immediately send all data before this date, 
 ignoring all other throttling mechansims.  To force a host current, set this value to a value far in the future.
