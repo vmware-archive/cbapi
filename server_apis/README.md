@@ -132,6 +132,49 @@ Example:
 
 Channel: watchlist.[TODO]
 
+| name                | type   | description | 
+| ------------------- | -------| -------------| 
+| `_version_`         | string | For internal use|
+| `cb_version`        | string | Carbon Black Server version|
+| `copied_mod_len`    | int32  | Number of bytes copied to server|
+| `group`             | string | First sensor group on which this binary was observed|
+| `hostname`          | string | First endpoint hostname on which this binary was observed|
+| `digsig_issuer`     | string | If digitally signed, the issuer.|
+| `digsig_publisher   | string | If digitally signed, the publisher.|
+| `digsig_result`     | string | If digitally signed, the human-readable status. See notes.|
+| `digsig_result_code`| in32   | For internal use.|
+| `digsig_sign_time`  | string | If digitally signed, the sign time.|
+| `digsig_subject`    | string | If digitally signed, the subject.|
+| `is_executable_image| bool   | True if the binary is a standalone executable (as compared to a library).|
+| `is_64bit`          | bool   | True if architecture is x64 (versus x86)
+| `md5`               | string | MD5 of the binary|
+| `observed_filename` | string | Full path to the executable backing the process|
+| `orig_mod_len`      | int32  | Size in bytes of the binary at the time of observation on the endpoint.|
+| `server_added_timestamp| string |The time this binary was first seen by the server.
+| `servername`        | string | Name of Carbon Black server|
+| `timestamp`         | string | Time binary was first observed (in endpoint time)|
+| `watchlist_id`      | int32  | Identifier of the watchlist that matched|
+| `watchlist_name`    | string | Name of watchlist that matched|
+| `watchlists`        | JSON   | List of matching watchlists.|
+| `file_version`      | string ||
+| `product_name`      | string ||
+| `company_name`      | string ||
+| `internal_name`     | string ||
+| `original_filename` | string ||
+| `file_desc`         | string ||
+                                                                             
+Notes:
+
+The digsig_status field can be one of eight values:
+* Signed
+* Unsigned
+* Bad Signature
+* Invalid Signature
+* Expired
+* Invalid Chain
+* Untrusted Root
+* Explicit Distrust 
+
 Example:
 
 ### Feed Hit
