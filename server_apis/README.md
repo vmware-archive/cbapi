@@ -68,6 +68,7 @@ The documentation below calls out in which format each notification type is publ
 * New binary instance
  * First instance of an endpoint observing a particular binary
  * First instance of a sensor group observing a particular binary
+* Binary file upload complete
 * Raw endpoint events
  * File modification
   * File Creation
@@ -84,15 +85,32 @@ The documentation below calls out in which format each notification type is publ
   * Process creation
   * Process termination
  * Binary information
-* Binary file upload complete
 
 ### Watchlist Hit  
+
+There are two types of watchlists:
+
+* Process Watchlists
+* Binary Watchlists
+
+On watchlist "hit" (match), an event is published.  The bulk of the contents of the event is pulled from the underlying process or binary document.  As such, the event fields are different between the two event types.
 
 #### Process Watchlist Hit
 
 #### Binary Watchlist Hit
 
 ### Feed Hit
+
+There are two types of feed events:
+
+* Ingress
+* Storage
+
+[TODO] should we add a third for feed_searcher or should that be counted as storage?
+
+Ingress feed events are published as the matching endpoint data arrives from the sensor.  These ingress feed events therefore provide the earliest available notification of the endpoint activity.  Ingress events are published prior to updating the data to the backend data store (SOLR), and therefore it may be up to twenty minutes before the data is discoverable via search.
+
+Storage feed events are published as the data is written to the backend data store. These storage feed events are published upon updating the data store, but prior to committing the changes.  Threfore, it may be up to ten minutes before the data is discoverble via search. 
 
 #### Ingress Feed Hit
 
@@ -126,6 +144,49 @@ Example Event:
 Notes:
 
 * The process_id field is the process key used to uniquely identify a process on the Carbon Black server.  For ingress feed hits, the process segment is not known.  The key can be used with the Carbon Black client API to query for the entire process document.
+
+#### New Binary Instance
+
+The Carbon Black server publishes events the first time an executable file (binary) is observed in each of three scenarios:
+
+1 First time it is observed on *any* endpoint
+2 First time it is observed on an *individual* endpoint for the first time
+3 First time it is observed on a sensor group for the first time
+
+[TODO] Scenario 1 is not curently implemented
+[TODO] Scenario 1 obviates the need for the "newly loaded modules" watchlist 
+
+##### Scenario 1: Observed on any Endpoint
+
+Subscription Channel: [TODO]
+
+##### Scenario 2: Observed on an individual endpoint for the first time
+
+Subscription Channel: cbsolr.newhost.observed
+
+Example Event:
+
+```
+{
+    "md5": "9E4B0E7472B4CEBA9E17F440B8CB0AB8",
+    "observed_name": "FS-HQ|1021",
+    "created_time": 1397248033.914
+}
+```
+
+##### Scenario 3: Observed within a sensor group for the first time
+
+Subscription Channel: cbsolr.newgroup.observed
+
+Example Event:
+
+```
+{
+    "md5": "9E4B0E7472B4CEBA9E17F440B8CB0AB8",
+    "observed_name": "Default Group",
+    "created_time": 1397248033.914
+}
+```
 
 #### New Binary File Arrival
 
