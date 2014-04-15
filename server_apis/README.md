@@ -60,31 +60,31 @@ The documentation below calls out in which format each notification type is publ
 ## Notification Types
 
 * Watchlist hit
- * Process Watchlist
- * Binary Watchlist
+  * Process Watchlist
+  * Binary Watchlist
 * Feed hit
- * Ingress
- * Storage
+  * Ingress
+  * Storage
 * New binary instance
- * First instance of an endpoint observing a particular binary
- * First instance of a sensor group observing a particular binary
+  * First instance of an endpoint observing a particular binary
+  * First instance of a sensor group observing a particular binary
 * Binary file upload complete
 * Raw endpoint events
- * File modification
-  * File Creation
-  * File Deletion
-  * File First-Written-To
-  * File Last-Written-To
- * Registry modification
+  * File modification
+    * File Creation
+    * File Deletion
+    * File First-Written-To
+    * File Last-Written-To
+* Registry modification
   * Registry Key Creation
-  * Registry Key Deletion
-  * Registry Value Write
-  * Registry Value Deletion
+    * Registry Key Deletion
+    * Registry Value Write
+    * Registry Value Deletion
  * Network Connection
- * Process
+* Process
   * Process creation
   * Process termination
- * Binary information
+* Binary information
 
 ### Watchlist Hit  
 
@@ -149,9 +149,9 @@ Notes:
 
 The Carbon Black server publishes events the first time an executable file (binary) is observed in each of three scenarios:
 
-1 First time it is observed on *any* endpoint
-2 First time it is observed on an *individual* endpoint for the first time
-3 First time it is observed on a sensor group for the first time
+1. First time it is observed on *any* endpoint
+2. First time it is observed on an *individual* endpoint for the first time
+3. First time it is observed on a sensor group for the first time
 
 [TODO] Scenario 1 is not curently implemented
 [TODO] Scenario 1 obviates the need for the "newly loaded modules" watchlist 
