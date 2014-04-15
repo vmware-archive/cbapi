@@ -1,4 +1,4 @@
-# Carbon Black Server API 
+# Carbon Black API 
 
 ## Overview
 
