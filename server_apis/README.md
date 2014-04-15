@@ -97,7 +97,42 @@ On watchlist "hit" (match), an event is published.  The bulk of the contents of 
 
 #### Process Watchlist Hit
 
+Channel: watchlist.[TODO]
+
+| name               | type   | description | 
+| ------------------ | -------|-------------| 
+| `cb\_version`      | string | Carbon Black server version|
+| `childproc\_count` | int32  | Total count of child processes created by this process|
+| `filemod\_count`   | int32  | Total count of file modifications made by this process|
+| `group`            | string | Sensor group this sensor was assigned to at time of process execution|
+| `host\_type`       | string | Type of the computer: server, workstation, domain controller|
+| `hostname`         | string | Hostname of the computer on which the process executed (at time of execution)|
+| `id`               | string | For internal use|
+| `last\_update`     | string | Last activity in this process is endpoint local time.  Example: 2014-02-04T16:23:22.547Z |
+| `modload\_count`   | int32  | Total count of module loads in this process.| 
+| `netconn\_count`   | int32  | Total count of network connections made and received by this process.|
+| `path`             | string | Full path to the executable file backing this process.|
+| `process\_md5`     | string | MD5 of the executable file backing this process.|
+| `process\_name`    | string | Filename of the executable backing this process.|
+| `regmod\_count`    | int32  | total count of registry modifications made by this process.|
+| `segment\_id`      | int32  | For internal use|
+| `sensor\_id`       | int32  | Endpoint identifier.|
+| `servername`       | string | Name of Carbon Black server|
+| `start`            | string | Start time of this process in endpoint local time. Example: 2014-02-04T16:23:22.516Z|
+| `unique\_id*       | string | Process unique Id|
+| `username`         | string | User context in which the process executed.|
+| `watchlist\_id`    | int32  | Identifier of the watchlist that matched|
+| `watchlist\_name`  | string | Name of watchlist that matched|
+| `cmdline           | string | Process command line|
+| `parent\_unique\_id`| string| Parent process unique|
+
+Example:
+
 #### Binary Watchlist Hit
+
+Channel: watchlist.[TODO]
+
+Example:
 
 ### Feed Hit
 
@@ -145,7 +180,11 @@ Notes:
 
 * The process_id field is the process key used to uniquely identify a process on the Carbon Black server.  For ingress feed hits, the process segment is not known.  The key can be used with the Carbon Black client API to query for the entire process document.
 
-#### New Binary Instance
+#### Storage Feed Hit
+
+[TODO]
+
+### New Binary Instance
 
 The Carbon Black server publishes events the first time an executable file (binary) is observed in each of three scenarios:
 
@@ -156,11 +195,11 @@ The Carbon Black server publishes events the first time an executable file (bina
 [TODO] Scenario 1 is not curently implemented
 [TODO] Scenario 1 obviates the need for the "newly loaded modules" watchlist 
 
-##### Scenario 1: Observed on any Endpoint
+#### Scenario 1: Observed on any Endpoint
 
 Subscription Channel: [TODO]
 
-##### Scenario 2: Observed on an individual endpoint for the first time
+#### Scenario 2: Observed on an individual endpoint for the first time
 
 Subscription Channel: cbsolr.newhost.observed
 
