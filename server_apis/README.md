@@ -99,32 +99,32 @@ On watchlist "hit" (match), an event is published.  The bulk of the contents of 
 
 Channel: watchlist.[TODO]
 
-| name               | type   | description | 
-| ------------------ | -------|-------------| 
-| `cb\_version`      | string | Carbon Black server version|
-| `childproc\_count` | int32  | Total count of child processes created by this process|
-| `filemod\_count`   | int32  | Total count of file modifications made by this process|
-| `group`            | string | Sensor group this sensor was assigned to at time of process execution|
-| `host\_type`       | string | Type of the computer: server, workstation, domain controller|
-| `hostname`         | string | Hostname of the computer on which the process executed (at time of execution)|
-| `id`               | string | For internal use|
-| `last\_update`     | string | Last activity in this process is endpoint local time.  Example: 2014-02-04T16:23:22.547Z |
-| `modload\_count`   | int32  | Total count of module loads in this process.| 
-| `netconn\_count`   | int32  | Total count of network connections made and received by this process.|
-| `path`             | string | Full path to the executable file backing this process.|
-| `process\_md5`     | string | MD5 of the executable file backing this process.|
-| `process\_name`    | string | Filename of the executable backing this process.|
-| `regmod\_count`    | int32  | total count of registry modifications made by this process.|
-| `segment\_id`      | int32  | For internal use|
-| `sensor\_id`       | int32  | Endpoint identifier.|
-| `servername`       | string | Name of Carbon Black server|
-| `start`            | string | Start time of this process in endpoint local time. Example: 2014-02-04T16:23:22.516Z|
-| `unique\_id*       | string | Process unique Id|
-| `username`         | string | User context in which the process executed.|
-| `watchlist\_id`    | int32  | Identifier of the watchlist that matched|
-| `watchlist\_name`  | string | Name of watchlist that matched|
-| `cmdline           | string | Process command line|
-| `parent\_unique\_id`| string| Parent process unique|
+| name              | type   | description | 
+| ----------------- | -------|-------------| 
+| `cb_version`      | string | Carbon Black server version|
+| `childproc_count` | int32  | Total count of child processes created by this process|
+| `filemod_count`   | int32  | Total count of file modifications made by this process|
+| `group`           | string | Sensor group this sensor was assigned to at time of process execution|
+| `host_type`       | string | Type of the computer: server, workstation, domain controller|
+| `hostname`        | string | Hostname of the computer on which the process executed (at time of execution)|
+| `id`              | string | For internal use|
+| `last_update`     | string | Last activity in this process is endpoint local time.  Example: 2014-02-04T16:23:22.547Z |
+| `modload_count`   | int32  | Total count of module loads in this process.| 
+| `netconn_count`   | int32  | Total count of network connections made and received by this process.|
+| `path`            | string | Full path to the executable file backing this process.|
+| `process_md5`     | string | MD5 of the executable file backing this process.|
+| `process_name`    | string | Filename of the executable backing this process.|
+| `regmod_count`    | int32  | total count of registry modifications made by this process.|
+| `segment_id`      | int32  | For internal use|
+| `sensor_id`       | int32  | Endpoint identifier.|
+| `servername`      | string | Name of Carbon Black server|
+| `start`           | string | Start time of this process in endpoint local time. Example: 2014-02-04T16:23:22.516Z|
+| `unique_id*       | string | Process unique Id|
+| `username`        | string | User context in which the process executed.|
+| `watchlist_id`    | int32  | Identifier of the watchlist that matched|
+| `watchlist_name`  | string | Name of watchlist that matched|
+| `cmdline          | string | Process command line|
+| `parent_unique_id`| string| Parent process unique|
 
 Example:
 
