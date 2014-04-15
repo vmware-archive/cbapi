@@ -20,10 +20,10 @@ There is no requirement that the helper library be used. The helper library and 
 
 #### install git as needed
 
+    This step, and all subsequent steps, should be performed on a server with Carbon Black installed.
+    
     [root@localhost carbonblack]# yum install git
     ...
-
-    This step, and all subsequent steps, should be performed on a server with Carbon Black installed.
 
 #### clone the github cbapi repository:
 
@@ -125,4 +125,35 @@ Example Event:
 ```
 Notes:
 
-* The process_id field is the process key used to uniquely identify a process on the Carbon Black server.  For ingress feed hits, the process segment is not known.  The key can be used with the Carbon Black client API to query for the entire process document. 
+* The process_id field is the process key used to uniquely identify a process on the Carbon Black server.  For ingress feed hits, the process segment is not known.  The key can be used with the Carbon Black client API to query for the entire process document.
+
+#### New Binary File Arrival
+
+The Carbon Black server can be configured to store a copy of all unique binary (executable) files observed on endpoints.  This includes Windows PE files such as EXEs and DLLs, Linux ELF files, and similar.  Upon the arrival of a new binary file, a binarystore event is published.
+
+This event provides an easy way to trigger custom analysis of a binary, including static or dynamic anaysis, integration with a third-party analysis system, or custom archiving.
+
+Subscription Channel: binarystore.file.added
+ 
+`binarystore.file.added` is a JSON structure with the following entries:
+
+| name  | type   | description | 
+| ----- | -------|-------------| 
+| `md5`          | string   | MD5 sum of the binary file. | 
+| `size`         | int32    | Size of the original binary, in bytes. |
+| `ioc_type`     | int32    | Size of the zip archive containing the binary file on the Carbon Black server | 
+| `created_time` | float    | Timestamp of the binary file addtion, measured in number of seconds since the epoch 
+
+Example Event:
+
+```
+{
+    "md5": "9E4B0E7472B4CEBA9E17F440B8CB0AB8",
+    "size" :320000,
+    "compressed_size": 126857,
+    "created_time": 1397248033.914
+}
+```
+Notes:
+
+* The Carbon Black Alliance client can be configured to delete binary store files from the Carbon Black server after uploading to the Alliance Server.  These files are still retrievable via the Carbon Black API, although there may be bandwidth or transfer time concerns.  
