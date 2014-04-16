@@ -6,6 +6,13 @@ Carbon Black 4.2+ supports a rich array of asyncronous server-side notifications
 
 [MORE HERE]
 
+## Intended Audience
+
+The intended audience of this document is composed of two inter-related groups:
+
+* Developers that wish to programmatically consume Carbon Black events
+* Technologists that wish to take a peek "under the hood" of the Carbon Black server to better understand the inner workings
+
 ## Using the Carbon Black Server API
 
 The Carbon Black Server API (CBSAPI) is found on github at:
@@ -61,6 +68,12 @@ All CBSAPI notifications are published in one of two formats:
 * Google Protobufs (https://code.google.com/p/protobuf/)
 
 The documentation below calls out in which format each notification type is published. 
+
+## Notification Mechanisms
+
+This document describes the underlying events published on the Carbon Black server message bus.  It is expected that these events will be consumed programmatically.
+
+The Carbon Black server provides built-in mechanisms to expose these same events via syslog, e-mail, and HTTP POST.  The configuration of these alternate notification mechanisms is outside of the scope of this document.
 
 ## Notification Types
 
