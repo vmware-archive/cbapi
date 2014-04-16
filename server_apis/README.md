@@ -58,7 +58,7 @@ This step, and all subsequent steps, should be performed on a server with Carbon
 
 ## Notification Architecture
 
-    The Carbon Black server uses the Advanced Message Queuing Protocol (AMQP) to publish events of interest.  Any AMQP compliant client can subscribe to these notifications. 
+The Carbon Black server uses the Advanced Message Queuing Protocol (AMQP) to publish events of interest.  Any AMQP compliant client can subscribe to these notifications. 
 
 ## Notification Format 
 
