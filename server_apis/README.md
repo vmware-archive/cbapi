@@ -169,18 +169,18 @@ Channel: watchlist.[TODO]
 | `md5`                   | string | MD5 of the binary|
 | `observed_filename`     | string | Full path to the executable backing the process|
 | `orig_mod_len`          | int32  | Size in bytes of the binary at the time of observation on the endpoint.|
-| `server_added_timestamp`| string |The time this binary was first seen by the server.
+| `server_added_timestamp`| string | The time this binary was first seen by the server.
 | `servername`            | string | Name of Carbon Black server|
 | `timestamp`             | string | Time binary was first observed (in endpoint time)|
 | `watchlist_id`          | int32  | Identifier of the watchlist that matched|
 | `watchlist_name`        | string | Name of watchlist that matched|
 | `watchlists`            | JSON   | List of matching watchlists.|
-| `file_version`          | string ||
-| `product_name`          | string ||
-| `company_name`          | string ||
-| `internal_name`         | string ||
-| `original_filename`     | string ||
-| `file_desc`             | string ||
+| `file_version`          | string | File Version (Windows Only)|
+| `product_name`          | string | Product Name (Windows Only)|
+| `company_name`          | string | Company Name (Windows Only)|
+| `internal_name`         | string | Internal Name (Windows Only)|
+| `original_filename`     | string | Internal Original Filename (Windows Only)|
+| `file_desc`             | string | File Description (Windows only)|
                                                                              
 Notes:
 
@@ -221,9 +221,11 @@ Subscription Channel: feed.hit.process
 | `report_id`    | string   | Identifier of the report which included the matching IOC.  See notes. |
 | `ioc_type`     | string   | One of "md5", "dns", "ipv4" | 
 | `ioc_value`    | string   | The matching IOC. | 
-| `feed_id`      | int | Identifier of the feed that included the matching report.  See notes. | 
-| `feed_name`    | string | The  name of the feed that included the matching report. | 
-| `created_time` | float | Timestamp of the feed match, measured in number of seconds since the epoch 
+| `sensor_id`    | int32    | Sensor Id of the endpoint on which the event matching the feed occurred|
+| `host`         | string   | Hostname of the endpoint on which the event matching the feed occurred|
+| `feed_id`      | int32    | Identifier of the feed that included the matching report.  See notes. | 
+| `feed_name`    | string   | The  name of the feed that included the matching report. | 
+| `created_time` | float    | Timestamp of the feed match, measured in number of seconds since the epoch 
 
 Example Event:
 
@@ -233,6 +235,8 @@ Example Event:
       "report_id": "dxmtest1_01",
       "ioc_type": "ipv4",
       "ioc_value": "172.16.100.22",
+      "host": "FS-NYC-1",
+      "sensor_id": 3321,
       "feed_id": 7,
       "feed_name": "dxmtest1",
       "created_time":1397240503.332
