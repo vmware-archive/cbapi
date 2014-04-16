@@ -20,7 +20,7 @@ There is no requirement that the helper library be used. The helper library and 
 
 #### install git as needed
 
-    This step, and all subsequent steps, should be performed on a server with Carbon Black installed.
+This step, and all subsequent steps, should be performed on a server with Carbon Black installed.
     
     [root@localhost carbonblack]# yum install git
     ...
@@ -36,9 +36,14 @@ There is no requirement that the helper library be used. The helper library and 
     Resolving deltas: 100% (50/50), done.
     remote: Total 105 (delta 10), reused 0 (delta 0)
 
-#### navigate to the newly-created cbapi directory
+#### navigate to the newly-created cbapi/python/example directory
 
-    [TODO]
+    [root@localhost repos]# pwd
+    /root/repos
+    [root@localhost repos]# cd cbapi/server_apis/python/example/
+    [root@localhost example]# ls
+    subscribe_all.py
+    [root@localhost example]# 
 
 #### use the example "subscribe_all.py" to see all event notifications on the Carbon Black server.
 
