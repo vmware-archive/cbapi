@@ -81,16 +81,16 @@ The documentation below calls out in which format each notification type is publ
     * File Deletion
     * File First-Written-To
     * File Last-Written-To
-* Registry modification
-  * Registry Key Creation
+  * Registry modification
+    * Registry Key Creation
     * Registry Key Deletion
     * Registry Value Write
     * Registry Value Deletion
- * Network Connection
-* Process
-  * Process creation
-  * Process termination
-* Binary information
+  * Network Connection
+  * Process
+    * Process creation
+    * Process termination
+  * Binary information
 
 ### Watchlist Hit  
 
@@ -298,7 +298,7 @@ Example Event:
 ```
 {
     "md5": "9E4B0E7472B4CEBA9E17F440B8CB0AB8",
-    "size" :320000,
+    "size": 320000,
     "compressed_size": 126857,
     "created_time": 1397248033.914
 }
