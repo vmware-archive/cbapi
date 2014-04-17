@@ -318,7 +318,7 @@ Notes:
 
 #### Storage Feed Hit
 
-##### Process Ingress Feed Hit
+##### Process Storage Feed Hit
 
 Name: `feed.storage.hit.process`
 
@@ -357,6 +357,42 @@ Example Event:
 Notes:
 
 * The process_id and segment_id fields can be used to construct a request for complete process segment information, including events such as netconns, modloads, and similar, using the Carbon Black Client API.
+
+##### Binary Storage Feed Hit 
+
+Name: `feed.storage.hit.binary`
+
+`feed.storage.hit.binary` is a JSON structure with the following entries:
+
+| name  | type   | description | 
+| ----- | -------|-------------| 
+| `md5`            | string   | MD5 of the binary.| 
+| `report_id`      | string   | Identifier of the report which included the matching IOC.|
+| `ioc_type`       | string   | One of "md5", "dns", "ipv4" | 
+| `ioc_value`      | string   | The matching IOC. | 
+| `sensor_id`      | int32    | Sensor Id of the endpoint on which the event matching the feed occurred|
+| `hostname`       | string   | Hostname of the endpoint on which the event matching the feed occurred|
+| `feed_id`        | int32    | Identifier of the feed that included the matching report.| 
+| `feed_name`      | string   | The  name of the feed that included the matching report.| 
+| `event_timestamp`| float    | Timestamp of the feed match, measured in number of seconds since the epoch| 
+
+Example Event:
+
+```
+    {
+      "md5": "506708142BC63DABA64F2D3AD1DCD5BF",
+      "report_id": "dxmtest1_04",
+      "ioc_type": "md5",
+      "ioc_value":"506708142bc63daba64f2d3ad1dcd5bf",
+      "feed_id":7,
+      "hostname": "FS-SEA-529",
+      "sensor_id": 3321,
+      "feed_name": "dxmtest1",
+      "event_timestamp": 1397244093.682
+    }
+```
+
+Notes: It can be up to 15 seconds from the time of the event generation until the document is visible via CBAPI or raw SOLR query.
 
 ### New Binary Instance
 
