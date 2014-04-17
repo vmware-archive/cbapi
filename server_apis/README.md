@@ -140,7 +140,7 @@ On watchlist "hit" (match), an event is published.  The bulk of the contents of 
 
 #### Process Watchlist Hit
 
-Name: watchlist.hit.process
+Name: `watchlist.hit.process`
 
 | name              | type   | description | 
 | ----------------- | -------|-------------| 
@@ -173,7 +173,7 @@ Example:
 
 #### Binary Watchlist Hit
 
-Name: watchlist.hit.binary
+Name: `watchlist.hit.binary`
 
 | name                    | type   | description | 
 | ----------------------- | -------| -------------| 
@@ -235,7 +235,7 @@ Storage feed events are published as the data is committed to the backend data s
 
 ##### Process Ingress Feed Hit
 
-Name: feed.ingress.hit.process
+Name: `feed.ingress.hit.process`
 
 `feed.ingress.hit.process` is a JSON structure with the following entries:
 
@@ -276,7 +276,7 @@ Notes:
 
 ##### Process Ingress Feed Hit
 
-Name: feed.storage.hit.process
+Name: `feed.storage.hit.process`
 
 `feed.storage.hit.process` is a JSON structure with the following entries:
 
@@ -324,7 +324,7 @@ The Carbon Black server publishes events the first time an executable file (bina
 
 #### Scenario 1: Observed for the first time on any endpoint
 
-Name: binaryinfo.observed 
+Name: `binaryinfo.observed`
 
 Example Event:
 
@@ -334,10 +334,11 @@ Example Event:
     "event_timestamp": 1397248033.914
     [TODO] alliance feed scores
 }
+```
 
 #### Scenario 2: Observed on an individual endpoint for the first time
 
-Name: binaryinfo.host.observed 
+Name: `binaryinfo.host.observed`
 
 Example Event:
 
@@ -353,7 +354,7 @@ Example Event:
 
 ##### Scenario 3: Observed within a sensor group for the first time
 
-Name: binaryinfo.group.observed
+Name: `binaryinfo.group.observed`
 
 Example Event:
 
@@ -372,7 +373,7 @@ The Carbon Black server can be configured to store a copy of all unique binary (
 
 This event provides an easy way to trigger custom analysis of a binary, including static or dynamic anaysis, integration with a third-party analysis system, or custom archiving.
 
-Name: binarystore.file.added
+Name: `binarystore.file.added`
  
 `binarystore.file.added` is a JSON structure with the following entries:
 
