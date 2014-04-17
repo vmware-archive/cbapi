@@ -142,6 +142,8 @@ On watchlist "hit" (match), an event is published.  The bulk of the contents of 
 
 Name: `watchlist.hit.process`
 
+`watchlist.hit.process` is a JSON structure with the following entries: 
+
 | name              | type   | description | 
 | ----------------- | -------|-------------| 
 | `cb_version`      | string | Carbon Black server version|
@@ -171,9 +173,13 @@ Name: `watchlist.hit.process`
 
 Example:
 
+[TODO]
+
 #### Binary Watchlist Hit
 
 Name: `watchlist.hit.binary`
+
+`watchlist.hit.binary` is a JSON structure with the following entries: 
 
 | name                    | type   | description | 
 | ----------------------- | -------| -------------| 
@@ -219,6 +225,8 @@ The digsig_status field can be one of eight values:
 * Explicit Distrust 
 
 Example:
+
+[TODO]
 
 ### Feed Hit
 
@@ -270,7 +278,43 @@ Notes:
 
 * The process_id field is the process key used to uniquely identify a process on the Carbon Black server.  For ingress feed hits, the process segment is not known.  The key can be used with the Carbon Black client API to query for the entire process document.
 
-##### [TODO]
+##### Binary Ingress Feed Hit
+
+Name: `feed.ingress.hit.binary`
+
+`feed.ingress.hit.binary` is a JSON structure with the following entries:
+
+| name  | type   | description | 
+| ----- | -------|-------------| 
+| `md5`            | string   | MD5 of the binary.| 
+| `report_id`      | string   | Identifier of the report which included the matching IOC.|
+| `ioc_type`       | string   | One of "md5", "dns", "ipv4" | 
+| `ioc_value`      | string   | The matching IOC. | 
+| `sensor_id`      | int32    | Sensor Id of the endpoint on which the event matching the feed occurred|
+| `hostname`       | string   | Hostname of the endpoint on which the event matching the feed occurred|
+| `feed_id`        | int32    | Identifier of the feed that included the matching report.| 
+| `feed_name`      | string   | The  name of the feed that included the matching report.| 
+| `event_timestamp`| float    | Timestamp of the feed match, measured in number of seconds since the epoch| 
+
+Example Event:
+
+```
+    {
+      "md5": "506708142BC63DABA64F2D3AD1DCD5BF",
+      "report_id": "dxmtest1_04",
+      "ioc_type": "md5",
+      "ioc_value":"506708142bc63daba64f2d3ad1dcd5bf",
+      "feed_id":7,
+      "hostname": "FS-SEA-529",
+      "sensor_id": 3321,
+      "feed_name": "dxmtest1",
+      "event_timestamp": 1397244093.682
+    }
+```
+
+Notes:
+
+* It may be as much as 60 seconds from the time of the event generation until the full binary document is queryable via the CBAPI or raw SOLR. 
 
 #### Storage Feed Hit
 
@@ -326,6 +370,10 @@ The Carbon Black server publishes events the first time an executable file (bina
 
 Name: `binaryinfo.observed`
 
+`binaryinfo.observed` is a JSON structure with the following entries:
+
+[TODO]
+
 Example Event:
 
 ```
@@ -339,6 +387,10 @@ Example Event:
 #### Scenario 2: Observed on an individual endpoint for the first time
 
 Name: `binaryinfo.host.observed`
+
+`binaryinfo.host.observed` is a JSON structure with the following entries:
+
+[TODO]
 
 Example Event:
 
@@ -355,6 +407,10 @@ Example Event:
 ##### Scenario 3: Observed within a sensor group for the first time
 
 Name: `binaryinfo.group.observed`
+
+`binaryinfo.group.observed` is a JSON structure with the following entries:
+
+[TODO]
 
 Example Event:
 
