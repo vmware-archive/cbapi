@@ -241,15 +241,15 @@ Name: feed.ingress.hit.process
 
 | name  | type   | description | 
 | ----- | -------|-------------| 
-| `process_id`   | string   | CB process key.  See Notes. | 
-| `report_id`    | string   | Identifier of the report which included the matching IOC.  See notes. |
-| `ioc_type`     | string   | One of "md5", "dns", "ipv4" | 
-| `ioc_value`    | string   | The matching IOC. | 
-| `sensor_id`    | int32    | Sensor Id of the endpoint on which the event matching the feed occurred|
-| `hostname`     | string   | Hostname of the endpoint on which the event matching the feed occurred|
-| `feed_id`      | int32    | Identifier of the feed that included the matching report.  See notes. | 
-| `feed_name`    | string   | The  name of the feed that included the matching report. | 
-| `created_time` | float    | Timestamp of the feed match, measured in number of seconds since the epoch 
+| `process_id`     | string   | CB process key.  See Notes. | 
+| `report_id`      | string   | Identifier of the report which included the matching IOC.  See notes. |
+| `ioc_type`       | string   | One of "md5", "dns", "ipv4" | 
+| `ioc_value`      | string   | The matching IOC. | 
+| `sensor_id`      | int32    | Sensor Id of the endpoint on which the event matching the feed occurred|
+| `hostname`       | string   | Hostname of the endpoint on which the event matching the feed occurred|
+| `feed_id`        | int32    | Identifier of the feed that included the matching report.  See notes. | 
+| `feed_name`      | string   | The  name of the feed that included the matching report. | 
+| `event_timestamp`| float    | Timestamp of the feed match, measured in number of seconds since the epoch 
 
 Example Event:
 
@@ -263,7 +263,7 @@ Example Event:
       "sensor_id": 3321,
       "feed_id": 7,
       "feed_name": "dxmtest1",
-      "created_time":1397240503.332
+      "event_timestamp":1397240503.332
     }
 ```
 Notes:
@@ -282,16 +282,16 @@ Name: feed.storage.hit.process
 
 | name  | type   | description | 
 | ----- | -------|-------------| 
-| `process_id`   | string   | CB process key.  See Notes.| 
-| `segment_id`   | int32    | Process segment identifier.  See Notes.|
-| `report_id`    | string   | Identifier of the report which included the matching IOC.  See notes. |
-| `ioc_type`     | string   | One of "md5", "dns", "ipv4"| 
-| `ioc_value`    | string   | The matching IOC.| 
-| `sensor_id`    | int32    | Sensor Id of the endpoint on which the event matching the feed occurred|
-| `hostname`     | string   | Hostname of the endpoint on which the event matching the feed occurred|
-| `feed_id`      | int32    | Identifier of the feed that included the matching report.  See notes. | 
-| `feed_name`    | string   | The  name of the feed that included the matching report. | 
-| `created_time` | float    | Timestamp of the feed match, measured in number of seconds since the epoch 
+| `process_id`     | string   | CB process key.  See Notes.| 
+| `segment_id`     | int32    | Process segment identifier.  See Notes.|
+| `report_id`      | string   | Identifier of the report which included the matching IOC.  See notes. |
+| `ioc_type`       | string   | One of "md5", "dns", "ipv4"| 
+| `ioc_value`      | string   | The matching IOC.| 
+| `sensor_id`      | int32    | Sensor Id of the endpoint on which the event matching the feed occurred|
+| `hostname`       | string   | Hostname of the endpoint on which the event matching the feed occurred|
+| `feed_id`        | int32    | Identifier of the feed that included the matching report.  See notes. | 
+| `feed_name`      | string   | The  name of the feed that included the matching report. | 
+| `event_timestamp`| float    | Timestamp of the feed match, measured in number of seconds since the epoch 
 
 Example Event:
 
@@ -306,7 +306,7 @@ Example Event:
       "sensor_id": 3321,
       "feed_id": 7,
       "feed_name": "dxmtest1",
-      "created_time":1397240503.332
+      "event_timestamp": 1397240503.332
     }
 ```
 
@@ -322,9 +322,18 @@ The Carbon Black server publishes events the first time an executable file (bina
 2. First time it is observed on an *individual* endpoint for the first time
 3. First time it is observed on a sensor group for the first time
 
-#### Scenario 1: Observed on any Endpoint
+#### Scenario 1: Observed for the first time on any endpoint
 
 Name: binaryinfo.observed 
+
+Example Event:
+
+```
+{
+    "md5": "9E4B0E7472B4CEBA9E17F440B8CB0AB8",
+    "event_timestamp": 1397248033.914
+    [TODO] alliance feed scores
+}
 
 #### Scenario 2: Observed on an individual endpoint for the first time
 
@@ -337,7 +346,8 @@ Example Event:
     "md5": "9E4B0E7472B4CEBA9E17F440B8CB0AB8",
     "hostname": "FS-HQ",
     "sensor_id": 1021,
-    "created_time": 1397248033.914
+    "event_timestamp": 1397248033.914
+    [TODO] alliance feed scores
 }
 ```
 
@@ -350,9 +360,9 @@ Example Event:
 ```
 {
     "md5": "9E4B0E7472B4CEBA9E17F440B8CB0AB8",
-    "hostname": "FS-HQ",
-    "sensor_id": 1021,
-    "created_time": 1397248033.914
+    "group": "Default Group",
+    "event_timestamp": 1397248033.914
+    [TODO] alliance feed scores
 }
 ```
 
@@ -368,10 +378,10 @@ Name: binarystore.file.added
 
 | name  | type   | description | 
 | ----- | -------|-------------| 
-| `md5`          | string   | MD5 sum of the binary file. | 
-| `size`         | int32    | Size of the original binary, in bytes. |
-| `ioc_type`     | int32    | Size of the zip archive containing the binary file on the Carbon Black server | 
-| `created_time` | float    | Timestamp of the binary file addtion, measured in number of seconds since the epoch 
+| `md5`            | string   | MD5 sum of the binary file. | 
+| `size`           | int32    | Size of the original binary, in bytes. |
+| `ioc_type`       | int32    | Size of the zip archive containing the binary file on the Carbon Black server | 
+| `event_timestamp`| float    | Timestamp of the binary file addtion, measured in number of seconds since the epoch 
 
 Example Event:
 
@@ -380,7 +390,7 @@ Example Event:
     "md5": "9E4B0E7472B4CEBA9E17F440B8CB0AB8",
     "size": 320000,
     "compressed_size": 126857,
-    "created_time": 1397248033.914
+    "event_timestamp": 1397248033.914
 }
 ```
 Notes:
