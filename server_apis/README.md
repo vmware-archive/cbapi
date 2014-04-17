@@ -1,5 +1,7 @@
 # Carbon Black Server API 
 
+BETA DOCUMENTATION - HIGHLY SUBJECT TO CHANGE
+
 ## Overview
 
 Carbon Black 4.2+ supports a rich array of asyncronous server-side notifications.
@@ -52,6 +54,24 @@ This step, and all subsequent steps, should be performed on a server with Carbon
     subscribe_all.py
     [root@localhost example]# 
 
+#### install the pika package
+
+The example scripts depend on the "Pika" package.  Documentation is available at http://pika.readthedocs.org/en/latest/.
+
+    [root@localhost example]# easy_install pika
+    Searching for pika
+    Reading http://pypi.python.org/simple/pika/
+    Best match: pika 0.9.13
+    Downloading https://pypi.python.org/packages/source/p/pika/pika-0.9.13.tar.gz#md5=1a1be22edf4c1eae84dcc3d0df9ef216
+    Processing pika-0.9.13.tar.gz
+    Running pika-0.9.13/setup.py -q bdist_egg --dist-dir /tmp/easy_install-bc5nZk/pika-0.9.13/egg-dist-tmp-Ii6kPF
+    Adding pika 0.9.13 to easy-install.pth file
+
+    Installed /usr/lib/python2.6/site-packages/pika-0.9.13-py2.6.egg
+    Processing dependencies for pika
+    Finished processing dependencies for pika
+    [root@localhost example]# 
+ 
 #### use the example "subscribe_all.py" to see all event notifications on the Carbon Black server.
 
     [TODO]
@@ -82,9 +102,13 @@ The Carbon Black server provides built-in mechanisms to expose these same events
   * Binary Watchlist
 * Feed hit
   * Ingress
+    * Process Ingress Feed Hit
+    * Binary Ingress Feed Hit
   * Storage
+    * Process Storage Feed Hit
+    * Binary Storage Feed Hit
 * New binary instance
-  * [TODO] First instance of any endpoint observing a particular binary
+  * First instance of any endpoint observing a particular binary
   * First instance of an endpoint observing a particular binary
   * First instance of a sensor group observing a particular binary
 * Binary file upload complete
@@ -116,7 +140,7 @@ On watchlist "hit" (match), an event is published.  The bulk of the contents of 
 
 #### Process Watchlist Hit
 
-Channel: watchlist.[TODO]
+Channel: watchlist.hit.process
 
 | name              | type   | description | 
 | ----------------- | -------|-------------| 
@@ -149,7 +173,7 @@ Example:
 
 #### Binary Watchlist Hit
 
-Channel: watchlist.[TODO]
+Name: watchlist.hit.binary
 
 | name                    | type   | description | 
 | ----------------------- | -------| -------------| 
@@ -203,15 +227,13 @@ There are two types of feed events:
 * Ingress
 * Storage
 
-[TODO] should we add a third for feed_searcher or should that be counted as storage?
-
 Ingress feed events are published as the matching endpoint data arrives from the sensor.  These ingress feed events therefore provide the earliest available notification of the endpoint activity.  Ingress events are published prior to updating the data to the backend data store (SOLR), and therefore it may be up to twenty minutes before the data is discoverable via search.
 
-Storage feed events are published as the data is written to the backend data store. These storage feed events are published upon updating the data store, but prior to committing the changes.  Threfore, it may be up to ten minutes before the data is discoverble via search. 
+Storage feed events are published as the data is committed to the backend data store. These storage feed events are published upon updating the data store, but prior to committing the changes.  Threfore, it may be up to ten minutes before the data is discoverble via search. 
 
 #### Ingress Feed Hit
 
-Subscription Channel: feed.hit.process
+Subscription Channel: feed.ingress.hit.process
 
 `feed.hit.process` is a JSON structure with the following entries:
 
@@ -248,7 +270,7 @@ Notes:
 
 #### Storage Feed Hit
 
-[TODO]
+]
 
 ### New Binary Instance
 
