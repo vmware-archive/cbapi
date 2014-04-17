@@ -408,7 +408,11 @@ Name: `binaryinfo.observed`
 
 `binaryinfo.observed` is a JSON structure with the following entries:
 
-[TODO]
+| name  | type   | description | 
+| ----- | -------|-------------| 
+| `md5`            | string   | MD5 of the binary.|
+| `event_timestamp`| float    | Timestamp of the feed match, measured in number of seconds since the epoch| 
+[TODO] alliance feed scores
 
 Example Event:
 
@@ -426,7 +430,13 @@ Name: `binaryinfo.host.observed`
 
 `binaryinfo.host.observed` is a JSON structure with the following entries:
 
-[TODO]
+| name  | type   | description | 
+| ----- | -------|-------------| 
+| `md5`            | string   | MD5 of the binary.|
+| `hostname`       | string   | Hostname of endpoint on which binary was observed|
+| `sensor_id`      | int32    | Sensor Id of endpoint on which binary was observed|
+| `event_timestamp`| float    | Timestamp of the feed match, measured in number of seconds since the epoch| 
+[TODO] alliance feed scores
 
 Example Event:
 
@@ -446,7 +456,12 @@ Name: `binaryinfo.group.observed`
 
 `binaryinfo.group.observed` is a JSON structure with the following entries:
 
-[TODO]
+| name  | type   | description | 
+| ----- | -------|-------------| 
+| `md5`            | string   | MD5 of the binary.|
+| `group`          | string   | Sensor group name on which the binary was observed|
+| `event_timestamp`| float    | Timestamp of the feed match, measured in number of seconds since the epoch| 
+[TODO] alliance feed scores
 
 Example Event:
 
