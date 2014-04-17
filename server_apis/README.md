@@ -113,21 +113,6 @@ The Carbon Black server provides built-in mechanisms to expose these same events
   * First instance of a sensor group observing a particular binary
 * Binary file upload complete
 * Raw endpoint events
-  * File modification
-    * File Creation
-    * File Deletion
-    * File First-Written-To
-    * File Last-Written-To
-  * Registry modification
-    * Registry Key Creation
-    * Registry Key Deletion
-    * Registry Value Write
-    * Registry Value Deletion
-  * Network Connection
-  * Process
-    * Process creation
-    * Process termination
-  * Binary information
 
 ### Watchlist Hit  
 
@@ -503,4 +488,71 @@ Example Event:
 ```
 Notes:
 
-* The Carbon Black Alliance client can be configured to delete binary store files from the Carbon Black server after uploading to the Alliance Server.  These files are still retrievable via the Carbon Black API, although there may be bandwidth or transfer time concerns.  
+* The Carbon Black Alliance client can be configured to delete binary store files from the Carbon Black server after uploading to the Alliance Server.  These files are still retrievable via the Carbon Black API, although there may be bandwidth or transfer time concerns. 
+
+#### Raw Endpoint Events
+
+The Carbon Black Server can be configured to publish some or all raw endpoint events as collected by the attached sensors.
+
+These events are the raw endpoint events and are exported:
+
+* upon arrival on the Carbon Black server
+* prior to processing, storage, and indexing on the Carbon Black server.
+
+The raw events themselves are published in Google Protobuffers format (https://code.google.com/p/protobuf/).  This is the same format used by the sensors themselves to encode the raw events. 
+
+The raw event volume can easily be measured in tens of thousands per second.  The Carbon Black server can be configured to export only specific event types in order to reduce the performance impact of event export.
+
+##### Raw Endpoint Event Types
+
+* File modification
+  * File Creation
+  * File Deletion
+  * File First-Written-To
+  * File Last-Written-To
+* Registry modification
+  * Registry Key Creation
+  * Registry Key Deletion
+  * Registry Value Write
+  * Registry Value Deletion
+* Network Connection
+* Process
+  * Process creation
+  * Process termination
+* Binary information
+
+##### Configuring the Carbon Black server to export raw endpoint events
+
+The Carbon Black server can be configured to export some or all raw endpoint events by modifying cb.conf, typically found in `/etc/cb/cb.conf`. 
+
+In particular, the following configuration option:
+
+    `DatastoreBroadcastEventTypes=<TYPE[S]>`
+
+The supported types are:
+
+| type         | description | 
+| -------------|-------------| 
+| *            | all endpoint events|
+| moduleload   | Binary module loads (for example, DLLs on Windows)|
+| netconn      | Network connections|
+| filemod      | File modifications|
+| regmod       | Registry modifications|
+| process      | Process creation and termination|
+| moduleinfo   | Binary module information|
+
+Multiple types can be specified using a comma delimiter, without spaces.
+
+##### Subscribing to raw endpoint events
+
+[TODO]
+
+##### Google Protocol Buffers definition
+
+The Google Protocol Buffers definition for all raw endpoint events is found at:
+
+    `proto/sensor_events.proto`
+
+##### Example
+
+[TODO]
