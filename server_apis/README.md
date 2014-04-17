@@ -140,7 +140,7 @@ On watchlist "hit" (match), an event is published.  The bulk of the contents of 
 
 #### Process Watchlist Hit
 
-Channel: watchlist.hit.process
+Name: watchlist.hit.process
 
 | name              | type   | description | 
 | ----------------- | -------|-------------| 
@@ -233,9 +233,11 @@ Storage feed events are published as the data is committed to the backend data s
 
 #### Ingress Feed Hit
 
-Subscription Channel: feed.ingress.hit.process
+##### Process Ingress Feed Hit
 
-`feed.hit.process` is a JSON structure with the following entries:
+Name: feed.ingress.hit.process
+
+`feed.ingress.hit.process` is a JSON structure with the following entries:
 
 | name  | type   | description | 
 | ----- | -------|-------------| 
@@ -244,7 +246,7 @@ Subscription Channel: feed.ingress.hit.process
 | `ioc_type`     | string   | One of "md5", "dns", "ipv4" | 
 | `ioc_value`    | string   | The matching IOC. | 
 | `sensor_id`    | int32    | Sensor Id of the endpoint on which the event matching the feed occurred|
-| `host`         | string   | Hostname of the endpoint on which the event matching the feed occurred|
+| `hostname`     | string   | Hostname of the endpoint on which the event matching the feed occurred|
 | `feed_id`      | int32    | Identifier of the feed that included the matching report.  See notes. | 
 | `feed_name`    | string   | The  name of the feed that included the matching report. | 
 | `created_time` | float    | Timestamp of the feed match, measured in number of seconds since the epoch 
@@ -257,7 +259,7 @@ Example Event:
       "report_id": "dxmtest1_01",
       "ioc_type": "ipv4",
       "ioc_value": "172.16.100.22",
-      "host": "FS-NYC-1",
+      "hostname": "FS-NYC-1",
       "sensor_id": 3321,
       "feed_id": 7,
       "feed_name": "dxmtest1",
@@ -268,9 +270,49 @@ Notes:
 
 * The process_id field is the process key used to uniquely identify a process on the Carbon Black server.  For ingress feed hits, the process segment is not known.  The key can be used with the Carbon Black client API to query for the entire process document.
 
+##### [TODO]
+
 #### Storage Feed Hit
 
-]
+##### Process Ingress Feed Hit
+
+Name: feed.storage.hit.process
+
+`feed.storage.hit.process` is a JSON structure with the following entries:
+
+| name  | type   | description | 
+| ----- | -------|-------------| 
+| `process_id`   | string   | CB process key.  See Notes.| 
+| `segment_id`   | int32    | Process segment identifier.  See Notes.|
+| `report_id`    | string   | Identifier of the report which included the matching IOC.  See notes. |
+| `ioc_type`     | string   | One of "md5", "dns", "ipv4"| 
+| `ioc_value`    | string   | The matching IOC.| 
+| `sensor_id`    | int32    | Sensor Id of the endpoint on which the event matching the feed occurred|
+| `hostname`     | string   | Hostname of the endpoint on which the event matching the feed occurred|
+| `feed_id`      | int32    | Identifier of the feed that included the matching report.  See notes. | 
+| `feed_name`    | string   | The  name of the feed that included the matching report. | 
+| `created_time` | float    | Timestamp of the feed match, measured in number of seconds since the epoch 
+
+Example Event:
+
+```
+    {
+      "process_id": " 9131443406494176380",
+      "segment_id": "1",
+      "report_id": "dxmtest1_01",
+      "ioc_type": "ipv4",
+      "ioc_value": "172.16.100.22",
+      "hostname": "FS-NYC-1",
+      "sensor_id": 3321,
+      "feed_id": 7,
+      "feed_name": "dxmtest1",
+      "created_time":1397240503.332
+    }
+```
+
+Notes:
+
+* The process_id and segment_id fields can be used to construct a request for complete process segment information, including events such as netconns, modloads, and similar, using the Carbon Black Client API.
 
 ### New Binary Instance
 
@@ -280,37 +322,36 @@ The Carbon Black server publishes events the first time an executable file (bina
 2. First time it is observed on an *individual* endpoint for the first time
 3. First time it is observed on a sensor group for the first time
 
-[TODO] Scenario 1 is not curently implemented
-[TODO] Scenario 1 obviates the need for the "newly loaded modules" watchlist 
-
 #### Scenario 1: Observed on any Endpoint
 
-Subscription Channel: [TODO]
+Name: binaryinfo.observed 
 
 #### Scenario 2: Observed on an individual endpoint for the first time
 
-Subscription Channel: cbsolr.newhost.observed
+Name: binaryinfo.host.observed 
 
 Example Event:
 
 ```
 {
     "md5": "9E4B0E7472B4CEBA9E17F440B8CB0AB8",
-    "observed_name": "FS-HQ|1021",
+    "hostname": "FS-HQ",
+    "sensor_id": 1021,
     "created_time": 1397248033.914
 }
 ```
 
 ##### Scenario 3: Observed within a sensor group for the first time
 
-Subscription Channel: cbsolr.newgroup.observed
+Name: binaryinfo.group.observed
 
 Example Event:
 
 ```
 {
     "md5": "9E4B0E7472B4CEBA9E17F440B8CB0AB8",
-    "observed_name": "Default Group",
+    "hostname": "FS-HQ",
+    "sensor_id": 1021,
     "created_time": 1397248033.914
 }
 ```
@@ -321,7 +362,7 @@ The Carbon Black server can be configured to store a copy of all unique binary (
 
 This event provides an easy way to trigger custom analysis of a binary, including static or dynamic anaysis, integration with a third-party analysis system, or custom archiving.
 
-Subscription Channel: binarystore.file.added
+Name: binarystore.file.added
  
 `binarystore.file.added` is a JSON structure with the following entries:
 
