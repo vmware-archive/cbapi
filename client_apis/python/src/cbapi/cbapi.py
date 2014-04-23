@@ -169,6 +169,14 @@ class CbApi(object):
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
         return r.json()
 
+    def process_report(self, id, segment=0):
+        """ download a "report" package describing the process
+            the format of this report is subject to change"""
+        r = requests.get("%s/api/v1/process/%s/%s/report" % (self.server, id, segment), headers=self.token_header, verify=self.ssl_verify)
+        if r.status_code != 200:
+            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+        
+        return r.content
 
     def binary_search(self, query_string, start=0, rows=10, sort="server_added_timestamp desc"):
         """ Search for binaries.  Arguments: 
