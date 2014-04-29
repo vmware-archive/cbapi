@@ -276,7 +276,7 @@ class CbApi(object):
         #
         mapping = {\
                     'WindowsEXE': '/api/v1/group/%s/installer/windows/exe' % (group_id,),\
-                    'WindowsMSI': '/api/v1/group/%s/installer/windows/exe' % (group_id,),\
+                    'WindowsMSI': '/api/v1/group/%s/installer/windows/msi' % (group_id,),\
                   }
 
         # verify that the type parameter is a known value
