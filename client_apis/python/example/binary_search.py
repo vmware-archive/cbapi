@@ -36,7 +36,7 @@ def main(argv):
     # perform a single binary search
     #
     binaries = cb.binary_search(opts.query)
-
+    
     print "%-20s : %s" % ('Displayed Results', len(binaries['results']))
     print "%-20s : %s" % ('Total Results', binaries['total_results'])
     print "%-20s : %sms" % ('QTime', int(1000*binaries['elapsed']))
