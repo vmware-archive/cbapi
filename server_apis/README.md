@@ -4,9 +4,9 @@ BETA DOCUMENTATION - HIGHLY SUBJECT TO CHANGE
 
 ## Overview
 
-Carbon Black 4.2+ supports a rich array of asyncronous server-side notifications.
+Carbon Black 4.2+ supports a rich array of asynchronous server-side notifications.
 
-[MORE HERE]
+This document describes these notifications, how to subscribe to these notifications, and the format of the notifications themselves.
 
 ## Intended Audience
 
@@ -232,17 +232,17 @@ Name: `feed.ingress.hit.process`
 
 `feed.ingress.hit.process` is a JSON structure with the following entries:
 
-| name  | type   | description | 
-| ----- | -------|-------------| 
-| `process_id`     | string   | CB process key.  See Notes. | 
-| `report_id`      | string   | Identifier of the report which included the matching IOC.  See notes. |
-| `ioc_type`       | string   | One of "md5", "dns", "ipv4" | 
-| `ioc_value`      | string   | The matching IOC. | 
-| `sensor_id`      | int32    | Sensor Id of the endpoint on which the event matching the feed occurred|
-| `hostname`       | string   | Hostname of the endpoint on which the event matching the feed occurred|
-| `feed_id`        | int32    | Identifier of the feed that included the matching report.  See notes. | 
-| `feed_name`      | string   | The  name of the feed that included the matching report. | 
-| `event_timestamp`| float    | Timestamp of the feed match, measured in number of seconds since the epoch 
+| name  | type     | description | 
+| ----- | ---------|-------------| 
+| `process_id`     | string      | CB process key.  See Notes. | 
+| `report_id`      | string      | Identifier of the report which included the matching IOC.  See notes. |
+| `ioc_type`       | string      | One of "md5", "dns", "ipv4" | 
+| `ioc_value`      | string      | The matching IOC. | 
+| `sensor_id`      | int32       | Sensor Id of the endpoint on which the event matching the feed occurred|
+| `hostname`       | string      | Hostname of the endpoint on which the event matching the feed occurred|
+| `feed_id`        | int32       | Identifier of the feed that included the matching report.  See notes. | 
+| `feed_name`      | string      | The  name of the feed that included the matching report. | 
+| `event_timestamp`| float       | Timestamp of the feed match, measured in number of seconds since the epoch 
 
 Example Event:
 
@@ -269,17 +269,17 @@ Name: `feed.ingress.hit.binary`
 
 `feed.ingress.hit.binary` is a JSON structure with the following entries:
 
-| name  | type   | description | 
-| ----- | -------|-------------| 
-| `md5`            | string   | MD5 of the binary.| 
-| `report_id`      | string   | Identifier of the report which included the matching IOC.|
-| `ioc_type`       | string   | One of "md5", "dns", "ipv4" | 
-| `ioc_value`      | string   | The matching IOC. | 
-| `sensor_id`      | int32    | Sensor Id of the endpoint on which the event matching the feed occurred|
-| `hostname`       | string   | Hostname of the endpoint on which the event matching the feed occurred|
-| `feed_id`        | int32    | Identifier of the feed that included the matching report.| 
-| `feed_name`      | string   | The  name of the feed that included the matching report.| 
-| `event_timestamp`| float    | Timestamp of the feed match, measured in number of seconds since the epoch| 
+| name             | type      | description | 
+| ---------------- | ----------|-------------| 
+| `md5`            | string    | MD5 of the binary.| 
+| `report_id`      | string    | Identifier of the report which included the matching IOC.|
+| `ioc_type`       | string    | One of "md5", "dns", "ipv4" | 
+| `ioc_value`      | string    | The matching IOC. | 
+| `sensor_id`      | int32     | Sensor Id of the endpoint on which the event matching the feed occurred|
+| `hostname`       | string    | Hostname of the endpoint on which the event matching the feed occurred|
+| `feed_id`        | int32     | Identifier of the feed that included the matching report.| 
+| `feed_name`      | string    | The  name of the feed that included the matching report.| 
+| `event_timestamp`| float     | Timestamp of the feed match, measured in number of seconds since the epoch| 
 
 Example Event:
 
@@ -309,8 +309,8 @@ Name: `feed.storage.hit.process`
 
 `feed.storage.hit.process` is a JSON structure with the following entries:
 
-| name  | type   | description | 
-| ----- | -------|-------------| 
+| name             | type     | description | 
+| -----------------| ---------|-------------| 
 | `process_id`     | string   | CB process key.  See Notes.| 
 | `segment_id`     | int32    | Process segment identifier.  See Notes.|
 | `report_id`      | string   | Identifier of the report which included the matching IOC.  See notes. |
@@ -349,8 +349,8 @@ Name: `feed.storage.hit.binary`
 
 `feed.storage.hit.binary` is a JSON structure with the following entries:
 
-| name  | type   | description | 
-| ----- | -------|-------------| 
+| name             | type     | description | 
+| -----------------|----------|-------------| 
 | `md5`            | string   | MD5 of the binary.| 
 | `report_id`      | string   | Identifier of the report which included the matching IOC.|
 | `ioc_type`       | string   | One of "md5", "dns", "ipv4" | 
@@ -469,8 +469,8 @@ Name: `binarystore.file.added`
  
 `binarystore.file.added` is a JSON structure with the following entries:
 
-| name  | type   | description | 
-| ----- | -------|-------------| 
+| name             | type     | description | 
+| -----------------|----------|-------------| 
 | `md5`            | string   | MD5 sum of the binary file. | 
 | `size`           | int32    | Size of the original binary, in bytes. |
 | `ioc_type`       | int32    | Size of the zip archive containing the binary file on the Carbon Black server | 
@@ -523,7 +523,7 @@ The raw event volume can easily be measured in tens of thousands per second.  Th
 
 ##### Configuring the Carbon Black server to export raw endpoint events
 
-The Carbon Black server can be configured to export some or all raw endpoint events by modifying cb.conf, typically found in `/etc/cb/cb.conf`. 
+The Carbon Black server can be configured to export some or all raw endpoint events by modifying cb.conf, found at `/etc/cb/cb.conf`. 
 
 In particular, the following configuration option:
 
@@ -543,15 +543,20 @@ The supported types are:
 
 Multiple types can be specified using a comma delimiter, without spaces.
 
-##### Subscribing to raw endpoint events
-
-[TODO]
-
 ##### Google Protocol Buffers definition
 
 The Google Protocol Buffers definition for all raw endpoint events is found at:
 
     `proto/sensor_events.proto`
+
+##### Subscribing to raw endpoint events
+
+(1) Update cb.conf as per the above instructions. 
+(2) Restart cb-enterprise:
+
+    `service cb-enterprise restart`
+
+(3) Subscribe to the events programmatically.  See the example below for one means to do that.
 
 ##### Example
 

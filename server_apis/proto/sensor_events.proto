@@ -12,10 +12,10 @@ message CbHeaderMsg
     optional int64  timestamp                       = 4;
     optional int64  process_guid                    = 5;    // deprecated; only provided for backwards compatibility
     optional int64  filepath_string_guid            = 6;
-    optional uint32 magic                           = 7 [default = 0xdeadbeef];
+    optional uint32 magic                           = 7;    // deprecated
     optional int64  process_filepath_string_guid    = 8;
-    optional int64  process_create_time             = 9;
-    optional int32  process_pid                     = 10;
+    optional int64  process_create_time             = 9;    // FILETIME format
+    optional int32  process_pid                     = 10;   // Windows Process Identifier (PID)
 }
 
 message CbStringMsg
@@ -66,14 +66,14 @@ message CbChildProcessMsg
     optional    bytes   md5hash                 = 3;    // md5 hash of child process
     optional    int64   child_guid              = 4;    // deprecated; only provided for backwards compatibility 
     optional    string  path                    = 5;    // path of child process (c:\a.exe)
-    optional    int64   pid                     = 6;    // for human consumption
-    optional    int64   create_time             = 7;    // higher resolution timestamp of process creation
+    optional    int64   pid                     = 6;    // Windows Process Identifier (PID) 
+    optional    int64   create_time             = 7;    // FILETIME format 
 }
 
 message CbModuleLoadMsg
 {
     optional    int64   guid                    = 1;
-    optional    int64   handlepath_string_guid  = 2;
+    optional    int64   handlepath_string_guid  = 2;    // find the module (binary) path via the CbStringMsg
     optional    bytes   md5hash                 = 3;
     optional    int32   scanid                  = 4;    // deprecated
     optional    bool    is_process_base_module  = 5;    // deprecated
@@ -109,11 +109,11 @@ message CbFileModMsg
         filetypeArchive7zip     = 0x0045;
     }
 
-    optional    int64               guid                = 1;
-    optional    CbFileModAction     action              = 2;
+    optional    int64               guid                = 1;  // deprecated
+    optional    CbFileModAction     action              = 2;  // CbFileModAction enum
     optional    bool                have_seen_before    = 3;  // deprecated 
-    optional    bytes               md5hash             = 4;
-    optional    CbFileType          type                = 5;
+    optional    bytes               md5hash             = 4;  // present for actionFileModLastWrite only
+    optional    CbFileType          type                = 5;  // CbFileType enum; present for actionFileModLastWrite only
 }
 
 message CbRegModMsg
@@ -126,10 +126,10 @@ message CbRegModMsg
         actionRegModDeleteValue  = 8;
     }
 
-    optional    int64               guid                = 1;
-    optional    CbRegModAction      action              = 2;
-    optional    bool                have_seen_before    = 3; // deprecated 
-    optional    bytes               utf8_regpath        = 4;
+    optional    int64               guid                = 1;  // deprecated
+    optional    CbRegModAction      action              = 2;  // CbRegModAction enum
+    optional    bool                have_seen_before    = 3;  // deprecated 
+    optional    bytes               utf8_regpath        = 4;  // value name appended to key for DeleteValue and WriteValue action types
 }
 
 
@@ -155,9 +155,9 @@ message CbNetConnMsg
     optional    bytes              utf8_netpath        = 7;
     optional    bool               outbound            = 8 [default=true];
     optional    bool               proxyConnection     = 9 [default=false];
-    optional    uint32             proxyIpv4Address    = 10; // ip of the web proxy itself
-    optional    uint32             proxyPort           = 11; // port (tcp) of the web proxy itself
-    optional    string             proxyNetPath        = 12; // dns name of the web proxy itself   
+    optional    uint32             proxyIpv4Address    = 10;  // ip of the web proxy itself
+    optional    uint32             proxyPort           = 11;  // port (tcp) of the web proxy itself
+    optional    string             proxyNetPath        = 12;  // dns name of the web proxy itself   
 }
 
 //
@@ -165,13 +165,13 @@ message CbNetConnMsg
 //
 message CbLinStatsMsg
 {
-    optional int32  lin_total                          = 1;
-    optional int32  lin_successful                     = 2;
-    optional int32  lin_no_scanidi                     = 3;
-    optional int32  lin_total_pended                   = 4;
-    optional int32  lin_current_scanid_pended_size     = 5;
-    optional int32  lin_current_handlepath_pended_size = 6;
-    optional int32  lin_current_filepath_pended_size   = 7;
+    optional int32  lin_total                          = 1;   // deprecated
+    optional int32  lin_successful                     = 2;   // deprecated
+    optional int32  lin_no_scanidi                     = 3;   // deprecated
+    optional int32  lin_total_pended                   = 4;   // deprecated
+    optional int32  lin_current_scanid_pended_size     = 5;   // deprecated
+    optional int32  lin_current_handlepath_pended_size = 6;   // deprecated
+    optional int32  lin_current_filepath_pended_size   = 7;   // deprecated
 }
 
 //
@@ -179,7 +179,7 @@ message CbLinStatsMsg
 //
 message CbStatisticsMsg
 {
-    optional CbLinStatsMsg lin_stats = 1;
+    optional CbLinStatsMsg lin_stats = 1;                     // deprecated
 }
 
 //
@@ -212,7 +212,7 @@ message CbModuleInfoMsg
     optional string                 utf8_DigSig_Result      = 21;   // human-readable version of DigSig_ResultCode
     optional string                 utf8_DigSig_ResultCode  = 22;   // preferable to utf8_DigSig_Result; encoded as hex string with 0x prefix
     optional string                 utf8_DigSig_SignTime    = 23;
-    optional bytes                  Icon                    = 24;   // PNG
+    optional bytes                  Icon                    = 24;   // BASE64(PNG)
     optional bytes                  ImageFileHeader         = 25;   // IMAGE_FILE_HEADER from PE header; expected to be 20 bytes
     optional string                 utf8_OnDiskFilename     = 26;   // filename of the file as it was found on the filesystem (not an internal name)
 }
@@ -222,13 +222,15 @@ message CbModuleInfoMsg
 //
 // describe the write of a single file
 //
+// WARNING: This is an unsupported message and subject to change
+//
 message CbVtWriteMsg
 {
-    optional bytes                  WritingProcessExeMd5 = 1;
-    optional bytes                  FileWrittenMd5 = 2;
-    optional bool                   FileWrittenIsPeModuleHint = 3;
-    optional string                 WritingProcessFilename = 4;
-    optional string                 FileWrittenFilename = 5;
+    optional bytes                  WritingProcessExeMd5      = 1;  // unsupported 
+    optional bytes                  FileWrittenMd5            = 2;  // unsupported
+    optional bool                   FileWrittenIsPeModuleHint = 3;  // unsupported
+    optional string                 WritingProcessFilename    = 4;  // unsupported
+    optional string                 FileWrittenFilename       = 5;  // unsupported
 }
 
 //
@@ -236,8 +238,8 @@ message CbVtWriteMsg
 //
 message CbVtLoadMsg
 {
-    optional bytes                  LoaderProcessExeMd5 = 1;
-    optional bytes                  LoadedModuleMd5 = 2;
+    optional bytes                  LoaderProcessExeMd5 = 1;        // deprecated
+    optional bytes                  LoadedModuleMd5     = 2;        // deprecated
 }
 
 //
@@ -245,9 +247,9 @@ message CbVtLoadMsg
 //
 message CbEndpointEnvironmentMsg
 {
-    optional int32                  SensorId       = 1;
-    optional string                 SensorHostName = 2;
-    optional int64                  HostId         = 3;
+    optional int32                  SensorId       = 1;             // sensor id of the endpoint from which the message originated
+    optional string                 SensorHostName = 2;             // hostname of the endpoint from which the message originated
+    optional int64                  HostId         = 3;             // unsupported
 }
 
 //
@@ -255,7 +257,7 @@ message CbEndpointEnvironmentMsg
 //
 message CbServerEnvironmentMsg
 {
-    optional int32                  NodeId        = 1;
+    optional int32                  NodeId        = 1;              // node id of the service which received the message; for clustered server setups
 }
 
 //
@@ -282,7 +284,7 @@ message CbEventMsg
     optional CbRegModMsg            regmod    = 7;
     optional CbStatisticsMsg        stats     = 8;  // deprecated
     optional CbModuleInfoMsg        module    = 9;
-    optional CbVtWriteMsg           vtwrite   = 10;
+    optional CbVtWriteMsg           vtwrite   = 10; // unsupported
     optional CbVtLoadMsg            vtload    = 11; // deprecated
     optional CbChildProcessMsg      childproc = 12;
     optional CbEnvironmentMsg       env       = 13; // populated by server at event-export time
