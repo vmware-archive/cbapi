@@ -6,14 +6,14 @@
 
 message CbHeaderMsg
 {
-    required int32  version                         = 1;
+    required int32  version                         = 1;    // 4
     optional int32  bootid                          = 2;    // deprecated
     optional int32  eventid                         = 3;    // deprecated
-    optional int64  timestamp                       = 4;
+    optional int64  timestamp                       = 4;    // FILETIME
     optional int64  process_guid                    = 5;    // deprecated; only provided for backwards compatibility
-    optional int64  filepath_string_guid            = 6;
+    optional int64  filepath_string_guid            = 6;    // lookup key for CbStringMsg
     optional uint32 magic                           = 7;    // deprecated
-    optional int64  process_filepath_string_guid    = 8;
+    optional int64  process_filepath_string_guid    = 8;    // lookup key for CbStringMsg
     optional int64  process_create_time             = 9;    // FILETIME format
     optional int32  process_pid                     = 10;   // Windows Process Identifier (PID)
 }
@@ -21,9 +21,9 @@ message CbHeaderMsg
 message CbStringMsg
 {
     enum CbStringType {
-        typeFilepath   = 1;
-        typeRegpath    = 2;
-        typeNetpath    = 3;
+        typeFilepath   = 1;                                 
+        typeRegpath    = 2;                                 // deprecated
+        typeNetpath    = 3;                                 // deprecated
     }
     optional int64             guid             = 1;
     optional bytes             utf8string       = 2;
@@ -72,9 +72,9 @@ message CbChildProcessMsg
 
 message CbModuleLoadMsg
 {
-    optional    int64   guid                    = 1;
+    optional    int64   guid                    = 1;    // deprecated
     optional    int64   handlepath_string_guid  = 2;    // find the module (binary) path via the CbStringMsg
-    optional    bytes   md5hash                 = 3;
+    optional    bytes   md5hash                 = 3;    // 16 byte md5 sum
     optional    int32   scanid                  = 4;    // deprecated
     optional    bool    is_process_base_module  = 5;    // deprecated
     optional    int64	image_base              = 6;    // deprecated
@@ -85,10 +85,10 @@ message CbFileModMsg
 {
     enum CbFileModAction
     {
-        actionFileModCreate    = 1;
-        actionFileModWrite     = 2;
-        actionFileModDelete    = 4;
-        actionFileModLastWrite = 8;
+        actionFileModCreate    = 1;  // file was created
+        actionFileModWrite     = 2;  // file was modified (any write, at any offset)
+        actionFileModDelete    = 4;  // file was deleted
+        actionFileModLastWrite = 8;  // newly-written file 'completed' CbFileModMsg will include filetype and md5
     }
     
     enum CbFileType
