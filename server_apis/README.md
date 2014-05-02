@@ -205,10 +205,20 @@ Name: `watchlist.hit.binary`
 
 `watchlist.hit.binary` is a JSON structure with the following entries: 
 
+| name              | type   | description | 
+| ----------------- | -------| -------------| 
+| `cb_version`      | string | Carbon Black server version|
+| `event_timestamp` | string | Timestamp when event was published|
+| `watchlist_id`    | int32  | Identifier of the watchlist that matched|
+| `watchlist_name`  | string | Name of watchlist that matched|
+| `server_name`     | string | Name of the Carbon Black Server|
+| `docs`            | list   | List of one or more matching process documents; see next table|
+
+Each matching binary document is a JSON structure with the following entries:
+  
 | name                    | type   | description | 
 | ----------------------- | -------| -------------| 
 | `_version_`             | string | For internal use|
-| `cb_version`            | string | Carbon Black Server version|
 | `copied_mod_len`        | int32  | Number of bytes copied to server|
 | `group`                 | string | First sensor group on which this binary was observed|
 | `hostname`              | string | First endpoint hostname on which this binary was observed|
@@ -226,9 +236,7 @@ Name: `watchlist.hit.binary`
 | `server_added_timestamp`| string | The time this binary was first seen by the server.
 | `servername`            | string | Name of Carbon Black server|
 | `timestamp`             | string | Time binary was first observed (in endpoint time)|
-| `watchlist_id`          | int32  | Identifier of the watchlist that matched|
-| `watchlist_name`        | string | Name of watchlist that matched|
-| `watchlists`            | JSON   | List of matching watchlists.|
+| `watchlists`            | list   | List of matching watchlists.|
 | `file_version`          | string | File Version (Windows Only)|
 | `product_name`          | string | Product Name (Windows Only)|
 | `company_name`          | string | Company Name (Windows Only)|
@@ -236,6 +244,54 @@ Name: `watchlist.hit.binary`
 | `original_filename`     | string | Internal Original Filename (Windows Only)|
 | `file_desc`             | string | File Description (Windows only)|
                                                                              
+Example:
+
+    {
+      "server_name": "localhost.localdomain",
+      "event_timestamp": 1399054218.59,
+      "watchlist_id": 13,
+      "cb_version": "4.2.0.140502.933",
+      "watchlist_name": "wireshark",
+      "docs":
+        [
+          {
+            "product_version_facet": "1.10.0",
+            "digsig_result": "Signed",
+            "observed_filename": ["c:\\\\program files\\\\wireshark\\\\dumpcap.exe"],
+            "product_version": "1.10.0",
+            "digsig_issuer": "COMODO Code Signing CA 2",
+            "product_name_facet": "Dumpcap",
+            "signed": "Signed",
+            "digsig_sign_time": "2013-06-06T00:36:00Z",
+            "orig_mod_len": 413104,
+            "is_executable_image": true,
+            "is_64bit": true,
+            "observed_filename_facet": ["c:\\\\program files\\\\wireshark\\\\dumpcap.exe"],
+            "digsig_subject": "Wireshark Foundation",
+            "file_version_facet": "1.10.0",
+            "digsig_publisher": "Wireshark Foundation",
+            "file_version": "1.10.0",
+            "company_name": "The Wireshark developer community",
+            "internal_name": "Dumpcap 1.10.0",
+            "_version_": 1459884874256089088,
+            "product_name": "Dumpcap",
+            "digsig_result_code": "0",
+            "timestamp": "2014-02-13T01:21:43.648Z",
+            "company_name_facet":
+            "The Wireshark developer community",
+            "copied_mod_len": 413104,
+            "server_added_timestamp": "2014-02-13T01:21:43.648Z",
+            "watchlist_2": "2014-02-13T01:25:09.054Z",
+            "md5": "F28CFB3761464EDDF09717FDE74A1ECA",
+            "watchlists": [{"wid": "2", "value": "2014-02-13T01:25:09.054Z"}],
+            "legal_copyright": "Copyright \\u00c2\\u00a9 2000 Gerald Combs <gerald@wireshark.org>, Gilbert Ramirez <gram@alumni.rice.edu> and others",
+            "digsig_publisher_facet": "Wireshark Foundation",
+            "original_filename": "Dumpcap.exe",
+            "file_desc": "Dumpcap"
+          }
+        ],
+    }
+
 Notes:
 
 The digsig_status field can be one of eight values:
@@ -247,10 +303,6 @@ The digsig_status field can be one of eight values:
 * Invalid Chain
 * Untrusted Root
 * Explicit Distrust 
-
-Example:
-
-[TODO]
 
 ### Feed Hit
 
