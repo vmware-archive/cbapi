@@ -488,7 +488,7 @@ Name: `binaryinfo.observed`
 | ----- | -------|-------------| 
 | `md5`            | string   | MD5 of the binary.|
 | `event_timestamp`| float    | Timestamp of the feed match, measured in number of seconds since the epoch| 
-[TODO] alliance feed scores
+| `scores`         | dict     | Dictionary of Alliance feed scores|
 
 Example Event:
 
@@ -496,7 +496,10 @@ Example Event:
 {
     "md5": "9E4B0E7472B4CEBA9E17F440B8CB0AB8",
     "event_timestamp": 1397248033.914
-    [TODO] alliance feed scores
+    "scores": 
+      {
+        "alliance_score_virustotal": 16
+      }
 }
 ```
 
@@ -506,13 +509,13 @@ Name: `binaryinfo.host.observed`
 
 `binaryinfo.host.observed` is a JSON structure with the following entries:
 
-| name  | type   | description | 
-| ----- | -------|-------------| 
+| name             | type     | description | 
+| ---------------- | -------- | ----------- | 
 | `md5`            | string   | MD5 of the binary.|
 | `hostname`       | string   | Hostname of endpoint on which binary was observed|
 | `sensor_id`      | int32    | Sensor Id of endpoint on which binary was observed|
 | `event_timestamp`| float    | Timestamp of the feed match, measured in number of seconds since the epoch| 
-[TODO] alliance feed scores
+| `scores`         | dict     | Dictionary of Alliance feed scores|
 
 Example Event:
 
@@ -522,7 +525,10 @@ Example Event:
     "hostname": "FS-HQ",
     "sensor_id": 1021,
     "event_timestamp": 1397248033.914
-    [TODO] alliance feed scores
+    "scores": 
+      {
+        "alliance_score_virustotal": 16
+      }
 }
 ```
 
@@ -532,12 +538,12 @@ Name: `binaryinfo.group.observed`
 
 `binaryinfo.group.observed` is a JSON structure with the following entries:
 
-| name  | type   | description | 
-| ----- | -------|-------------| 
+| name             | type     | description | 
+| ---------------- | -------- |-------------| 
 | `md5`            | string   | MD5 of the binary.|
 | `group`          | string   | Sensor group name on which the binary was observed|
 | `event_timestamp`| float    | Timestamp of the feed match, measured in number of seconds since the epoch| 
-[TODO] alliance feed scores
+| `scores`         | dict     | Dictionary of Alliance feed scores|
 
 Example Event:
 
@@ -546,7 +552,10 @@ Example Event:
     "md5": "9E4B0E7472B4CEBA9E17F440B8CB0AB8",
     "group": "Default Group",
     "event_timestamp": 1397248033.914
-    [TODO] alliance feed scores
+    "scores": 
+      {
+        "alliance_score_virustotal": 16
+      }
 }
 ```
 
