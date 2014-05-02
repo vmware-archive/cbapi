@@ -566,12 +566,14 @@ Name: `binarystore.file.added`
 | `size`           | int32    | Size of the original binary, in bytes. |
 | `ioc_type`       | int32    | Size of the zip archive containing the binary file on the Carbon Black server | 
 | `event_timestamp`| float    | Timestamp of the binary file addtion, measured in number of seconds since the epoch 
+| `file_path`      | string   | Path, on the server disk, of the copied binary file (zipped).|
 
 Example Event:
 
 ```
 {
     "md5": "9E4B0E7472B4CEBA9E17F440B8CB0AB8",
+    "file_path": "/var/cb/data/modulestore/FE2/AFA/FE2AFACC396DC37F51421DE4A08DA8A7.zip"
     "size": 320000,
     "compressed_size": 126857,
     "event_timestamp": 1397248033.914
@@ -579,7 +581,8 @@ Example Event:
 ```
 Notes:
 
-* The Carbon Black Alliance client can be configured to delete binary store files from the Carbon Black server after uploading to the Alliance Server.  These files are still retrievable via the Carbon Black API, although there may be bandwidth or transfer time concerns. 
+* The Carbon Black Server can be configured to delete binary store files from the Carbon Black server after uploading to the Alliance Server.  These files are still retrievable via the Carbon Black API, although there may be bandwidth or transfer time concerns.  See the `AllianceClientNoDeleteOnUpload` configuration option in `cb.conf`. 
+* The Carbon Black Server can be configured to automatically delete binary store files from the Carbon Black server due to disk space constraints.  See the `KeepAllModuleFiles` configuration option in `cb.conf`.  
 
 #### Raw Endpoint Events
 
