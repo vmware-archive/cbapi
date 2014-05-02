@@ -153,7 +153,7 @@ Name: `watchlist.hit.process`
 | `username`        | string | User context in which the process executed.|
 | `watchlist_id`    | int32  | Identifier of the watchlist that matched|
 | `watchlist_name`  | string | Name of watchlist that matched|
-| `cmdline          | string | Process command line|
+| `cmdline`         | string | Process command line|
 | `parent_unique_id`| string| Parent process unique|
 
 Example:
