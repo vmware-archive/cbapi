@@ -149,7 +149,7 @@ Name: `watchlist.hit.process`
 | `sensor_id`       | int32  | Endpoint identifier.|
 | `servername`      | string | Name of Carbon Black server|
 | `start`           | string | Start time of this process in endpoint local time. Example: 2014-02-04T16:23:22.516Z|
-| `unique_id*       | string | Process unique Id|
+| `unique_id`       | string | Process unique Id|
 | `username`        | string | User context in which the process executed.|
 | `watchlist_id`    | int32  | Identifier of the watchlist that matched|
 | `watchlist_name`  | string | Name of watchlist that matched|
