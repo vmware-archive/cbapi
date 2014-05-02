@@ -132,6 +132,16 @@ Name: `watchlist.hit.process`
 | name              | type   | description | 
 | ----------------- | -------|-------------| 
 | `cb_version`      | string | Carbon Black server version|
+| `event_timestamp` | string | Timestamp when event was published|
+| `watchlist_id`    | int32  | Identifier of the watchlist that matched|
+| `watchlist_name`  | string | Name of watchlist that matched|
+| `server_name`     | string | Name of the Carbon Black Server|
+| `docs`            | list   | List of one or more matching process documents; see next table|
+
+Each matching process document is a JSON structure with the following entries:
+
+| name              | type   | description |
+| ----------------- | ------ | ----------- |
 | `childproc_count` | int32  | Total count of child processes created by this process|
 | `filemod_count`   | int32  | Total count of file modifications made by this process|
 | `group`           | string | Sensor group this sensor was assigned to at time of process execution|
@@ -151,14 +161,43 @@ Name: `watchlist.hit.process`
 | `start`           | string | Start time of this process in endpoint local time. Example: 2014-02-04T16:23:22.516Z|
 | `unique_id`       | string | Process unique Id|
 | `username`        | string | User context in which the process executed.|
-| `watchlist_id`    | int32  | Identifier of the watchlist that matched|
-| `watchlist_name`  | string | Name of watchlist that matched|
 | `cmdline`         | string | Process command line|
 | `parent_unique_id`| string| Parent process unique|
 
 Example:
 
-[TODO]
+    {
+      "server_name": "localhost.localdomain",
+      "event_timestamp": 1399047907.02,
+      "watchlist_id": 8,
+      "cb_version": "4.2.0.140502.933",
+      "watchlist_name": "Non-System Filemods to system32",
+      "docs":
+        [
+          {
+            "username": "SYSTEM",
+            "process_md5": "fbeb9658133497f8d1f70480fed7db67",
+            "hostname": "WIN8-TEST",
+            "group": "Default Group",
+            "segment_id": 1,
+            "parent_unique_id": "",
+            "process_name": "wmiadap.exe",
+            "host_type": "server",
+            "last_update": "2014-02-24T05:16:37.445Z",
+            "start": "2014-02-24T05:16:23.186Z",
+            "sensor_id": 2,
+            "modload_count": 0,
+            "netconn_count": 0,
+            "path": "c:\\windows\\system32\\wbem\\wmiadap.exe",
+            "regmod_count": 0,
+            "filemod_count": 0,
+            "id": "2891574818926877171",
+            "unique_id": "2820effa-4399-d9f3-0000-000000000001",
+            "childproc_count": 0
+          },
+        ]
+     }
+
 
 #### Binary Watchlist Hit
 
