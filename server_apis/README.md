@@ -564,7 +564,7 @@ Name: `binarystore.file.added`
 | -----------------|----------|-------------| 
 | `md5`            | string   | MD5 sum of the binary file. | 
 | `size`           | int32    | Size of the original binary, in bytes. |
-| `ioc_type`       | int32    | Size of the zip archive containing the binary file on the Carbon Black server | 
+| `compressed_size`| int32    | Size of the zip archive containing the binary file on the Carbon Black server | 
 | `event_timestamp`| float    | Timestamp of the binary file addtion, measured in number of seconds since the epoch 
 | `file_path`      | string   | Path, on the server disk, of the copied binary file (zipped).|
 
