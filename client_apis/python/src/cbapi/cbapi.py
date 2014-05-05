@@ -238,7 +238,7 @@ class CbApi(object):
 
         return r.json()
 
-    def feed_synchronize(self, name):
+    def feed_synchronize(self, name, full_sync=True):
         '''
         force the synchronization of a feed
         '''
@@ -250,7 +250,9 @@ class CbApi(object):
         for feed in feed_request.json():
             if feed['name'] == name:
                 sync_request = requests.post("%s/api/v1/feed/%s/synchronize" % (self.server, feed["id"]),
-                                             headers=self.token_header, verify=self.ssl_verify)
+                                             headers=self.token_header,
+                                             verify=self.ssl_verify,
+                                             data=json.dumps({"full_sync": full_sync}))
                 if sync_request.status_code == 200:
                     return {"result": True}
                 elif sync_request.status_code == 409:
