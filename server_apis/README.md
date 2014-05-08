@@ -484,9 +484,9 @@ Name: `binaryinfo.observed`
 
 `binaryinfo.observed` is a JSON structure with the following entries:
 
-| name  | type   | description | 
-| ----- | -------|-------------| 
-| `md5`            | string   | MD5 of the binary.|
+| name             | type     | description | 
+| ---------------- | -------- |-------------| 
+| `md5`            | string   | MD5 of the binary|
 | `event_timestamp`| float    | Timestamp of the feed match, measured in number of seconds since the epoch| 
 | `scores`         | dict     | Dictionary of Alliance feed scores|
 
@@ -495,7 +495,7 @@ Example Event:
 ```
 {
     "md5": "9E4B0E7472B4CEBA9E17F440B8CB0AB8",
-    "event_timestamp": 1397248033.914
+    "event_timestamp": 1397248033.914,
     "scores": 
       {
         "alliance_score_virustotal": 16
@@ -524,10 +524,15 @@ Example Event:
     "md5": "9E4B0E7472B4CEBA9E17F440B8CB0AB8",
     "hostname": "FS-HQ",
     "sensor_id": 1021,
-    "event_timestamp": 1397248033.914
+    "event_timestamp": 1397248033.914,
     "scores": 
       {
         "alliance_score_virustotal": 16
+      },
+    "watchlists":
+      {
+        "watchlist_7": "2014-02-13T00:30:11.247Z"
+        "watchlist_9": "2014-02-13T00:21:13.009Z"
       }
 }
 ```
@@ -555,6 +560,11 @@ Example Event:
     "scores": 
       {
         "alliance_score_virustotal": 16
+      },
+    "watchlists":
+      {
+        "watchlist_7": "2014-02-13T00:30:11.247Z"
+        "watchlist_9": "2014-02-13T00:21:13.009Z"
       }
 }
 ```
