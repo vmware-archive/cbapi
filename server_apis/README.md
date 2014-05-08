@@ -516,6 +516,7 @@ Name: `binaryinfo.host.observed`
 | `sensor_id`      | int32    | Sensor Id of endpoint on which binary was observed|
 | `event_timestamp`| float    | Timestamp of the feed match, measured in number of seconds since the epoch| 
 | `scores`         | dict     | Dictionary of Alliance feed scores|
+| `watchlists`     | dict     | Dictionary of already-matched watchlists|
 
 Example Event:
 
@@ -545,10 +546,11 @@ Name: `binaryinfo.group.observed`
 
 | name             | type     | description | 
 | ---------------- | -------- |-------------| 
-| `md5`            | string   | MD5 of the binary.|
+| `md5`            | string   | MD5 of the binary|
 | `group`          | string   | Sensor group name on which the binary was observed|
 | `event_timestamp`| float    | Timestamp of the feed match, measured in number of seconds since the epoch| 
 | `scores`         | dict     | Dictionary of Alliance feed scores|
+| `watchlists`     | dict     | Dictionary of already-matched watchlists|
 
 Example Event:
 
