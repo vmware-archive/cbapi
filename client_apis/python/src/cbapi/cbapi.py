@@ -146,9 +146,10 @@ class CbApi(object):
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
         return r.json()
 
-    def process_summary(self, id, segment):
+    def process_summary(self, id, segment, children_count=15):
         """ get the detailed metadata for a process.  Requires the 'id' field from a process
             search result, as well as a segement, also found from a process search result.
+            The results will be limited to children_count children metadata structures.
 
             Returns a python dictionary with the following primary fields:
                 - process - metadata for this process
@@ -156,7 +157,7 @@ class CbApi(object):
                 - children - a list of metadata structures for child processes
                 - siblings - a list of metadata structures for sibling processes
         """
-        r = requests.get("%s/api/v1/process/%s/%s" % (self.server, id, segment), headers=self.token_header, verify=self.ssl_verify)
+        r = requests.get("%s/api/v1/process/%s/%s/%d" % (self.server, id, segment, children_count), headers=self.token_header, verify=self.ssl_verify)
         if r.status_code != 200:
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
         return r.json()
