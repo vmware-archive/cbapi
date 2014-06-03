@@ -157,7 +157,8 @@ class CbApi(object):
                 - children - a list of metadata structures for child processes
                 - siblings - a list of metadata structures for sibling processes
         """
-        r = requests.get("%s/api/v1/process/%s/%s/%d" % (self.server, id, segment, children_count), headers=self.token_header, verify=self.ssl_verify)
+        print "REQUEST: %s/api/v1/process/%s/%s?children=%d" % (self.server, id, segment, children_count)
+        r = requests.get("%s/api/v1/process/%s/%s?children=%d" % (self.server, id, segment, children_count), headers=self.token_header, verify=self.ssl_verify)
         if r.status_code != 200:
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
         return r.json()
