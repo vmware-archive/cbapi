@@ -1,7 +1,5 @@
 # Carbon Black Server API 
 
-BETA DOCUMENTATION - HIGHLY SUBJECT TO CHANGE
-
 ## Overview
 
 Carbon Black 4.2+ supports a rich array of asynchronous server-side notifications.
@@ -19,7 +17,9 @@ The intended audience of this document is composed of two inter-related groups:
 
 The Carbon Black Server API (CBSAPI) is found on github at:
 
-  https://github.com/carbonblack/cbapi/server_apis
+  https://github.com/carbonblack/cbapi/
+
+in the "server_apis" directory.
 
 The CBSAPI is a collection of documentation, example scripts, and a helper library to help subscribe to Carbon Black server notifications, parse and understand the contents of those notifications, and demonstrate common business logic uses of those notifications.
 
