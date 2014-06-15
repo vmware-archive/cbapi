@@ -69,7 +69,9 @@ if __name__ == "__main__":
     channel.queue_bind(exchange='api.events', queue=queue_name, routing_key='#')
 
     channel.basic_consume(on_message, queue=queue_name)
-    
+   
+    print "-> Subscribed!"
+ 
     try:
         channel.start_consuming()
     except KeyboardInterrupt:

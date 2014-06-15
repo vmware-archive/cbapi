@@ -74,7 +74,9 @@ The example scripts depend on the "Pika" package.  Documentation is available at
  
 #### use the example "subscribe_all.py" to see all event notifications on the Carbon Black server.
 
-    [TODO]
+The 'subscribe_all.py' example script is found at:
+
+    `server_apis/python/example`
 
 ## Notification Architecture
 
@@ -675,4 +677,7 @@ The Google Protocol Buffers definition for all raw endpoint events is found at:
 
 ##### Example
 
-[TODO]
+[root@localhost example]# python subscribe_all.py -p OxU4Nwyf5DE7UNrA
+-> Subscribed!
+
+
