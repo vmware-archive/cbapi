@@ -708,8 +708,8 @@ A structure with the following fields:
 - `alliance_score_srs`: If enabled and available, the Bit9 Software Reputation Service (SRS) score, normalized to a CB score
 - `alliance_score_tis`: If enabled and available, the Bit9 Threat Indicators Service (TIS) score, normalized to a CB score
 - `alliance_score_*`: 0 or more other scores, applied by configuring feeds.
-- `hostname`: 0 or more hostnames on which this binary was observed
-- `sensor_group`: 0 or more sensor groups in which this binary was observed
+- `endpoint`: list of 0 or more hostname,sensorid tuples on which this binary was observed.  The | character serves as the delimiter between the hostname and the sensorid.
+- `group`: list of 0 or more sensor groups (by name) in which this binary was observed
 
 A complete example:
 
@@ -748,7 +748,16 @@ GET http://192.168.206.154/api/binary/1C8B787BAA52DEAD1A6FEC1502D652f0/summary
   "legal_copyright": "\u00a9 Microsoft Corporation. All rights reserved.", 
   "digsig_publisher_facet": "Microsoft Corporation", 
   "original_filename": "MSHTML.DLL.MUI", 
-  "file_desc": "Microsoft (R) HTML Viewer"
+  "file_desc": "Microsoft (R) HTML Viewer",
+  "group": [
+    "Default Group",
+    "Domain Controllers"
+  ],
+  "endpoint": [
+    "DC01|17",
+    "XP-KIOSK-32|1002",
+    "XP-KIOSK-87|688"
+  ]
 }
 ```
 
