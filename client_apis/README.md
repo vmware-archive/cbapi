@@ -538,7 +538,7 @@ JSON object with the following elements:
 A binary object contains the following fields:
 
 - `md5`: the md5 hash of this binary
-- `server_added_timestamp`: the first time this binary was received on the server in the server's GMT time
+- `server_added_timestamp`: the first time this binary was received on the server in the server GMT time
 - `orig_mod_len`: Filesize in bytes
 - `copied_mod_len`: Bytes copied from remote host, if file is > 25MB this will be less than `orig_mod_len`
 - `observed_filename`: The set of unique filenames this binary has been seen as
@@ -678,7 +678,7 @@ Returns the metadata for the binary with the provided md5
 A structure with the following fields:
 
 - `md5`: the md5 hash of this binary
-- `server_added_timestamp`: the first time this binary was received on the server in the server's GMT time
+- `server_added_timestamp`: the first time this binary was received on the server in the server GMT time
 - `orig_mod_len`: Filesize in bytes
 - `copied_mod_len`: Bytes copied from remote host, if file is > 25MB this will be less than `orig_mod_len`
 - `observed_filename`: A list of strings, one per unique filename this binary has been seen as
