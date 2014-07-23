@@ -98,7 +98,7 @@ Process search.  Parameters passed as a query string.
 *Supports*:: `GET`
 
 ##### Parameters:
-- `q`: REQUIRED Query string. Accepts the same data as the search box on the Process Search page.  `TODO`: link to query syntax doc
+- `q`: REQUIRED Query string. Accepts the same data as the search box on the Process Search page.  See https://github.com/carbonblack/cbapi/blob/master/client_apis/docs/query_overview.pdf 
 - `rows`: OPTIONAL Return this many rows, 10 by default.
 - `start`: OPTIONAL Start at this row, 0 by default.
 - `sort`: OPTIONAL Sort rows by this field and order.  `last_update desc` by default.
@@ -516,7 +516,7 @@ Binary search.  Parameters passed as query string.
 *Supports*:: `GET`
 
 ##### Parameters:
-- `q`: REQUIRED Query string. Accepts the same data as the search box on the Binary Search page.  `TODO`: link to query syntax doc
+- `q`: REQUIRED Query string. Accepts the same data as the search box on the Binary Search page. See https://github.com/carbonblack/cbapi/blob/master/client_apis/docs/query_overview.pdf 
 - `rows`: OPTIONAL Return this many rows, 10 by default.
 - `start`: OPTIONAL Start at this row, 0 by default.
 - `sort`: OPTIONAL Sort rows by this field and order.  `server_added_timestamp desc` by default.  
