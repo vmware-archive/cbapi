@@ -1,0 +1,292 @@
+//
+// Google Protobuf Definition for Carbon Black Sensor Events
+//
+// Copyright 2014 Bit9, Inc.
+//
+
+message CbHeaderMsg
+{
+    required int32  version                         = 1;    // 4
+    optional int32  bootid                          = 2;    // deprecated
+    optional int32  eventid                         = 3;    // deprecated
+    optional int64  timestamp                       = 4;    // FILETIME
+    optional int64  process_guid                    = 5;    // deprecated; only provided for backwards compatibility
+    optional int64  filepath_string_guid            = 6;    // lookup key for CbStringMsg
+    optional uint32 magic                           = 7;    // deprecated
+    optional int64  process_filepath_string_guid    = 8;    // lookup key for CbStringMsg
+    optional int64  process_create_time             = 9;    // FILETIME format
+    optional int32  process_pid                     = 10;   // Windows Process Identifier (PID)
+}
+
+message CbStringMsg
+{
+    enum CbStringType {
+        typeFilepath   = 1;                                 
+        typeRegpath    = 2;                                 // deprecated
+        typeNetpath    = 3;                                 // deprecated
+    }
+    optional int64             guid             = 1;
+    optional bytes             utf8string       = 2;
+    optional CbStringType      string_type      = 3 [default = typeFilepath];
+}
+
+message CbProcessMsg
+{
+    optional    int32   pid                     = 1;    // deprecated; see process_pid in header
+    optional    bool    created                 = 2;    // false means the process is exiting
+                                                        // on created filepath_string_guid will be
+                                                        // the path to the process base module on disk
+    optional    int32   parent_pid              = 3;  
+    optional    int64   parent_create_time      = 4;  
+    optional    int64   parent_guid             = 5;    // deprecated; only for backwards compatibility 
+    optional    bytes   md5hash                 = 6;    // only set on created = true
+    optional    bool    have_seen_before        = 7;    // if true, we've sent this before
+    optional    int64   deprecated              = 8;    // formerly commandlinestringguid; command line now inline (see next line)
+    optional    bytes   commandline             = 9;
+    optional    bytes   parent_md5              = 10;   // parent process md5 
+    optional    string  parent_path             = 11;   // parent process qualified filename
+    optional    bool    creationobserved        = 12 [default=false];   // was the creation of this process observed, or 
+                                                                        // already running at sensor start time
+    optional    bool    expect_followon_w_md5   = 13 [default=false];   // sensor is attempting to calculate the md5 of the process
+                                                                        // and will send a new process message with md5 when calc complete
+    optional    string  uid                     = 14;   // uid or SID of process security context 
+    optional    string  username                = 15;   // username of process security context 
+}
+
+//
+// ChildProcessMsg is a subset of CbProcessMsg
+// It is used in support of allowing viewing of child processes in the event
+// stream (for example, in the UI's process analysis page) and in allowing
+// child processes to be tagged as events. 
+//
+message CbChildProcessMsg
+{
+    optional    bool    created                 = 1;    // creation:true::term:false
+    optional    int64   parent_guid             = 2;    // deprecated; only provided for backwards compatibility 
+    optional    bytes   md5hash                 = 3;    // md5 hash of child process
+    optional    int64   child_guid              = 4;    // deprecated; only provided for backwards compatibility 
+    optional    string  path                    = 5;    // path of child process (c:\a.exe)
+    optional    int64   pid                     = 6;    // Windows Process Identifier (PID) 
+    optional    int64   create_time             = 7;    // FILETIME format 
+}
+
+message CbModuleLoadMsg
+{
+    optional    int64   guid                    = 1;    // deprecated
+    optional    int64   handlepath_string_guid  = 2;    // find the module (binary) path via the CbStringMsg
+    optional    bytes   md5hash                 = 3;    // 16 byte md5 sum
+    optional    int32   scanid                  = 4;    // deprecated
+    optional    bool    is_process_base_module  = 5;    // deprecated
+    optional    int64	image_base              = 6;    // deprecated
+    optional    uint32	image_size              = 7;    // deprecated
+}
+
+message CbFileModMsg
+{
+    enum CbFileModAction
+    {
+        actionFileModCreate    = 1;  // file was created
+        actionFileModWrite     = 2;  // file was modified (any write, at any offset)
+        actionFileModDelete    = 4;  // file was deleted
+        actionFileModLastWrite = 8;  // newly-written file 'completed' CbFileModMsg will include filetype and md5
+    }
+    
+    enum CbFileType
+    {
+        filetypeUnknown         = 0x0000;  
+        filetypePe              = 0x0001;   // windows
+        filetypeElf             = 0x0002;   // linux
+        filetypeUniverasalBin   = 0x0003;   // osx
+        filetypeEicar           = 0x0008;
+        filetypeOfficeLegacy    = 0x0010;
+        filetypeOfficeOpenXml   = 0x0011;
+        filetypePdf             = 0x0030;
+        filetypeArchivePkzip    = 0x0040;
+        filetypeArchiveLzh      = 0x0041;
+        filetypeArchiveLzw      = 0x0042;
+        filetypeArchiveRar      = 0x0043;
+        filetypeArchiveTar      = 0x0044;
+        filetypeArchive7zip     = 0x0045;
+    }
+
+    optional    int64               guid                = 1;  // deprecated
+    optional    CbFileModAction     action              = 2;  // CbFileModAction enum
+    optional    bool                have_seen_before    = 3;  // deprecated 
+    optional    bytes               md5hash             = 4;  // present for actionFileModLastWrite only
+    optional    CbFileType          type                = 5;  // CbFileType enum; present for actionFileModLastWrite only
+}
+
+message CbRegModMsg
+{
+    enum CbRegModAction
+    {
+        actionRegModCreateKey    = 1;
+        actionRegModWriteValue   = 2;
+        actionRegModDeleteKey    = 4;
+        actionRegModDeleteValue  = 8;
+    }
+
+    optional    int64               guid                = 1;  // deprecated
+    optional    CbRegModAction      action              = 2;  // CbRegModAction enum
+    optional    bool                have_seen_before    = 3;  // deprecated 
+    optional    bytes               utf8_regpath        = 4;  // value name appended to key for DeleteValue and WriteValue action types
+}
+
+
+//
+// describes an inbound or outbound network connection
+//
+// supports connections via web proxies 
+//
+message CbNetConnMsg
+{
+    enum ProtocolType
+    {
+        ProtoTcp = 6;   // RFC 793
+        ProtoUdp = 17;  // RFC 768
+    }
+
+    optional    int64              guid                = 1;  // deprecated
+    optional    uint32             ipv4Address         = 2;  // may not be present when web proxy used
+    optional    uint64             ipv6LoPart          = 3;  // not supported
+    optional    uint64             ipv6HiPart          = 4;  // not supported
+    optional    uint32             port                = 5;
+    optional    ProtocolType	   protocol 	       = 6;
+    optional    bytes              utf8_netpath        = 7;
+    optional    bool               outbound            = 8 [default=true];
+    optional    bool               proxyConnection     = 9 [default=false];
+    optional    uint32             proxyIpv4Address    = 10;  // ip of the web proxy itself
+    optional    uint32             proxyPort           = 11;  // port (tcp) of the web proxy itself
+    optional    string             proxyNetPath        = 12;  // dns name of the web proxy itself   
+}
+
+//
+// deprecated
+//
+message CbLinStatsMsg
+{
+    optional int32  lin_total                          = 1;   // deprecated
+    optional int32  lin_successful                     = 2;   // deprecated
+    optional int32  lin_no_scanidi                     = 3;   // deprecated
+    optional int32  lin_total_pended                   = 4;   // deprecated
+    optional int32  lin_current_scanid_pended_size     = 5;   // deprecated
+    optional int32  lin_current_handlepath_pended_size = 6;   // deprecated
+    optional int32  lin_current_filepath_pended_size   = 7;   // deprecated
+}
+
+//
+// deprecated
+//
+message CbStatisticsMsg
+{
+    optional CbLinStatsMsg lin_stats = 1;                     // deprecated
+}
+
+//
+// CbModuleInfoMsg
+//
+// describes certain sensor-calculated metadata associated with an individual PE module
+//
+message CbModuleInfoMsg
+{
+    optional bytes                  md5                     = 1;
+    optional uint32                 CopiedModuleLength      = 2;
+    optional uint64                 OriginalModuleLength    = 3;
+    optional string                 utf8_FileDescription    = 4;
+    optional string                 utf8_CompanyName        = 5;
+    optional string                 utf8_ProductName        = 6;
+    optional string                 utf8_FileVersion        = 7;
+    optional string                 utf8_Comments           = 8;
+    optional string                 utf8_LegalCopyright     = 9;
+    optional string                 utf8_LegalTrademark     = 10;
+    optional string                 utf8_InternalName       = 11;
+    optional string                 utf8_OriginalFileName   = 12;
+    optional string                 utf8_ProductDescription = 13;
+    optional string                 utf8_ProductVersion     = 14;
+    optional string                 utf8_PrivateBuild       = 15;
+    optional string                 utf8_SpecialBuild       = 16;
+    optional string                 utf8_DigSig_Publisher   = 17;
+    optional string                 utf8_DigSig_ProgramName = 18;
+    optional string                 utf8_DigSig_IssuerName  = 19;
+    optional string                 utf8_DigSig_SubjectName = 20;
+    optional string                 utf8_DigSig_Result      = 21;   // human-readable version of DigSig_ResultCode
+    optional string                 utf8_DigSig_ResultCode  = 22;   // preferable to utf8_DigSig_Result; encoded as hex string with 0x prefix
+    optional string                 utf8_DigSig_SignTime    = 23;
+    optional bytes                  Icon                    = 24;   // BASE64(PNG)
+    optional bytes                  ImageFileHeader         = 25;   // IMAGE_FILE_HEADER from PE header; expected to be 20 bytes
+    optional string                 utf8_OnDiskFilename     = 26;   // filename of the file as it was found on the filesystem (not an internal name)
+}
+
+//
+// file-write message
+//
+// describe the write of a single file
+//
+// WARNING: This is an unsupported message and subject to change
+//
+message CbVtWriteMsg
+{
+    optional bytes                  WritingProcessExeMd5      = 1;  // unsupported 
+    optional bytes                  FileWrittenMd5            = 2;  // unsupported
+    optional bool                   FileWrittenIsPeModuleHint = 3;  // unsupported
+    optional string                 WritingProcessFilename    = 4;  // unsupported
+    optional string                 FileWrittenFilename       = 5;  // unsupported
+}
+
+//
+// deprecated
+//
+message CbVtLoadMsg
+{
+    optional bytes                  LoaderProcessExeMd5 = 1;        // deprecated
+    optional bytes                  LoadedModuleMd5     = 2;        // deprecated
+}
+
+//
+// describes the sensor and host on which the event was collected
+//
+message CbEndpointEnvironmentMsg
+{
+    optional int32                  SensorId       = 1;             // sensor id of the endpoint from which the message originated
+    optional string                 SensorHostName = 2;             // hostname of the endpoint from which the message originated
+    optional int64                  HostId         = 3;             // unsupported
+}
+
+//
+// describes the server on which the event was received and processed
+//
+message CbServerEnvironmentMsg
+{
+    optional int32                  NodeId        = 1;              // node id of the service which received the message; for clustered server setups
+}
+
+//
+// describes the environment on which the event was collected,
+// transmitted, and received.
+//
+// populated by the server at import time, not by the sensor
+// at collection or transmission time
+//
+message CbEnvironmentMsg
+{
+    optional CbEndpointEnvironmentMsg   endpoint = 1;
+    optional CbServerEnvironmentMsg     server   = 2;  
+}
+
+message CbEventMsg
+{
+    required CbHeaderMsg            header    = 1;
+    repeated CbStringMsg            strings   = 2;
+    optional CbProcessMsg           process   = 3;
+    optional CbModuleLoadMsg        modload   = 4;
+    optional CbFileModMsg           filemod   = 5;
+    optional CbNetConnMsg           network   = 6;
+    optional CbRegModMsg            regmod    = 7;
+    optional CbStatisticsMsg        stats     = 8;  // deprecated
+    optional CbModuleInfoMsg        module    = 9;
+    optional CbVtWriteMsg           vtwrite   = 10; // unsupported
+    optional CbVtLoadMsg            vtload    = 11; // deprecated
+    optional CbChildProcessMsg      childproc = 12;
+    optional CbEnvironmentMsg       env       = 13; // populated by server at event-export time
+}
+

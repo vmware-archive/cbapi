@@ -1,13 +1,12 @@
 #
 # CARBON BLACK API
-# Copyright, Carbon Black, Inc 2013
-# technology-support@carbonblack.com
+# Copyright Bit9, Inc. 2014 
+# support@carbonblack.com
 #
 
-import requests
-import urllib
 import json
-from requests.auth import HTTPDigestAuth
+import urllib
+import requests
 
 class CbApi(object):
     """ Python bindings for Carbon Black API 
@@ -69,6 +68,40 @@ class CbApi(object):
         if r.status_code != 200:
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
 
+    def get_platform_server_config(self):
+        """ Get Bit9 Platform Server configuration
+            This includes server address and authentication information
+
+            Must authenticate as a global administrator for this data to be available
+
+            Note: the secret is never available (via query) for remote callers, although
+                  it can be applied
+        """
+        r = requests.get("%s/api/v1/settings/global/platformserver" % (self.server,), \
+                                                                       headers=self.token_header, \
+                                                                       verify=self.ssl_verify)
+        if r.status_code != 200:
+            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+
+        return json.loads(r.content)
+
+    def set_platform_server_config(self, platform_server_config):
+        """ Sets the Bit9 Platform Server configuration
+            This includes the server address, username, and password
+
+            Must authenticate as a global administrator to have the rights to set this config
+
+            platform_server_config is expected to be a python dictionary with the following keys:
+                username : username for authentication
+                password : password for authentication
+                server   : server address
+        """
+        r = requests.post("%s/api/v1/settings/global/platformserver" % (self.server,), \
+                                                                        headers=self.token_header, \
+                                                                        data = json.dumps(platform_server_config))
+        if r.status_code != 200:
+            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+
     def process_search(self, query_string, start=0, rows=10, sort="last_update desc"):
         """ Search for processes.  Arguments: 
 
@@ -113,9 +146,10 @@ class CbApi(object):
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
         return r.json()
 
-    def process_summary(self, id, segment):
+    def process_summary(self, id, segment, children_count=15):
         """ get the detailed metadata for a process.  Requires the 'id' field from a process
             search result, as well as a segement, also found from a process search result.
+            The results will be limited to children_count children metadata structures.
 
             Returns a python dictionary with the following primary fields:
                 - process - metadata for this process
@@ -123,7 +157,7 @@ class CbApi(object):
                 - children - a list of metadata structures for child processes
                 - siblings - a list of metadata structures for sibling processes
         """
-        r = requests.get("%s/api/v1/process/%s/%s" % (self.server, id, segment), headers=self.token_header, verify=self.ssl_verify)
+        r = requests.get("%s/api/v1/process/%s/%s?children=%d" % (self.server, id, segment, children_count), headers=self.token_header, verify=self.ssl_verify)
         if r.status_code != 200:
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
         return r.json()
@@ -136,6 +170,14 @@ class CbApi(object):
             raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
         return r.json()
 
+    def process_report(self, id, segment=0):
+        """ download a "report" package describing the process
+            the format of this report is subject to change"""
+        r = requests.get("%s/api/v1/process/%s/%s/report" % (self.server, id, segment), headers=self.token_header, verify=self.ssl_verify)
+        if r.status_code != 200:
+            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+        
+        return r.content
 
     def binary_search(self, query_string, start=0, rows=10, sort="server_added_timestamp desc"):
         """ Search for binaries.  Arguments: 
@@ -205,7 +247,7 @@ class CbApi(object):
 
     def sensors(self, query_parameters={}):
         '''
-        get sensors, optionally specifying searchcriteria
+        get sensors, optionally specifying search criteria
 
         as of this writing, supported search criteria are:
           ip - any portion of an ip address
@@ -223,6 +265,35 @@ class CbApi(object):
             raise Exception("Unexpected response from /api/sensor: %s" % (r.status_code))
         return r.json()
 
+    def sensor_installer(self, type, group_id=1):
+        """
+        get sensor installer package for a specified sensor group
+
+        group_id - the group_id to download an installer for; defaults to 1 "Default Group"
+        type - the sensor installer type.  [WindowsEXE|WindowsMSI]
+        """
+
+        # set up a mapping of types to REST endpoints
+        #
+        mapping = {\
+                    'WindowsEXE': '/api/v1/group/%s/installer/windows/exe' % (group_id,),\
+                    'WindowsMSI': '/api/v1/group/%s/installer/windows/msi' % (group_id,),\
+                  }
+
+        # verify that the type parameter is a known value
+        #
+        if not mapping.has_key(type):
+            raise ValueError("Unrecognized type '%s'; should be one of 'WindowsEXE' or 'WindowsMSI'" % (type,))
+
+        # build the fully-qualified URL
+        #
+        url = "%s%s" % (self.server, mapping[type])
+        
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+       
+        return r.content 
+
     def watchlist(self, id=None):
         '''
         get all watchlists or a single watchlist
@@ -235,6 +306,24 @@ class CbApi(object):
         r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
         if r.status_code != 200:
             raise Exception("Unexpected response from %s: %s" % (url, r.status_code))
+
+        return r.json()
+
+    def feed_add_from_url(self, feed_url, enabled, validate_server_cert, use_proxy):
+        '''
+        add a new feed to the Carbon Black server, as specified by URL
+        '''
+        request = {\
+                      'use_proxy': use_proxy,\
+                      'validate_server_cert': validate_server_cert,\
+                      'feed_url': feed_url,\
+                      'enabled': enabled,\
+                  }
+
+        url = "%s/api/v1/feed" % (self.server,)
+        
+        r = requests.post(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
+        r.raise_for_status()
 
         return r.json()
 
