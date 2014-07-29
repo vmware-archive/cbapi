@@ -95,7 +95,7 @@ The documentation below calls out in which format each notification type is publ
 
 This document describes the underlying events published on the Carbon Black server message bus.  It is expected that these events will be consumed programmatically.
 
-The Carbon Black server provides built-in mechanisms to expose these same events via syslog, e-mail, and HTTP POST.  The configuration of these alternate notification mechanisms is outside of the scope of this document.
+The Carbon Black server provides built-in mechanisms to expose these same events via syslog and e-mail.  The configuration of these alternate notification mechanisms is outside of the scope of this document.
 
 ## Notification Types
 
