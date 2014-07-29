@@ -644,7 +644,7 @@ The Carbon Black server can be configured to export some or all raw endpoint eve
 
 In particular, the following configuration option:
 
-    `DatastoreBroadcastEventTypes=<TYPE[S]>`
+    DatastoreBroadcastEventTypes=<TYPE[S]>
 
 The supported types are:
 
@@ -664,14 +664,15 @@ Multiple types can be specified using a comma delimiter, without spaces.
 
 The Google Protocol Buffers definition for all raw endpoint events is found at:
 
-    `proto/sensor_events.proto`
+    proto/sensor_events.proto
+    
 
 ##### Subscribing to raw endpoint events
 
 (1) Update cb.conf as per the above instructions. 
 (2) Restart cb-enterprise:
 
-    `service cb-enterprise restart`
+    service cb-enterprise restart
 
 (3) Subscribe to the events programmatically.  See the example below for one means to do that.
 
