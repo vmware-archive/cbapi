@@ -313,9 +313,9 @@ There are two types of feed events:
 * Ingress
 * Storage
 
-Ingress feed events are published as the matching endpoint data arrives from the sensor.  These ingress feed events therefore provide the earliest available notification of the endpoint activity.  Ingress events are published prior to updating the data to the backend data store (SOLR), and therefore it may be up to twenty minutes before the data is discoverable via search.
+Ingress feed events are published as the matching endpoint data arrives from the sensor.  These ingress feed events therefore provide the earliest available notification of the endpoint activity.  Ingress events are published prior to updating the data to the backend data store (SOLR), and therefore it may be up to fifteen minutes before the data is discoverable via search.  The latency is partially dependent on the configured SOLR soft-commit (auto-commit) interval.
 
-Storage feed events are published as the data is committed to the backend data store. These storage feed events are published upon updating the data store, but prior to committing the changes.  Threfore, it may be up to ten minutes before the data is discoverble via search. 
+Storage feed events are published as the data is committed to the backend data store (SOLR).  As compared to ingress feed events, storage feed events happen later in time, but when all data is fully indexed and searchable via SOLR and therefore the CB client API. 
 
 #### Ingress Feed Hit
 
