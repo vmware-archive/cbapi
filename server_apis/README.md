@@ -145,61 +145,68 @@ Each matching process document is a JSON structure with the following entries:
 | name              | type   | description |
 | ----------------- | ------ | ----------- |
 | `childproc_count` | int32  | Total count of child processes created by this process|
+| `cmdline`         | string | Process command line |
 | `filemod_count`   | int32  | Total count of file modifications made by this process|
 | `group`           | string | Sensor group this sensor was assigned to at time of process execution|
 | `host_type`       | string | Type of the computer: server, workstation, domain controller|
 | `hostname`        | string | Hostname of the computer on which the process executed (at time of execution)|
-| `id`              | string | For internal use|
 | `last_update`     | string | Last activity in this process is endpoint local time.  Example: 2014-02-04T16:23:22.547Z |
 | `modload_count`   | int32  | Total count of module loads in this process.| 
 | `netconn_count`   | int32  | Total count of network connections made and received by this process.|
+| `os_type`         | string | Operating system type of the endpoint, e.g. Windows, Linux, Osx. |
+| `parent_name`     | string | Name of the parent process. |
+| `parent_md5`      | string | MD5 of the parent process. |
+| `parent_pid`      | int32  | PID of parent process. |
+| `parent_unique_id`| string | Parent process unique identifer. |
 | `path`            | string | Full path to the executable file backing this process.|
 | `process_md5`     | string | MD5 of the executable file backing this process.|
 | `process_name`    | string | Filename of the executable backing this process.|
+| `process_pid`     | int32  | PID of this process. |
 | `regmod_count`    | int32  | total count of registry modifications made by this process.|
 | `segment_id`      | int32  | For internal use|
 | `sensor_id`       | int32  | Endpoint identifier.|
-| `servername`      | string | Name of Carbon Black server|
 | `start`           | string | Start time of this process in endpoint local time. Example: 2014-02-04T16:23:22.516Z|
 | `unique_id`       | string | Process unique Id|
 | `username`        | string | User context in which the process executed.|
-| `cmdline`         | string | Process command line|
-| `parent_unique_id`| string| Parent process unique|
 
 Example:
 
-    {
-      "server_name": "localhost.localdomain",
-      "event_timestamp": 1399047907.02,
-      "watchlist_id": 8,
-      "cb_version": "4.2.0.140502.933",
-      "watchlist_name": "Non-System Filemods to system32",
-      "docs":
-        [
-          {
-            "username": "SYSTEM",
-            "process_md5": "fbeb9658133497f8d1f70480fed7db67",
-            "hostname": "WIN8-TEST",
-            "group": "Default Group",
-            "segment_id": 1,
-            "parent_unique_id": "",
-            "process_name": "wmiadap.exe",
-            "host_type": "server",
-            "last_update": "2014-02-24T05:16:37.445Z",
-            "start": "2014-02-24T05:16:23.186Z",
-            "sensor_id": 2,
-            "modload_count": 0,
-            "netconn_count": 0,
-            "path": "c:\\windows\\system32\\wbem\\wmiadap.exe",
-            "regmod_count": 0,
-            "filemod_count": 0,
-            "id": "2891574818926877171",
-            "unique_id": "2820effa-4399-d9f3-0000-000000000001",
-            "childproc_count": 0
-          },
-        ]
-     }
-
+```
+  {
+    "server_name": "cb-enterprise-testing.local", 
+    "docs": [
+        {"process_md5": "a3ccfd0aa0b17fd23aa9fd0d84b86c05", 
+         "sensor_id": 1, 
+         "modload_count": 49, 
+         "parent_unique_id": "00000001-0000-09e4-01cf-a5dee70168f2-00000001", 
+         "cmdline": "\"c:\\users\\admin\\desktop\\putty.exe\" ", 
+         "filemod_count": 0, 
+         "id": "00000001-0000-afbc-01cf-b31b9e83777f", 
+         "parent_name": "explorer.exe", 
+         "parent_md5": "332feab1435662fc6c672e25beb37be3", 
+         "group": "Default Group", 
+         "hostname": "WIN8-TEST", 
+         "last_update": "2014-08-08T15:15:47.544Z", 
+         "start": "2014-08-08T15:15:42.193Z", 
+         "regmod_count": 6, 
+         "process_pid": 44988, 
+         "username": "win8-test\\admin", 
+         "process_name": "putty.exe", 
+         "path": "c:\\users\\admin\\desktop\\putty.exe", 
+         "netconn_count": 1, 
+         "parent_pid": 2532, 
+         "segment_id": 1, 
+         "host_type": "workstation", 
+         "os_type": "windows", 
+         "childproc_count": 0, 
+         "unique_id": "00000001-0000-afbc-01cf-b31b9e83777f-00000001"}
+     ], 
+     "event_timestamp": 1407362104.19, 
+     "watchlist_id": 10, 
+     "cb_version": "4.2.1.140808.1059", 
+     "watchlist_name": "Tor Feed"
+  }
+```
 
 #### Binary Watchlist Hit
 
@@ -220,10 +227,9 @@ Each matching binary document is a JSON structure with the following entries:
   
 | name                    | type   | description | 
 | ----------------------- | -------| -------------| 
-| `_version_`             | string | For internal use|
 | `copied_mod_len`        | int32  | Number of bytes copied to server|
+| `endpint`               | string | Hostname and sensor ID of the first endpoint on which this binary was observed. |
 | `group`                 | string | First sensor group on which this binary was observed|
-| `hostname`              | string | First endpoint hostname on which this binary was observed|
 | `digsig_issuer`         | string | If digitally signed, the issuer.|
 | `digsig_publisher`      | string | If digitally signed, the publisher.|
 | `digsig_result`         | string | If digitally signed, the human-readable status. See notes.|
@@ -236,7 +242,6 @@ Each matching binary document is a JSON structure with the following entries:
 | `observed_filename`     | string | Full path to the executable backing the process|
 | `orig_mod_len`          | int32  | Size in bytes of the binary at the time of observation on the endpoint.|
 | `server_added_timestamp`| string | The time this binary was first seen by the server.
-| `servername`            | string | Name of Carbon Black server|
 | `timestamp`             | string | Time binary was first observed (in endpoint time)|
 | `watchlists`            | list   | List of matching watchlists.|
 | `file_version`          | string | File Version (Windows Only)|
@@ -245,54 +250,49 @@ Each matching binary document is a JSON structure with the following entries:
 | `internal_name`         | string | Internal Name (Windows Only)|
 | `original_filename`     | string | Internal Original Filename (Windows Only)|
 | `file_desc`             | string | File Description (Windows only)|
-                                                                             
+| `product_desc`          | string | Product Description (Windows only)|
+| `product_version`       | string | Product Description (Windows only)|
+| `comments`              | string | Comment String (Windows only)|
+| `legal_copyright`       | string | Legal copyright string (Windows only)|
+| `legal_trademarkt`      | string | Legal trademark string (Windows only)|
+| `private_build`         | string | Private build string (Windows only)|                                                            
 Example:
 
-    {
-      "server_name": "localhost.localdomain",
-      "event_timestamp": 1399054218.59,
-      "watchlist_id": 13,
-      "cb_version": "4.2.0.140502.933",
-      "watchlist_name": "wireshark",
-      "docs":
-        [
-          {
-            "product_version_facet": "1.10.0",
-            "digsig_result": "Signed",
-            "observed_filename": ["c:\\\\program files\\\\wireshark\\\\dumpcap.exe"],
-            "product_version": "1.10.0",
-            "digsig_issuer": "COMODO Code Signing CA 2",
-            "product_name_facet": "Dumpcap",
-            "signed": "Signed",
-            "digsig_sign_time": "2013-06-06T00:36:00Z",
-            "orig_mod_len": 413104,
-            "is_executable_image": true,
-            "is_64bit": true,
-            "observed_filename_facet": ["c:\\\\program files\\\\wireshark\\\\dumpcap.exe"],
-            "digsig_subject": "Wireshark Foundation",
-            "file_version_facet": "1.10.0",
-            "digsig_publisher": "Wireshark Foundation",
-            "file_version": "1.10.0",
-            "company_name": "The Wireshark developer community",
-            "internal_name": "Dumpcap 1.10.0",
-            "_version_": 1459884874256089088,
-            "product_name": "Dumpcap",
-            "digsig_result_code": "0",
-            "timestamp": "2014-02-13T01:21:43.648Z",
-            "company_name_facet":
-            "The Wireshark developer community",
-            "copied_mod_len": 413104,
-            "server_added_timestamp": "2014-02-13T01:21:43.648Z",
-            "watchlist_2": "2014-02-13T01:25:09.054Z",
-            "md5": "F28CFB3761464EDDF09717FDE74A1ECA",
-            "watchlists": [{"wid": "2", "value": "2014-02-13T01:25:09.054Z"}],
-            "legal_copyright": "Copyright \\u00c2\\u00a9 2000 Gerald Combs <gerald@wireshark.org>, Gilbert Ramirez <gram@alumni.rice.edu> and others",
-            "digsig_publisher_facet": "Wireshark Foundation",
-            "original_filename": "Dumpcap.exe",
-            "file_desc": "Dumpcap"
-          }
-        ],
-    }
+```
+  {
+    "server_name": "cb-enterprise-testing.local", 
+    "docs": [
+        {"digsig_result": "Signed", 
+         "observed_filename": ["c:\\windows\\system32\\prncache.dll"], 
+         "product_version": "6.1.7601.17514", 
+         "signed": "Signed", 
+         "digsig_sign_time": "2010-11-21T00:37:00Z", 
+         "is_executable_image": false, 
+         "orig_mod_len": 183808, 
+         "is_64bit": true, 
+         "digsig_publisher": "Microsoft Corporation", 
+         "group": ["Default Group"], 
+         "file_version": "6.1.7601.17514 (win7sp1_rtm.101119-1850)", 
+         "company_name": "Microsoft Corporation", 
+         "internal_name": "PrintCache", 
+         "product_name": "Microsoft\u00ae Windows\u00ae Operating System", 
+         "digsig_result_code": "0", 
+         "timestamp": "2014-08-09T11:19:04.009Z", 
+         "copied_mod_len": 183808, 
+         "server_added_timestamp": "2014-08-09T11:19:04.009Z", 
+         "md5": "A1CDE92DDC170D307DB3C5BAA348811B", 
+         "endpoint": ["WIN8-TEST|1"], 
+         "legal_copyright": "\u00a9 Microsoft Corporation. All rights reserved.", 
+         "original_filename": "PrnCache.dll", 
+         "os_type": "Windows", 
+         "file_desc": "Print UI Cache"}
+     ], 
+     "event_timestamp": 1407583203.5, 
+     "watchlist_id": 10, 
+     "cb_version": "4.2.1.140811.29", 
+     "watchlist_name": "SRS Trust"
+  }
+```
 
 Notes:
 
@@ -451,6 +451,7 @@ Each matching process document is a JSON structure with the following entries:
 | `path`            | string | Full path to the executable file backing this process.|
 | `process_md5`     | string | MD5 of the executable file backing this process.|
 | `process_name`    | string | Filename of the executable backing this process.|
+| `process_pid`     | int32  | PID of this process. |
 | `regmod_count`    | int32  | total count of registry modifications made by this process.|
 | `segment_id`      | int32  | For internal use|
 | `start`           | string | Start time of this process in endpoint local time. Example: 2014-02-04T16:23:22.516Z|
@@ -470,14 +471,14 @@ Example Event:
          "netconn_count":"1",
          "os_type":"windows",
          "unique_id":"00000001-0000-afbc-01cf-b31b9e83777f-00000001",
-         "username":"gakkor-latitude\\gakkor",
+         "username":"win8-test\\admin",
          "last_update":"2014-08-08T15:15:47.544Z",
          "parent_md5":"332feab1435662fc6c672e25beb37be3",
-         "path":"c:\\users\\gakkor\\desktop\\putty.exe",
+         "path":"c:\\users\\admin\\desktop\\putty.exe",
          "filemod_count":0,
          "regmod_count":6,
          "process_name":"putty.exe",
-         "cmdline":"\"c:\\users\\gakkor\\desktop\\putty.exe\" ",
+         "cmdline":"\"c:\\users\\admin\\desktop\\putty.exe\" ",
          "parent_unique_id":"00000001-0000-09e4-01cf-a5dee70168f2-00000001",
          "childproc_count":0,
          "process_pid":"44988",
@@ -491,7 +492,7 @@ Example Event:
      "ioc_type":"ipv4",
      "ioc_value":"38.229.70.52",
      "ioc_attr":{"port":"22","protocol":"TCP","direction":"Outbound"},
-     "hostname":"GAKKOR-LATITUDE",
+     "hostname":"WIN8-TEST",
      "sensor_id":1,
      "cb_version":"4.2.1.140808.1059",
      "server_name":"localhost",
@@ -583,7 +584,7 @@ Example Event:
         "alliance_score_srstrust":"-100",
         "digsig_result_code":"0",
         "file_desc":"Volume Mixer",
-        "endpoint":"GAKKOR-LATITUDE|1",
+        "endpoint":"WIN8-TEST|1",
         "legal_copyright":"Microsoft Corporation. All rights reserved.",
         "original_filename":"SndVol.exe",
         "is_64bit":"true",
@@ -595,7 +596,7 @@ Example Event:
     "ioc_type":"md5",
     "ioc_value":"c3489639ec8e181044f6c6bfd3d01ac9",
     "ioc_attr":{},
-    "hostname":"GAKKOR-LATITUDE",
+    "hostname":"WIN8-TEST",
     "sensor_id":1,
     "cb_version":"4.2.1.140811.1054",
     "server_name":"localhost",
