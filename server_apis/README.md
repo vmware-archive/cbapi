@@ -228,7 +228,7 @@ Each matching binary document is a JSON structure with the following entries:
 | name                    | type   | description | 
 | ----------------------- | -------| -------------| 
 | `copied_mod_len`        | int32  | Number of bytes copied to server|
-| `endpint`               | string | Hostname and sensor ID of the first endpoint on which this binary was observed. |
+| `endpoint`              | string | Hostname and sensor ID of the first endpoint on which this binary was observed. |
 | `group`                 | string | First sensor group on which this binary was observed|
 | `digsig_issuer`         | string | If digitally signed, the issuer.|
 | `digsig_publisher`      | string | If digitally signed, the publisher.|
@@ -241,6 +241,7 @@ Each matching binary document is a JSON structure with the following entries:
 | `md5`                   | string | MD5 of the binary|
 | `observed_filename`     | string | Full path to the executable backing the process|
 | `orig_mod_len`          | int32  | Size in bytes of the binary at the time of observation on the endpoint.|
+| `os_type`               | string | Operating system type, e.g. Windows, Linux, Osx. |
 | `server_added_timestamp`| string | The time this binary was first seen by the server.
 | `timestamp`             | string | Time binary was first observed (in endpoint time)|
 | `watchlists`            | list   | List of matching watchlists.|
@@ -443,7 +444,7 @@ Each matching process document is a JSON structure with the following entries:
 | `last_update`     | string | Last activity in this process is endpoint local time.  Example: 2014-02-04T16:23:22.547Z |
 | `modload_count`   | int32  | Total count of module loads in this process.| 
 | `netconn_count`   | int32  | Total count of network connections made and received by this process.|
-| `os_type`         | string | Operating system type of the endpoint, e.g. Windows, Linux, Osx. |
+| `os_type`         | string | Operating system type, e.g. Windows, Linux, Osx. |
 | `parent_name`     | string | Name of the parent process. |
 | `parent_md5`      | string | MD5 of the parent process. |
 | `parent_pid`      | int32  | PID of parent process. |
@@ -534,7 +535,7 @@ Each matching process document is a JSON structure with the following entries:
 | name                    | type   | description | 
 | ----------------------- | -------| -------------| 
 | `copied_mod_len`        | int32  | Number of bytes copied to server|
-| `endpint`               | string | Hostname and sensor ID of the end point on which this binary was observed. |
+| `endpoint`              | string | Hostname and sensor ID of the endpoint on which this binary was observed. |
 | `group`                 | string | First sensor group on which this binary was observed|
 | `digsig_issuer`         | string | If digitally signed, the issuer.|
 | `digsig_publisher`      | string | If digitally signed, the publisher.|
@@ -547,6 +548,7 @@ Each matching process document is a JSON structure with the following entries:
 | `md5`                   | string | MD5 of the binary|
 | `observed_filename`     | string | Full path to the executable backing the process|
 | `orig_mod_len`          | int32  | Size in bytes of the binary at the time of observation on the endpoint.|
+| `os_type`               | string | Operating system type of the endpoint, e.g. Windows, Linux, Osx. |
 | `server_added_timestamp`| string | The time this binary was first seen by the server.
 | `file_version`          | string | File Version (Windows Only)|
 | `product_name`          | string | Product Name (Windows Only)|
