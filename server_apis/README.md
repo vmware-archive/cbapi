@@ -330,27 +330,33 @@ Name: `feed.ingress.hit.process`
 | `process_id`     | string      | CB process key.  See Notes. | 
 | `report_id`      | string      | Identifier of the report which included the matching IOC.  See notes. |
 | `ioc_type`       | string      | One of "md5", "dns", "ipv4" | 
-| `ioc_value`      | string      | The matching IOC. | 
-| `sensor_id`      | int32       | Sensor Id of the endpoint on which the event matching the feed occurred|
-| `hostname`       | string      | Hostname of the endpoint on which the event matching the feed occurred|
+| `ioc_value`      | string      | The matching IOC. |
+| `ioc_attr`       | JSON        | Key value pairs of additional attributes related to the hit (if present). |
+| `sensor_id`      | int32       | Sensor Id of the endpoint on which the event matching the feed occurred. |
+| `hostname`       | string      | Hostname of the endpoint on which the event matching the feed occurred |
+| `cb_version`     | string      | Carbon Black server version. |
+| `server_name`    | string      | Name of Carbon Black server. |
 | `feed_id`        | int32       | Identifier of the feed that included the matching report.  See notes. | 
 | `feed_name`      | string      | The  name of the feed that included the matching report. | 
-| `event_timestamp`| float       | Timestamp of the feed match, measured in number of seconds since the epoch 
+| `event_timestamp`| float       | Timestamp of the feed match, measured in number of seconds since the epoch |
 
 Example Event:
 
 ```
-    {
-      "process_id": " 9131443406494176380",
-      "report_id": "dxmtest1_01",
-      "ioc_type": "ipv4",
-      "ioc_value": "172.16.100.22",
-      "hostname": "FS-NYC-1",
-      "sensor_id": 3321,
-      "feed_id": 7,
-      "feed_name": "dxmtest1",
-      "event_timestamp":1397240503.332
-    }
+  {
+    "process_id":"00000001-0000-afbc-01cf-b31b9e83777f",
+    "report_id":"TOR-Node-38.229.70.52",
+    "ioc_type":"ipv4",
+    "ioc_value":"38.229.70.52",
+    "ioc_attr":{"port":22,"protocol":"TCP","direction":"Outbound"},
+    "hostname":"FS-NYC-1",
+    "sensor_id":1,
+    "cb_version":"4.2.1.140808.1059",
+    "server_name":"localhost.localdomain",
+    "feed_id":14,
+    "feed_name":"tor",
+    "event_timestamp":1407362000
+  }
 ```
 Notes:
 
@@ -367,9 +373,12 @@ Name: `feed.ingress.hit.binary`
 | `md5`            | string    | MD5 of the binary.| 
 | `report_id`      | string    | Identifier of the report which included the matching IOC.|
 | `ioc_type`       | string    | One of "md5", "dns", "ipv4" | 
-| `ioc_value`      | string    | The matching IOC. | 
+| `ioc_value`      | string    | The matching IOC. |
+| `ioc_attr`       | JSON      | Key value pairs of additional attributes related to the hit (if present). |
 | `sensor_id`      | int32     | Sensor Id of the endpoint on which the event matching the feed occurred|
 | `hostname`       | string    | Hostname of the endpoint on which the event matching the feed occurred|
+| `cb_version`     | string    | Carbon Black server version. |
+| `server_name`    | string    | Name of Carbon Black server. |
 | `feed_id`        | int32     | Identifier of the feed that included the matching report.| 
 | `feed_name`      | string    | The  name of the feed that included the matching report.| 
 | `event_timestamp`| float     | Timestamp of the feed match, measured in number of seconds since the epoch| 
@@ -382,9 +391,12 @@ Example Event:
       "report_id": "dxmtest1_04",
       "ioc_type": "md5",
       "ioc_value":"506708142bc63daba64f2d3ad1dcd5bf",
+      "ioc_attr": {},
       "feed_id":7,
       "hostname": "FS-SEA-529",
       "sensor_id": 3321,
+      "cb_version":"4.2.1.140808.1059",
+      "server_name":"localhost.localdomain",
       "feed_name": "dxmtest1",
       "event_timestamp": 1397244093.682
     }
@@ -407,29 +419,86 @@ Name: `feed.storage.hit.process`
 | `process_id`     | string   | CB process key.  See Notes.| 
 | `segment_id`     | int32    | Process segment identifier.  See Notes.|
 | `report_id`      | string   | Identifier of the report which included the matching IOC.  See notes. |
-| `ioc_type`       | string   | One of "md5", "dns", "ipv4"| 
-| `ioc_value`      | string   | The matching IOC.| 
-| `sensor_id`      | int32    | Sensor Id of the endpoint on which the event matching the feed occurred|
-| `hostname`       | string   | Hostname of the endpoint on which the event matching the feed occurred|
+| `ioc_type`       | string   | One of "md5", "dns", "ipv4" | 
+| `ioc_value`      | string   | The matching IOC. | 
+| `ioc_attr`       | JSON     | Key value pairs of additional attributes related to the hit (if present). |
+| `sensor_id`      | int32    | Sensor Id of the endpoint on which the event matching the feed occurred |
+| `hostname`       | string   | Hostname of the endpoint on which the event matching the feed occurred |
+| `cb_version`     | string   | Carbon Black server version. |
+| `server_name`    | string   | Name of Carbon Black server. |
 | `feed_id`        | int32    | Identifier of the feed that included the matching report.  See notes. | 
 | `feed_name`      | string   | The  name of the feed that included the matching report. | 
-| `event_timestamp`| float    | Timestamp of the feed match, measured in number of seconds since the epoch 
+| `event_timestamp`| float    | Timestamp of the feed match, measured in number of seconds since the epoch |
+| `docs`           | list     | List of one or more matching process documents; see next table |
+
+Each matching process document is a JSON structure with the following entries:
+
+| name              | type   | description |
+| ----------------- | ------ | ----------- |
+| `childproc_count` | int32  | Total count of child processes created by this process |
+| `cmdline`         | string | Process command line |
+| `filemod_count`   | int32  | Total count of file modifications made by this process|
+| `group`           | string | Sensor group this sensor was assigned to at time of process execution|
+| `host_type`       | string | Type of the computer: server, workstation, domain controller|
+| `last_update`     | string | Last activity in this process is endpoint local time.  Example: 2014-02-04T16:23:22.547Z |
+| `modload_count`   | int32  | Total count of module loads in this process.| 
+| `netconn_count`   | int32  | Total count of network connections made and received by this process.|
+| `os_type`         | string | Operating system type of the endpoint, e.g. Windows, Linux, Osx. |
+| `parent_name`     | string | Name of the parent process. |
+| `parent_md5`      | string | MD5 of the parent process. |
+| `parent_pid`      | int32  | PID of parent process. |
+| `parent_unique_id`| string | Parent process unique identifer. |
+| `path`            | string | Full path to the executable file backing this process.|
+| `process_md5`     | string | MD5 of the executable file backing this process.|
+| `process_name`    | string | Filename of the executable backing this process.|
+| `regmod_count`    | int32  | total count of registry modifications made by this process.|
+| `segment_id`      | int32  | For internal use|
+| `start`           | string | Start time of this process in endpoint local time. Example: 2014-02-04T16:23:22.516Z|
+| `unique_id`       | string | Process unique Id|
+| `username`        | string | User context in which the process executed.|
+
 
 Example Event:
 
 ```
-    {
-      "process_id": " 9131443406494176380",
-      "segment_id": "1",
-      "report_id": "dxmtest1_01",
-      "ioc_type": "ipv4",
-      "ioc_value": "172.16.100.22",
-      "hostname": "FS-NYC-1",
-      "sensor_id": 3321,
-      "feed_id": 7,
-      "feed_name": "dxmtest1",
-      "event_timestamp": 1397240503.332
-    }
+  {
+    "process_id":"00000001-0000-afbc-01cf-b31b9e83777f",
+    "segment_id":1,
+    "docs":[
+        {"modload_count":0,
+         "host_type":"workstation",
+         "netconn_count":"1",
+         "os_type":"windows",
+         "unique_id":"00000001-0000-afbc-01cf-b31b9e83777f-00000001",
+         "username":"gakkor-latitude\\gakkor",
+         "last_update":"2014-08-08T15:15:47.544Z",
+         "parent_md5":"332feab1435662fc6c672e25beb37be3",
+         "path":"c:\\users\\gakkor\\desktop\\putty.exe",
+         "filemod_count":0,
+         "regmod_count":6,
+         "process_name":"putty.exe",
+         "cmdline":"\"c:\\users\\gakkor\\desktop\\putty.exe\" ",
+         "parent_unique_id":"00000001-0000-09e4-01cf-a5dee70168f2-00000001",
+         "childproc_count":0,
+         "process_pid":"44988",
+         "start":"2014-08-08T15:15:42.193Z",
+         "process_md5":"a3ccfd0aa0b17fd23aa9fd0d84b86c05",
+         "parent_name":"explorer.exe",
+         "parent_pid":"2532",
+         "group":"Default Group"}
+     ],
+     "report_id":"TOR-Node-38.229.70.52",
+     "ioc_type":"ipv4",
+     "ioc_value":"38.229.70.52",
+     "ioc_attr":{"port":"22","protocol":"TCP","direction":"Outbound"},
+     "hostname":"GAKKOR-LATITUDE",
+     "sensor_id":1,
+     "cb_version":"4.2.1.140808.1059",
+     "server_name":"localhost",
+     "feed_id":14,
+     "feed_name":"tor",
+     "event_timestamp":1407362099.567
+  }
 ```
 
 Notes:
@@ -444,30 +513,96 @@ Name: `feed.storage.hit.binary`
 
 | name             | type     | description | 
 | -----------------|----------|-------------| 
-| `md5`            | string   | MD5 of the binary.| 
-| `report_id`      | string   | Identifier of the report which included the matching IOC.|
+| `md5`            | string   | MD5 of the binary. | 
+| `report_id`      | string   | Identifier of the report which included the matching IOC. |
 | `ioc_type`       | string   | One of "md5", "dns", "ipv4" | 
-| `ioc_value`      | string   | The matching IOC. | 
-| `sensor_id`      | int32    | Sensor Id of the endpoint on which the event matching the feed occurred|
-| `hostname`       | string   | Hostname of the endpoint on which the event matching the feed occurred|
-| `feed_id`        | int32    | Identifier of the feed that included the matching report.| 
-| `feed_name`      | string   | The  name of the feed that included the matching report.| 
-| `event_timestamp`| float    | Timestamp of the feed match, measured in number of seconds since the epoch| 
+| `ioc_value`      | string   | The matching IOC. |
+| `ioc_attr`       | JSON     | Key value pairs of additional attributes related to the hit (if present). |
+| `sensor_id`      | int32    | Sensor Id of the endpoint on which the event matching the feed occurred |
+| `hostname`       | string   | Hostname of the endpoint on which the event matching the feed occurred |
+| `cb_version`     | string   | Carbon Black server version. |
+| `server_name`    | string   | Name of Carbon Black server. |
+| `feed_id`        | int32    | Identifier of the feed that included the matching report. | 
+| `feed_name`      | string   | The  name of the feed that included the matching report. | 
+| `event_timestamp`| float    | Timestamp of the feed match, measured in number of seconds since the epoch | 
+| `docs`           | list     | List of one or more matching process documents; see next table |
+
+Each matching process document is a JSON structure with the following entries:
+
+  
+| name                    | type   | description | 
+| ----------------------- | -------| -------------| 
+| `copied_mod_len`        | int32  | Number of bytes copied to server|
+| `endpint`               | string | Hostname and sensor ID of the end point on which this binary was observed. |
+| `group`                 | string | First sensor group on which this binary was observed|
+| `digsig_issuer`         | string | If digitally signed, the issuer.|
+| `digsig_publisher`      | string | If digitally signed, the publisher.|
+| `digsig_result`         | string | If digitally signed, the human-readable status. See notes.|
+| `digsig_result_code`    | in32   | For internal use.|
+| `digsig_sign_time`      | string | If digitally signed, the sign time.|
+| `digsig_subject`        | string | If digitally signed, the subject.|
+| `is_executable_image`   | bool   | True if the binary is a standalone executable (as compared to a library).|
+| `is_64bit`              | bool   | True if architecture is x64 (versus x86)
+| `md5`                   | string | MD5 of the binary|
+| `observed_filename`     | string | Full path to the executable backing the process|
+| `orig_mod_len`          | int32  | Size in bytes of the binary at the time of observation on the endpoint.|
+| `server_added_timestamp`| string | The time this binary was first seen by the server.
+| `file_version`          | string | File Version (Windows Only)|
+| `product_name`          | string | Product Name (Windows Only)|
+| `company_name`          | string | Company Name (Windows Only)|
+| `internal_name`         | string | Internal Name (Windows Only)|
+| `original_filename`     | string | Internal Original Filename (Windows Only)|
+| `file_desc`             | string | File Description (Windows only)|
+| `product_desc`          | string | Product Description (Windows only)|
+| `product_version`       | string | Product Description (Windows only)|
+| `comments`              | string | Comment String (Windows only)|
+| `legal_copyright`       | string | Legal copyright string (Windows only)|
+| `legal_trademarkt`      | string | Legal trademark string (Windows only)|
+| `private_build`         | string | Private build string (Windows only)|
+
 
 Example Event:
 
 ```
-    {
-      "md5": "506708142BC63DABA64F2D3AD1DCD5BF",
-      "report_id": "dxmtest1_04",
-      "ioc_type": "md5",
-      "ioc_value":"506708142bc63daba64f2d3ad1dcd5bf",
-      "feed_id":7,
-      "hostname": "FS-SEA-529",
-      "sensor_id": 3321,
-      "feed_name": "dxmtest1",
-      "event_timestamp": 1397244093.682
-    }
+  {
+    "md5":"C3489639EC8E181044F6C6BFD3D01AC9",
+    "docs":[
+        {"file_version":"6.1.7601.17514 (win7sp1_rtm.101119-1850)",
+        "product_name":"Microsoft Windows Operating System",
+        "is_executable_image":"false",
+        "digsig_result":"Signed",
+        "observed_filename":["c:\\windows\\system32\\sndvol.exe","C:\\Windows\\system32\\sndvol.exe"],
+        "os_type":"Windows",
+        "orig_mod_len":"273920",
+        "company_name":"Microsoft Corporation",
+        "server_added_timestamp":"Aug 9, 2014 5:27:56 PM",
+        "internal_name":"Volume Control Applet",
+        "copied_mod_len":"0",
+        "product_version":"6.1.7601.17514",
+        "digsig_sign_time":"2010-11-21T00:37:00.000Z",
+        "alliance_score_srstrust":"-100",
+        "digsig_result_code":"0",
+        "file_desc":"Volume Mixer",
+        "endpoint":"GAKKOR-LATITUDE|1",
+        "legal_copyright":"Microsoft Corporation. All rights reserved.",
+        "original_filename":"SndVol.exe",
+        "is_64bit":"true",
+        "md5":"C3489639EC8E181044F6C6BFD3D01AC9",
+        "digsig_publisher":"Microsoft Corporation",
+        "group":"Default Group"}
+    ],
+    "report_id":"c3489639ec8e181044f6c6bfd3d01ac9",
+    "ioc_type":"md5",
+    "ioc_value":"c3489639ec8e181044f6c6bfd3d01ac9",
+    "ioc_attr":{},
+    "hostname":"GAKKOR-LATITUDE",
+    "sensor_id":1,
+    "cb_version":"4.2.1.140811.1054",
+    "server_name":"localhost",
+    "feed_id":2,
+    "feed_name":"srstrust",
+    "event_timestamp":1407621575.945
+  }
 ```
 
 Notes: It can be up to 15 seconds from the time of the event generation until the document is visible via CBAPI or raw SOLR query.
