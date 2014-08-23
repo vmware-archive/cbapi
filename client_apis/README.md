@@ -160,7 +160,8 @@ The facet object is a list of dictionaries with the following keys.  Each key is
 Each facet result object has three values:
 - `name`: the facet value
 - `value`: the count of occurrences of this value
-- `percent`: the ratio of this value to the total set of values in the result set
+- `percent`: count / max(count) - the ratio of this value to the largest value in the result set
+- `ratio`: count / sum(count) - the ratio of this value to the sum of all values in the result set
 
 A complete example:
 
