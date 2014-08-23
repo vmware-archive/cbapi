@@ -309,6 +309,46 @@ class CbApi(object):
 
         return r.json()
 
+    def watchlist_add(self, type, name, search_query):
+        '''
+        adds a new watchlist
+        '''
+        request = {\
+                      'index_type': type,\
+                      'name': name,\
+                      'search_query': search_query\
+                  }
+
+        url = "%s/api/v1/watchlist" % (self.server,)
+
+        r = requests.post(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()  
+
+    def watchlist_del(self, id):
+        '''
+        deletes a watchlist
+        '''
+        request = {'id': id}
+
+        url = "%s/api/v1/watchlist/%s" % (self.server, id)
+        
+        r = requests.delete(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json() 
+
+    def watchlist_modify(self, id, watchlist):
+        '''
+        updates a watchlist
+        '''
+        url = "%s/api/v1/watchlist/%s" % (self.server, id)
+
+        r = requests.put(url, headers=self.token_header, data=json.dumps(watchlist), verify=self.ssl_verify)
+
+        return r.json()
+
     def feed_add_from_url(self, feed_url, enabled, validate_server_cert, use_proxy):
         '''
         add a new feed to the Carbon Black server, as specified by URL

@@ -81,7 +81,10 @@ class CBQuery(object):
         # IOC per request - you could build a large OR clause together with a few hundred
         # to efficiently and quickly check 1000s of IOCs, at the cost of increased complexity
         # when you discover a hit.
-
+        #
+        # note 2 - with a list of flat indicators, what you really want is a CB feed
+        # see http://github.com/carbonblack/cbfeeds
+        #
         for ioc in iocs:
             if CRON_INTERVAL:
                 q = "%s:%s and last_update:-%s" % (type, ioc, CRON_INTERVAL)
