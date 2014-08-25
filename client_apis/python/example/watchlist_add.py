@@ -10,7 +10,7 @@ sys.path.append('../src/cbapi')
 import cbapi 
 
 def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Add, Edit, and Delete a Watchlist")
+    parser = optparse.OptionParser(usage="%prog [options]", description="Add a watchlist")
 
     # for each supported output type, add an option
     #
@@ -18,6 +18,14 @@ def build_cli_parser():
                       help="CB server's URL.  e.g., http://127.0.0.1 ")
     parser.add_option("-a", "--apitoken", action="store", default=None, dest="token",
                       help="API Token for Carbon Black server")
+    parser.add_option("-q", "--query", action="store", default=None, dest="query",
+                      help="Watchlist query string, start with q=  e.g. q=process_name:notepad.exe")
+    parser.add_option("-t", "--type", action="store", default=None, dest="type",
+                      help="Watchlist type 'events' or 'modules'")
+    parser.add_option("-n", "--name", action="store", default=None, dest="name",
+                      help="Watchlist name")
+    parser.add_option("-i", "--id", action="store", default=None, dest="id",
+                      help="Watchlist ID (optional)")
     return parser
 
 def watchlist_output(watchlist):
@@ -41,8 +49,17 @@ def watchlist_output(watchlist):
 def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
-    if not opts.url or not opts.token:
+    if not opts.url or not opts.token or not opts.name or not opts.type or not opts.query:
         print "Missing required param; run with --help for usage"
+        sys.exit(-1)
+
+    # baseline argument validation
+    #
+    if opts.type != "events" and opts.type != "modules":
+        print "Watchlist type must be one of 'events' or 'modules'"
+        sys.exit(-1)
+    if not opts.query.startswith("q="):
+        print "Query must begin with q="
         sys.exit(-1)
 
     # build a cbapi object
@@ -53,7 +70,7 @@ def main(argv):
     # for the purposes of this test script, hardcode the watchlist type, name, and query string
     #
     print "-> Adding watchlist..."
-    watchlist = cb.watchlist_add('events', 'test watchlist', 'q=process_name:notepad.exe')
+    watchlist = cb.watchlist_add(opts.type, opts.name, opts.query, id=opts.id)
     print "-> Watchlist added [id=%s]" % (watchlist['id'])
 
     # get record describing this watchlist  
@@ -62,26 +79,6 @@ def main(argv):
     watchlist = cb.watchlist(watchlist['id'])
     print "-> Watchlist queried; details:" 
     watchlist_output(watchlist)
-
-    # edit the search query of the just-added watchlist
-    #
-    print "-> Modifying the watchlist query..."
-    watchlist['search_query'] = 'q=process_name:calc.exe'
-    cb.watchlist_modify(watchlist['id'], watchlist)
-    print "-> Watchlist modified" 
-
-    # get record describing this watchlist  
-    #
-    print "-> Querying for watchlist information..."
-    watchlist = cb.watchlist(watchlist['id'])
-    print "-> Watchlist queried; details:" 
-    watchlist_output(watchlist)
- 
-    # delete the just-added watchlist
-    #
-    print "-> Deleting Watchlist..."
-    cb.watchlist_del(watchlist['id'])
-    print "-> Watchlist deleted"
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

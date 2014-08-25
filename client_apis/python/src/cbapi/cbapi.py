@@ -309,7 +309,7 @@ class CbApi(object):
 
         return r.json()
 
-    def watchlist_add(self, type, name, search_query):
+    def watchlist_add(self, type, name, search_query, id=id):
         '''
         adds a new watchlist
         '''
@@ -318,6 +318,9 @@ class CbApi(object):
                       'name': name,\
                       'search_query': search_query\
                   }
+
+        if id is not None:
+          request['id'] = id
 
         url = "%s/api/v1/watchlist" % (self.server,)
 
