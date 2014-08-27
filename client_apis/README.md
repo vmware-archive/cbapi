@@ -187,7 +187,7 @@ GET http://192.168.206.151/api/v1/process/?q=notepad.exe
       "filemod_count": 10, 
       "id": "-3748189368838069954", 
       "unique_id": "cbfbc1a0-b782-e13e-0000-000000000001", 
-      "childproc_count": 7
+      "childproc_count": 7,
       "os_type: "windows"
     }, 
   ], 
@@ -262,7 +262,7 @@ GET http://192.168.206.154/api/v1/process/2032659773721368929/1
     "hostname": "WIN-EP7RMLTCLAJ", 
     "parent_id": "5856845119039539348", 
     "path": "c:\\windows\\system32\\taskhost.exe", 
-    "id": "2032659773721368929"
+    "id": "2032659773721368929",
     "os_type": "windows"
   }, 
   "siblings": [
@@ -277,7 +277,7 @@ GET http://192.168.206.154/api/v1/process/2032659773721368929/1
       "start": "2013-09-10T04:10:07Z", 
       "hostname": "WIN-EP7RMLTCLAJ", 
       "path": "c:\\windows\\system32\\svchost.exe", 
-      "id": "5286285292765095481"
+      "id": "5286285292765095481",
       "os_type": "windows"
     }, 
   ], 
@@ -293,7 +293,7 @@ GET http://192.168.206.154/api/v1/process/2032659773721368929/1
     "start": "2013-09-10T04:09:51Z", 
     "hostname": "WIN-EP7RMLTCLAJ", 
     "path": "c:\\windows\\system32\\services.exe", 
-    "id": "5856845119039539348"
+    "id": "5856845119039539348",
     "os_type": "windows"
   }
 }
@@ -629,7 +629,7 @@ GET http://192.168.206.151/api/binary?q=notepad.exe
       "server_added_timestamp": "2013-08-16T11:26:48.321Z", 
       "legal_copyright": "\u00a9 Microsoft Corporation. All rights reserved.", 
       "original_filename": "NOTEPAD.EXE", 
-      "file_desc": "Notepad"
+      "file_desc": "Notepad",
       "os_type": "windows"
     }
   ],
