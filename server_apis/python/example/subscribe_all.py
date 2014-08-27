@@ -6,8 +6,6 @@ import optparse
 
 def on_message(channel, method_frame, header_frame, body):
 
-
-
     try:
 
         print method_frame.routing_key
@@ -20,7 +18,6 @@ def on_message(channel, method_frame, header_frame, body):
             print header_frame.content_type
         #pprint.pprint(body)
         print
-        #channel.basic_ack(delivery_tag=method_frame.delivery_tag)
 
     except Exception, e:
         print e
@@ -68,7 +65,7 @@ if __name__ == "__main__":
 
     channel.queue_bind(exchange='api.events', queue=queue_name, routing_key='#')
 
-    channel.basic_consume(on_message, queue=queue_name)
+    channel.basic_consume(on_message, queue=queue_name, no_ack=True)
    
     print "-> Subscribed!"
  
