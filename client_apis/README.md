@@ -135,6 +135,7 @@ A process contains the following fields:
 - `id`: the internal CB process GUID for this process (processes are identified by this GUID and their segment id)
 - `segment_id`: the process segment id (processes are identified by this segment id and their process ID id)
 - `unique_id`: internal CB process id combining of the process GUID and segment GUID
+- `os_type`: operating system type of the computer for this process; one of windows, linux, osx
 
 *Event Object*
 
@@ -187,6 +188,7 @@ GET http://192.168.206.151/api/v1/process/?q=notepad.exe
       "id": "-3748189368838069954", 
       "unique_id": "cbfbc1a0-b782-e13e-0000-000000000001", 
       "childproc_count": 7
+      "os_type: "windows"
     }, 
   ], 
   "terms": [
@@ -240,7 +242,7 @@ Each process summary object contains the following structure:
 - `hostname`: the hostname of the computer this process executed on
 - `id`: the internal CB process guid of this process
 - `segment_id`: the segment id of this process
-
+- `os_type`: operating system type of the computer for this process; one of windows, linux, osx
 
 A complete example:
 
@@ -261,6 +263,7 @@ GET http://192.168.206.154/api/v1/process/2032659773721368929/1
     "parent_id": "5856845119039539348", 
     "path": "c:\\windows\\system32\\taskhost.exe", 
     "id": "2032659773721368929"
+    "os_type": "windows"
   }, 
   "siblings": [
     {
@@ -275,6 +278,7 @@ GET http://192.168.206.154/api/v1/process/2032659773721368929/1
       "hostname": "WIN-EP7RMLTCLAJ", 
       "path": "c:\\windows\\system32\\svchost.exe", 
       "id": "5286285292765095481"
+      "os_type": "windows"
     }, 
   ], 
   "children": [], 
@@ -290,6 +294,7 @@ GET http://192.168.206.154/api/v1/process/2032659773721368929/1
     "hostname": "WIN-EP7RMLTCLAJ", 
     "path": "c:\\windows\\system32\\services.exe", 
     "id": "5856845119039539348"
+    "os_type": "windows"
   }
 }
 ```
@@ -329,6 +334,7 @@ The process object may contain the following entries.
 - `modload_complete`: a pipe-delimited list of modload strings
 - `netconn_complete`: a pipe-delimited list of netconn strings
 - `childproc_complete`: a pipe-delimited list of childproc strings
+- `os_type`: operating system type of the computer for this process; one of windows, linux, osx
 
 Each xxx_complete record is a string similar to:
 
@@ -393,7 +399,8 @@ GET http://192.168.206.154/api/v1/process/2032659773721368929/1/event
   "group": "Default Group", 
   "start": "2013-09-19T22:07:07Z",
   "process_name": "taskhost.exe", 
-  "segment_id": 1, 
+  "segment_id": 1,
+  "os_type": "windows",
   "regmod_complete": [
         "2|2013-09-19 22:07:07.000000|\\registry\\user\\s-1-5-19\\software\\microsoft\\sqmclient\\reliability\\adaptivesqm\\manifestinfo\\version", 
         "2|2013-09-19 22:09:07.000000|\\registry\\machine\\software\\microsoft\\reliability analysis\\rac\\wmilasttime"
@@ -467,6 +474,7 @@ A process preview structure with the following fields:
 - `filemod_count`: the **total** count of file modifications in this process
 - `netconn_count`: **total** count of network connections in this process
 - `childproc_count`: the **total** count of child processes launched by this process
+- `os_type`: operating system type of the computer for this process; one of windows, linux, osx
 
 If a query string is provided, the endpoint will highlight all matching strings.  Highlighted results will 
 be surrounded with `PREPREPRE` and `POSTPOSTPOST` to designate the start and end of a matching substring.
@@ -506,7 +514,8 @@ GET http://192.168.206.132/api/v1/process/7078511340675742078/1/preview/?q=windo
   "filemod_count": 0, 
   "segment": "", 
   "id": "7078511340675742078", 
-  "unique_id": "623bec8f-8f8d-397e-0000-000000000001"
+  "unique_id": "623bec8f-8f8d-397e-0000-000000000001",
+  "os_type": "windows"
 }
 
 ```
@@ -566,6 +575,8 @@ A binary object contains the following fields:
 - `digsig_issuer`: If signed and present, the issuer name
 - `digsig_subject`: If signed and present, the subject
 - `alliance_score_virustotal`: If enabled and the hit count > 1, the number of [VirusTotal](http://virustotal.com) hits for this md5
+- `os_type`: operating system type of the computer for this process; one of windows, linux, osx
+
  
 *Facet object* 
 
@@ -619,6 +630,7 @@ GET http://192.168.206.151/api/binary?q=notepad.exe
       "legal_copyright": "\u00a9 Microsoft Corporation. All rights reserved.", 
       "original_filename": "NOTEPAD.EXE", 
       "file_desc": "Notepad"
+      "os_type": "windows"
     }
   ],
   "terms": [
@@ -711,6 +723,8 @@ A structure with the following fields:
 - `alliance_score_*`: 0 or more other scores, applied by configuring feeds.
 - `endpoint`: list of 0 or more hostname,sensorid tuples on which this binary was observed.  The | character serves as the delimiter between the hostname and the sensorid.
 - `group`: list of 0 or more sensor groups (by name) in which this binary was observed
+- `os_type`: operating system type of the computer for this process; one of windows, linux, osx
+
 
 A complete example:
 
@@ -750,6 +764,7 @@ GET http://192.168.206.154/api/binary/1C8B787BAA52DEAD1A6FEC1502D652f0/summary
   "digsig_publisher_facet": "Microsoft Corporation", 
   "original_filename": "MSHTML.DLL.MUI", 
   "file_desc": "Microsoft (R) HTML Viewer",
+  "os_type": "windows",
   "group": [
     "Default Group",
     "Domain Controllers"
