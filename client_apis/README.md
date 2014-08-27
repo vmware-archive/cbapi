@@ -130,6 +130,7 @@ A process contains the following fields:
 - `filemod_count`: the count of file modifications in this process
 - `netconn_count`: count of network connections in this process
 - `childproc_count`: the count of child processes launched by this process
+- `crossproc_count`: the count of cross process events launched by this process
 - `group`: the CB Host group this sensor is assigned to 
 - `sensor_id`: the internal CB id for the sensor on which the process executed
 - `id`: the internal CB process GUID for this process (processes are identified by this GUID and their segment id)
@@ -334,6 +335,7 @@ The process object may contain the following entries.
 - `modload_complete`: a pipe-delimited list of modload strings
 - `netconn_complete`: a pipe-delimited list of netconn strings
 - `childproc_complete`: a pipe-delimited list of childproc strings
+- `crossproc_complete`: a pipe-delimited list of crossproc string
 - `os_type`: operating system type of the computer for this process; one of windows, linux, osx
 
 Each xxx_complete record is a string similar to:
@@ -346,7 +348,7 @@ The pipe character (`|`) delimits the fields.
 
 ##### filemod_complete
 ```
-"1|2013-09-16 07:11:58.000000|c:\\documents and settings\\administrator\\local settings\\temp\\hsperfdata_administrator\\3704|"
+"1|2013-09-16 07:11:58.000000|c:\\documents and settings\\administrator\\local settings\\temp\\hsperfdata_administrator\\3704|||false"
 ```
 - field 0: operation type, an integer 1, 2, 4 or 8
   - 1: Created the file
@@ -356,6 +358,21 @@ The pipe character (`|`) delimits the fields.
 - field 1: event time
 - field 2: file path
 - field 3: if operation type (field 0) is 8, last write, this value is the md5 of the file after the last write
+- field 4: file type, if known, an integer
+  - 1: PE
+  - 2: Elf
+  - 3: UniversalBin
+  - 8: EICAR
+  - 16: OfficeLegacy
+  - 17: OfficeOpenXml
+  - 48: Pdf
+  - 64: ArchivePkzip
+  - 65: ArchiveLzh
+  - 66: ArchiveLzw
+  - 67: ArchiveRar
+  - 68: ArchiveTar
+  - 69: Archive7zip
+- field 5: boolean "true" if event is flagged as potential tamper attempt; "false" otherwise
 
 ##### modload_complete
 ```
@@ -387,6 +404,32 @@ The pipe character (`|`) delimits the fields.
 - field 3: protocol: 6 is TCP, 17 is UDP
 - field 4: domain name associated with the IP address, from the client's perspective at the time of the network connection
 - field 5: boolean "true" if the connection was outbound; "false" if the connection was inbound
+
+##### childproc_complete
+```
+"2014-01-23 09:19:08.331|8832db0c-6b84-fc4b-0000-000000000001|51138beea3e2c21ec44d0932c71762a8|c:\windows\system32\rundll32.exe|6980|true|false"
+```
+- field 0: event time
+- field 1: unique_id of the child process
+- field 2: md5 of the child process
+- field 3: path of the child process
+- field 4: PID of child process
+- field 5: boolean "true" if child process started; "false" if terminated
+- field 6: boolean "true" if event is flagged as potential tamper attempt; "false" otherwise
+- 
+##### crossproc_complete
+```
+"ProcessOpen|2014-01-23 09:19:08.331|00000177-0000-0258-01cf-c209d9f1c431|204f3f58212b3e422c90bd9691a2df28|c:\windows\system32\lsass.exe|1|2097151|false"
+```
+- field 0: type of cross-process access: RemoteThread if remote thread creation; ProcessOpen if process handle open with access privileges
+- field 1: event time
+- field 2: unique_id of the targeted process
+- field 3: md5 of the targeted process
+- field 4: path of the targeted process
+- field 5: sub-type for ProcessOpen, "1" for handle open to process; "2" for handle open to thread in process
+- field 6: requested access priviledges
+- field 7: boolean "true" if event is flagged as potential tamper attempt; "false" otherwise
+
 
 A complete example:
 
@@ -469,11 +512,13 @@ A process preview structure with the following fields:
 - `modload_complete`: a pipe-delimited **summary** list of modload strings (see spec above)
 - `netconn_complete`: a pipe-delimited **summary** list of netconn strings (see spec above)
 - `childproc_complete`: a pipe-delimited list of **summary** childproc strings (see spec above)
+- `crossproc_complete`: a pipe-delimited list of **summary** crossproc string (see spec above)
 - `modload_count`: the **total** count of modules loaded in this process
 - `regmod_count`: the **total** count of registry modifications in this process
 - `filemod_count`: the **total** count of file modifications in this process
 - `netconn_count`: **total** count of network connections in this process
 - `childproc_count`: the **total** count of child processes launched by this process
+- `crossproc_count`: the **total** count of cross process events launched by this process
 - `os_type`: operating system type of the computer for this process; one of windows, linux, osx
 
 If a query string is provided, the endpoint will highlight all matching strings.  Highlighted results will 
