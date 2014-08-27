@@ -815,6 +815,10 @@ Watchlist enumeration, creation, modification, and deletion
 ##### Parameters:
 - `id`: OPTIONAL the watchlist id
 
+##### Notes
+
+- Using the optional 'id' parameter, a caller may create a watchlist with a specific, known id.  This can be useful as the watchlist id is included as part of the underlying process or binary document and therefore can be used as as search criteria.
+
 ##### Returns
 
 - With no id parameter (`GET /api/v1/watchlist`) returns a list of watchlists, with each list entry describing one watchlist
