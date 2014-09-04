@@ -309,14 +309,15 @@ class CbApi(object):
 
         return r.json()
 
-    def watchlist_add(self, type, name, search_query, id=id):
+    def watchlist_add(self, type, name, search_query, id=id, readonly=False):
         '''
         adds a new watchlist
         '''
         request = {\
                       'index_type': type,\
                       'name': name,\
-                      'search_query': search_query\
+                      'search_query': search_query,\
+                      'readonly': readonly\
                   }
 
         if id is not None:

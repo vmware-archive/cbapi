@@ -26,6 +26,8 @@ def build_cli_parser():
                       help="Watchlist name")
     parser.add_option("-i", "--id", action="store", default=None, dest="id",
                       help="Watchlist ID (optional)")
+    parser.add_option("-r", "--readonly", action="store_true", default=False, dest="readonly",
+                      help="When set, marks the new watchlist as 'read-only' so that it cannot be deleted from the console")
     return parser
 
 def watchlist_output(watchlist):
@@ -71,7 +73,7 @@ def main(argv):
     # for the purposes of this test script, hardcode the watchlist type, name, and query string
     #
     print "-> Adding watchlist..."
-    watchlist = cb.watchlist_add(opts.type, opts.name, opts.query, id=opts.id)
+    watchlist = cb.watchlist_add(opts.type, opts.name, opts.query, id=opts.id, readonly=opts.readonly)
     print "-> Watchlist added [id=%s]" % (watchlist['id'])
 
     # get record describing this watchlist  
