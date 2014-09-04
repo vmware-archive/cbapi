@@ -44,6 +44,7 @@ def watchlist_output(watchlist):
     print '    %-20s | %s' % ('last_hit', watchlist['last_hit'])
     print '    %-20s | %s' % ('last_hit_count', watchlist['last_hit_count'])
     print '    %-20s | %s' % ('search_query', watchlist['search_query'])
+    print '    %-20s | %s' % ('readonly', watchlist['readonly'])
     print '\n'
 
 def main(argv):
