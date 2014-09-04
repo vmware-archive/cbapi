@@ -51,6 +51,7 @@ def main(argv):
     print '%-20s | %s' % ('last_hit', watchlist['last_hit'])
     print '%-20s | %s' % ('last_hit_count', watchlist['last_hit_count'])
     print '%-20s | %s' % ('search_query', watchlist['search_query'])
+    print '%-20s | %s' % ('readonly', watchlist['readonly'])
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
