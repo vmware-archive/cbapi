@@ -36,7 +36,8 @@ The following APIs are versioned.
 - [`/api/v1/sensor`](#apiv1sensoridhostnamehostnameipipaddr) - Sensor details
 - [`/api/v1/group/<groupid>/installer/windows/exe`](#windowsexeinstaller) - Signed EXE Sensor Installer for Windows
 - [`/api/v1/group/<groupid>/installer/windows/msi`](#windowsmsiinstaller) - Signed MSI Sensor Installer for Windows
-
+- [`/api/v1/group/<groupid>/installer/osx`](#osxinstaller) - PKG Sensor Installer for OSX
+- [`/api/v1/group/<groupid>/installer/linux`](#linuxinstaller) - Sensor Installer for Linux
 #### Watchlists
 - [`/api/v1/watchlist`](#apiv1watchlist) - Watchlist enumeration, addition, modification, and deletion
 
@@ -1026,3 +1027,30 @@ None
 
 - ZIP archive including a signed Windows MSI sensor installer and settings file  
 
+-----
+
+####  `/api/v1/group/<groupid>/installer/osx`
+Download a zip archive including a signed OSX PKG sensor installer
+
+*Supports*: `GET`
+
+##### Parameters:
+None
+
+##### Returns:
+
+- ZIP archive including a signed OSX PKG sensor installer and settings file
+
+------
+
+#### `/api/v1/group/<groupid>/installer/linux`
+Download a zip archive including a Linux sensor installer
+
+*Supports*: `GET`
+
+##### Parameters:
+None
+
+##### Returns:
+
+- ZIP archive including a Linux sensor installer and settings file
