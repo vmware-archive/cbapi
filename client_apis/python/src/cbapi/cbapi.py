@@ -270,7 +270,7 @@ class CbApi(object):
         get sensor installer package for a specified sensor group
 
         group_id - the group_id to download an installer for; defaults to 1 "Default Group"
-        type - the sensor installer type.  [WindowsEXE|WindowsMSI]
+        type - the sensor installer type.  [WindowsEXE|WindowsMSI|OSX|Linux]
         """
 
         # set up a mapping of types to REST endpoints
@@ -278,12 +278,14 @@ class CbApi(object):
         mapping = {\
                     'WindowsEXE': '/api/v1/group/%s/installer/windows/exe' % (group_id,),\
                     'WindowsMSI': '/api/v1/group/%s/installer/windows/msi' % (group_id,),\
+                    'OSX':        '/api/v1/group/%s/installer/osx' % (group_id,),\
+                    'Linux':      '/api/v1/group/%s/installer/linux' % (group_id,),\
                   }
 
         # verify that the type parameter is a known value
         #
         if not mapping.has_key(type):
-            raise ValueError("Unrecognized type '%s'; should be one of 'WindowsEXE' or 'WindowsMSI'" % (type,))
+            raise ValueError("Unrecognized type '%s'; should be one of 'WindowsEXE', 'WindowsMSI', 'OSX', or 'Linux'" % (type,))
 
         # build the fully-qualified URL
         #
