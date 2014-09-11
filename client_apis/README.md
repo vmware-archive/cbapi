@@ -1041,6 +1041,10 @@ None
 
 - ZIP archive including a signed OSX PKG sensor installer and settings file
 
+##### Notes:
+
+- Requires Carbon Black Enterprise Server 4.2.1 or greater
+
 ------
 
 #### `/api/v1/group/<groupid>/installer/linux`
@@ -1054,3 +1058,7 @@ None
 ##### Returns:
 
 - ZIP archive including a Linux sensor installer and settings file
+
+##### Notes:
+
+- Requires Carbon Black Enterprise Server 4.2.1 or greater
