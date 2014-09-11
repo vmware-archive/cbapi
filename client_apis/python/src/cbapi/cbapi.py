@@ -374,6 +374,10 @@ class CbApi(object):
     def feed_synchronize(self, name, full_sync=True):
         '''
         force the synchronization of a feed
+        
+        this triggers the CB server to refresh the feed.  it does not result in immediate
+        tagging of any existing process or binary documents that match the feed.  it does result
+        in any new incoming data from sensors being tagged on ingress.
         '''
 
         feed_request = requests.get("%s/api/v1/feed" % self.server, headers=self.token_header, verify=self.ssl_verify)
@@ -394,4 +398,6 @@ class CbApi(object):
                     raise Exception("Unexpected response from /api/v1/feed/%s/synchronize: %s"
                                     % (feed['id'], sync_request.status_code))
 
-        return r.json()
+                return r.json()
+
+        raise Exception("No such feed %s" % (name,))
