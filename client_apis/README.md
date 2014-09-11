@@ -1058,7 +1058,7 @@ None
 
 ##### Returns:
 
-- ZIP archive including a Linux sensor installer and settings file
+- compressed tarball (tar.gz) archive including a Linux sensor installer and settings file
 
 ##### Notes:
 
