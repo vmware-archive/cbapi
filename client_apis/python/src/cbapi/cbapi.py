@@ -373,6 +373,38 @@ class CbApi(object):
 
         return r.json()
 
+    def feed_get_id_by_name(self, name):
+        '''
+        helper function to find the feed id given the feed name
+        '''
+
+        for feed in self.feed_enum():
+            if feed['name'].lower() == name.lower():
+                return feed['id']
+
+    def feed_enum(self):
+        '''
+        enumerate all configured feeds
+        '''
+
+        url = "%s/api/v1/feed" % (self.server,)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def feed_info(self, id):
+        '''
+        retrieve information about an existing feed, as specified by id 
+        
+        note: the endpoint /api/v1/feed/<id> is not supported as of CB server 5.0
+        '''
+        feeds = self.feed_enum()
+        for feed in feeds:
+          if str(feed['id']) == str(id):
+              return feed 
+        
     def feed_synchronize(self, name, full_sync=True):
         '''
         force the synchronization of a feed
