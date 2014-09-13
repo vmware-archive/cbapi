@@ -20,7 +20,8 @@ def build_cli_parser():
                       help="API Token for Carbon Black server")
     parser.add_option("-f", "--feedname", action="store", default=None, dest="feedname",
                       help="Feed Name")
-
+    parser.add_option("-i", "--id", action="store", default=None, dest="feedid",
+                      help="Feed Id")
     return parser
 
 def output_feed_info(feed):
@@ -35,18 +36,22 @@ def output_feed_info(feed):
 def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
-    if not opts.server_url or not opts.token or not opts.feedname:
+    if not opts.server_url or not opts.token or (not opts.feedname and not opts.feedid):
       print "Missing required param; run with --help for usage"
+      print "One of -f or -i must be specified"
       sys.exit(-1)
 
     # build a cbapi object
     #
     cb = cbapi.CbApi(opts.server_url, token=opts.token)
 
-    id = cb.feed_get_id_by_name(opts.feedname)
-    if id is None:
-      print "-> No configured feed with name '%s' found!" % (opts.feedname) 
-      return
+    if not opts.feedid:
+      id = cb.feed_get_id_by_name(opts.feedname)
+      if id is None:
+        print "-> No configured feed with name '%s' found!" % (opts.feedname) 
+        return
+    else:
+      id = opts.feedid
 
     output_feed_info(cb.feed_info(id))
 
