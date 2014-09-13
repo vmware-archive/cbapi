@@ -404,6 +404,17 @@ class CbApi(object):
         for feed in feeds:
           if str(feed['id']) == str(id):
               return feed 
+
+    def feed_del(self, id):
+        '''
+        delete a feed, as specified by id
+        '''
+        url = "%s/api/v1/feed/%s" % (self.server, id)
+
+        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
         
     def feed_synchronize(self, name, full_sync=True):
         '''
