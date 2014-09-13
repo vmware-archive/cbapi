@@ -25,8 +25,6 @@ def build_cli_parser():
     return parser
 
 def output_feed_info(feed):
-    print feed.keys()
-
     print "%s" % (feed['name'])
     print "%s" % ('-' * 80,)
     for key in feed.keys():
