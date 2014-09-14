@@ -46,17 +46,14 @@ class CbApi(object):
                 - version - version of the Carbon Black Enterprise Server
         """
         r = requests.get("%s/api/info" % self.server, headers=self.token_header, verify=self.ssl_verify)
-        if r.status_code != 200:
-            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+        r.raise_for_status()
         return json.loads(r.content)
 
     def license_status(self):
         """ Provide a summary of the current applied license
         """
         r = requests.get("%s/api/v1/license" % (self.server,),  headers=self.token_header, verify=self.ssl_verify)
-        if r.status_code != 200:
-            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
-
+        r.raise_for_status()
         return json.loads(r.content)
 
     def apply_license(self, license):
@@ -65,8 +62,7 @@ class CbApi(object):
         r = requests.post("%s/api/v1/license" % (self.server,), headers=self.token_header, \
                 data=json.dumps({'license': license}), \
                 verify=self.ssl_verify)
-        if r.status_code != 200:
-            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+        r.raise_for_status()
 
     def get_platform_server_config(self):
         """ Get Bit9 Platform Server configuration
@@ -80,9 +76,7 @@ class CbApi(object):
         r = requests.get("%s/api/v1/settings/global/platformserver" % (self.server,), \
                                                                        headers=self.token_header, \
                                                                        verify=self.ssl_verify)
-        if r.status_code != 200:
-            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
-
+        r.raise_for_status()
         return json.loads(r.content)
 
     def set_platform_server_config(self, platform_server_config):
@@ -99,8 +93,7 @@ class CbApi(object):
         r = requests.post("%s/api/v1/settings/global/platformserver" % (self.server,), \
                                                                         headers=self.token_header, \
                                                                         data = json.dumps(platform_server_config))
-        if r.status_code != 200:
-            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+        r.raise_for_status()
 
     def process_search(self, query_string, start=0, rows=10, sort="last_update desc"):
         """ Search for processes.  Arguments: 
@@ -142,8 +135,7 @@ class CbApi(object):
         #
         r = requests.post("%s/api/v1/process" % self.server, headers=self.token_header,
                           data=json.dumps(params), verify=self.ssl_verify)
-        if r.status_code != 200:
-            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+        r.raise_for_status()
         return r.json()
 
     def process_summary(self, id, segment, children_count=15):
@@ -158,25 +150,21 @@ class CbApi(object):
                 - siblings - a list of metadata structures for sibling processes
         """
         r = requests.get("%s/api/v1/process/%s/%s?children=%d" % (self.server, id, segment, children_count), headers=self.token_header, verify=self.ssl_verify)
-        if r.status_code != 200:
-            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+        r.raise_for_status()
         return r.json()
 
     def process_events(self, id, segment):
         """ get all the events (filemods, regmods, etc) for a process.  Requires the 'id' and 'segment_id' fields
             from a process search result"""
         r = requests.get("%s/api/v1/process/%s/%s/event" % (self.server, id, segment), headers=self.token_header, verify=self.ssl_verify)
-        if r.status_code != 200:
-            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+        r.raise_for_status()
         return r.json()
 
     def process_report(self, id, segment=0):
         """ download a "report" package describing the process
             the format of this report is subject to change"""
         r = requests.get("%s/api/v1/process/%s/%s/report" % (self.server, id, segment), headers=self.token_header, verify=self.ssl_verify)
-        if r.status_code != 200:
-            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
-        
+        r.raise_for_status() 
         return r.content
 
     def binary_search(self, query_string, start=0, rows=10, sort="server_added_timestamp desc"):
@@ -219,8 +207,7 @@ class CbApi(object):
         # @note GET is also supported through the use of a query string
         r = requests.post("%s/api/v1/binary" % self.server, headers=self.token_header,
                           data=json.dumps(params), verify=self.ssl_verify)
-        if r.status_code != 200:
-            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+        r.raise_for_status()
         return r.json()
 
     def binary_summary(self, md5):
@@ -240,8 +227,7 @@ class CbApi(object):
         r = requests.get("%s/api/v1/binary/%s" % (self.server, md5hash),
                          headers=self.token_header, verify=self.ssl_verify)
 
-        if r.status_code != 200:
-            raise Exception("Unexpected response from /api/v1/binary: %s" % (r.status_code))
+        r.raise_for_status()
         return r._content
 
     def sensors(self, query_parameters={}):
@@ -260,8 +246,7 @@ class CbApi(object):
             url += "%s=%s&" % (query_parameter, query_parameters[query_parameter])
 
         r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
-        if r.status_code != 200:   
-            raise Exception("Unexpected response from /api/sensor: %s" % (r.status_code))
+        r.raise_for_status()
         return r.json()
 
     def sensor_installer(self, type, group_id=1):
@@ -305,9 +290,7 @@ class CbApi(object):
             url = url + "/%s" % (id,)
 
         r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
-        if r.status_code != 200:
-            raise Exception("Unexpected response from %s: %s" % (url, r.status_code))
-
+        r.raise_for_status()
         return r.json()
 
     def watchlist_add(self, type, name, search_query, id=id, readonly=False):
@@ -425,8 +408,7 @@ class CbApi(object):
         '''
 
         feed_request = requests.get("%s/api/v1/feed" % self.server, headers=self.token_header, verify=self.ssl_verify)
-        if feed_request.status_code != 200:
-            raise Exception("Unexpected response from /api/v1/feed: %s" % feed_request.status_code)
+        feed_request.raise_for_status()
 
         for feed in feed_request.json():
             if feed['name'] == name:
