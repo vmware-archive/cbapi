@@ -229,8 +229,7 @@ class CbApi(object):
             Returns a python dictionary with the binary metadata. """
         r = requests.get("%s/api/v1/binary/%s/summary" % (self.server, md5),
                              headers=self.token_header, verify=self.ssl_verify)
-        if r.status_code != 200:
-            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+        r.raise_for_status()
         return r.json()
 
     def binary(self, md5hash):

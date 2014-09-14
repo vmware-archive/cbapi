@@ -10,7 +10,7 @@ sys.path.append('../src/cbapi')
 import cbapi 
 
 def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Dump Binary Info")
+    parser = optparse.OptionParser(usage="%prog [options]", description="Perform a binary search")
 
     # for each supported output type, add an option
     #
