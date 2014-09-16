@@ -102,7 +102,7 @@ def build_cli_parser():
     parser.add_option("-a", "--apitoken", action="store", default=None, dest="token",
                       help="API Token for Carbon Black server")
     parser.add_option("-f", "--filelist", action="store", default=None, dest="filelist",
-                      help="Endpoint hostname to query for network traffic")
+                      help="Filename containing list of newline-delimited filenames to check for modifications")
     parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
                       help="Do not verify server SSL certificate.")
     return parser
