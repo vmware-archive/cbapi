@@ -1,7 +1,6 @@
 import sys
 import struct
 import socket
-import pprint
 import optparse 
 
 # in the github repo, cbapi is not in the example directory
@@ -38,13 +37,17 @@ def main(argv):
     #
     cb = cbapi.CbApi(opts.server_url, token=opts.token)
 
-    #   
+    # add the feed.  The feed metadata (name, icon, etc.) will be pulled from
+    # the feed itself  
     #
     results = cb.feed_add_from_url(opts.feed_url, opts.enabled, opts.validate_server_cert, opts.use_proxy)
 
-    del(results["icon"])
-
-    pprint.pprint(results)
+    print
+    print "-> Feed added [id=%s]" % (results['id'])
+    print "   -------------------------"
+    print "   Name     : %s" % (results['name'],)
+    print "   Display  : %s" % (results['display_name'],)
+    print
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
