@@ -10,7 +10,7 @@ sys.path.append('../src/cbapi')
 import cbapi 
 
 def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Enumerate all configured feeds")
+    parser = optparse.OptionParser(usage="%prog [options]", description="Enumerate all reports in a configured feed")
 
     # for each supported output type, add an option
     #
@@ -18,13 +18,14 @@ def build_cli_parser():
                       help="CB server's URL.  e.g., http://127.0.0.1 ")
     parser.add_option("-a", "--apitoken", action="store", default=None, dest="token",
                       help="API Token for Carbon Black server")
-
+    parser.add_option("-i", "--id", action="store", default=None, dest="id",
+                      help="Id of feed of which to enumerate reports")
     return parser
 
 def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
-    if not opts.server_url or not opts.token:
+    if not opts.server_url or not opts.token or not opts.id:
       print "Missing required param; run with --help for usage"
       sys.exit(-1)
 
@@ -34,17 +35,17 @@ def main(argv):
 
     # enumerate configured feeds
     #
-    feeds = cb.feed_enum()
+    reports = cb.feed_report_enum(opts.id)
 
     # output a banner
     #
-    print "%-3s  %-15s   %-8s   %s" % ("Id", "Name", "Enabled", "Url")
-    print "%s+%s+%s+%s" % ("-"*3, "-"*17, "-"*10, "-"*31)
+    print "%-33s  %-5s   %-8s" % ("Report Id", "Score", "Timestamp")
+    print "%s+%s+%s" % ("-"*33, "-"*7, "-"*12)
 
-    # output a row about each feed
+    # output a row about each report 
     #
-    for feed in feeds:
-        print "%-3s| %-15s | %-8s | %s" % (feed['id'], feed['name'], feed['enabled'], feed['feed_url'])
+    for report in reports:
+        print "%-33s| %-5s | %-8s" % (report['id'], report['score'], report['timestamp'])
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

@@ -427,3 +427,21 @@ class CbApi(object):
                 return r.json()
 
         raise Exception("No such feed %s" % (name,))
+
+    def feed_report_enum(self, id):
+        '''
+        enumerate all reports for an existing feed
+
+        note that this will enumerate only the reports that are available on
+        the Carbon Black server.  If the feed source has changed since the
+        last time the feed was synchronized, these reports may be out-of-date.
+
+        use feed_synchronize to force a feed synchronization
+        '''
+
+        url = "%s/api/v1/feed/%s/report" % (self.server, id)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
