@@ -18,6 +18,8 @@ def build_cli_parser():
                       help="CB server's URL.  e.g., http://127.0.0.1 ")
     parser.add_option("-a", "--apitoken", action="store", default=None, dest="token",
                       help="API Token for Carbon Black server")
+    parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
+                      help="Do not verify server SSL certificate.")
     parser.add_option("-q", "--query", action="store", default=None, dest="query",
                       help="binary query")
     return parser
@@ -31,7 +33,7 @@ def main(argv):
 
     # build a cbapi object
     #
-    cb = cbapi.CbApi(opts.url, token=opts.token)
+    cb = cbapi.CbApi(opts.url, token=opts.token, ssl_verify=opts.ssl_verify)
 
     # perform a single binary search
     #

@@ -18,6 +18,8 @@ def build_cli_parser():
                       help="CB server's URL.  e.g., http://127.0.0.1 ")
     parser.add_option("-a", "--apitoken", action="store", default=None, dest="token",
                       help="API Token for Carbon Black server")
+    parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
+                      help="Do not verify server SSL certificate.")
     return parser
 
 def main(argv):
@@ -32,7 +34,7 @@ def main(argv):
 
     # build a cbapi object
     #
-    cb = cbapi.CbApi(opts.url, token=opts.token)
+    cb = cbapi.CbApi(opts.url, token=opts.token, ssl_verify=opts.ssl_verify)
 
     # retrieving large result sets requires paging
     # the 'rows' variable controls the page size

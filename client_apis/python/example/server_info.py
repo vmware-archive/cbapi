@@ -18,6 +18,8 @@ def build_cli_parser():
                       help="CB server's URL.  e.g., http://127.0.0.1 ")
     parser.add_option("-a", "--apitoken", action="store", default=None, dest="token",
                       help="API Token for Carbon Black server")
+    parser.add_option("-v", "--verifyservercert", action="store_true", default=False, dest="ssl_verify",
+                      help="Perform SSL certificate verificaton of the server cert (applies when using https CB server urls)")
     return parser
 
 def output_info(server, info):
@@ -35,7 +37,7 @@ def main(argv):
 
     # build a cbapi object
     #
-    cb = cbapi.CbApi(opts.server_url, token=opts.token)
+    cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
 
     output_info(opts.server_url, cb.info())
 

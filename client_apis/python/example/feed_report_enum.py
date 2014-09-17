@@ -20,6 +20,8 @@ def build_cli_parser():
                       help="API Token for Carbon Black server")
     parser.add_option("-i", "--id", action="store", default=None, dest="id",
                       help="Id of feed of which to enumerate reports")
+    parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
+                      help="Do not verify server SSL certificate.")
     return parser
 
 def main(argv):
@@ -31,7 +33,7 @@ def main(argv):
 
     # build a cbapi object
     #
-    cb = cbapi.CbApi(opts.server_url, token=opts.token)
+    cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
 
     # enumerate configured feeds
     #

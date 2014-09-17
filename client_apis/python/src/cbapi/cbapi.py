@@ -45,6 +45,7 @@ class CbApi(object):
             Returns a python dictionary with the following field:
                 - version - version of the Carbon Black Enterprise Server
         """
+        print self.ssl_verify
         r = requests.get("%s/api/info" % self.server, headers=self.token_header, verify=self.ssl_verify)
         r.raise_for_status()
         return json.loads(r.content)

@@ -18,6 +18,8 @@ def build_cli_parser():
                       help="CB server's URL.  e.g., http://127.0.0.1 ")
     parser.add_option("-a", "--apitoken", action="store", default=None, dest="token",
                       help="API Token for Carbon Black server")
+    parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
+                      help="Do not verify server SSL certificate.")
     parser.add_option("-u", "--server-url", action="store", default=None, dest="server_url",
                       help="Specify the URL of the configured Bit9 Platform Server")
     parser.add_option("-s", "--ssl-cert-verify", action="store", default=None, dest="ssl_cert_verify",
@@ -50,7 +52,7 @@ def main(argv):
 
     # build a cbapi object
     #
-    cb = cbapi.CbApi(opts.url, token=opts.token)
+    cb = cbapi.CbApi(opts.url, token=opts.token, ssl_verify=opts.ssl_verify)
 
     # if none of the four "set" parameters are provided,
     # query for the existing Bit9 Platform Server configuration  
