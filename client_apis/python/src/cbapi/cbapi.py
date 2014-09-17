@@ -445,3 +445,15 @@ class CbApi(object):
         r.raise_for_status()
 
         return r.json()
+
+    def feed_report_info(self, feedid, reportid):
+        '''
+        retrieve a single report from a feed
+        '''
+
+        url = "%s/api/v1/feed/%s/report/%s" % (self.server, feedid, reportid,)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
