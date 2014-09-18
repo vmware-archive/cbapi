@@ -20,9 +20,13 @@ def build_cli_parser():
                       help="API Token for Carbon Black server")
     parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
                       help="Do not verify server SSL certificate.")
+    parser.add_option("-f", "--full", action="store_true", default=False, dest="fulloutput",
+                      help="Do not truncate watchlist queries in the output")
     return parser
 
-def truncate(string, length):
+def truncate(fulloutput, string, length):
+    if fulloutput:
+        return string
     if len(string) + 2 > length:
         return string[:length] + "..."
     return string
@@ -47,7 +51,7 @@ def main(argv):
 
     # for each result 
     for watchlist in watchlists:
-        print "%-4s | %-32s | %s" % (watchlist['id'], watchlist['name'], truncate(watchlist['search_query'], 57))
+        print "%-4s | %-32s | %s" % (watchlist['id'], watchlist['name'], truncate(opts.fulloutput, watchlist['search_query'], 57))
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
