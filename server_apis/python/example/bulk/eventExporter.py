@@ -24,6 +24,8 @@ def build_cli_parser():
                       help="Directory to enumerate looking for Carbon Black event log files")
     parser.add_option("-r", "--remove", action="store_true", default=False, dest="remove",
                       help="Remove event log file(s) after processing; use with caution!")
+    parser.add_option("-a", "--auto", action="store_true", default=False, dest="auto",
+                      help="Automatically find the event log directory from CB server config")
     return parser
 
 def json_encode(data):
@@ -49,6 +51,17 @@ def getPathFromEvent(event):
         return event["path"]
     elif "modload" == event["type"]:
         return event["path"]
+    elif "netconn" == event["type"]:
+        if event.get('protocol', 17) == 6:
+            proto = "tcp"
+        else:
+            proto = "udp"
+
+        return "%s:%s (%s) via %s %s" % (event.get("ipv4", "<no IP>"), event["port"], event.get("domain", "<no domain>"), proto, event.get("direction", "<unknown direction>"))
+    elif "childproc" == event["type"]:
+        return event["created"]
+
+    import pdb; pdb.set_trace()
 
     return ""
 
@@ -67,7 +80,7 @@ def dumpEvent(event, outputformat):
         pprint.pprint(event)
         return
 
-    print "%-19s | %12s | %33s | %s" % (time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(event["timestamp"])),\
+    print "%-19s | %10s | %33s | %s" % (time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(event["timestamp"])),\
                                         event['type'],\
                                         getMd5FromEvent(event),
                                         getPathFromEvent(event))
@@ -81,11 +94,21 @@ def processEventLogDir(directory, outputformat, remove):
         for filename in filenames:
             processEventLogFile(os.path.join(root, filename), outputformat, remove)
 
+def getEventLogDirFromCfg():
+    """
+    determine the directory for archived CB sensor logs based on current configuration
+    """
+    for line in open("/etc/cb/datastore/archive.properties").readlines():
+        if line.strip().startswith('cbfs-http.log-archive.filesystem.location'):
+            return line.split('=')[1].strip()
+
+    raise Exception("Unable to determine value of the cbfs-http.log-archive.filesystem.location config option")
+
 def processEventLogFile(filename, outputformat, remove):
     """
     read an entire event log file from disk, break it into its
     component protobuf events, re-package each protobuf event as
-    json, and deliver to TCP endpoint 
+    json, and output 
     """
 
     sys.stderr.write("-> Processing %s...\n" % (filename,)) 
@@ -132,7 +155,7 @@ if __name__ == '__main__':
 
     parser = build_cli_parser()
     opts, args = parser.parse_args(sys.argv)
-    if not opts.outputformat or not (opts.filename or opts.directory):
+    if not opts.outputformat or not (opts.filename or opts.directory or opts.auto):
         print "Missing required param; run with --help for usage"
         sys.exit(-1)
 
@@ -140,3 +163,5 @@ if __name__ == '__main__':
         processEventLogFile(opts.filename, opts.outputformat, opts.remove)
     elif opts.directory:
         processEventLogDir(opts.directory, opts.outputformat, opts.remove)
+    elif opts.auto:
+        processEventLogDir(getEventLogDirFromCfg(), opts.outputformat, opts.remove)
