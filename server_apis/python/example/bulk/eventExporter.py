@@ -22,6 +22,8 @@ def build_cli_parser():
                       help="Single CB sensor event log filename to process")
     parser.add_option("-d", "--directory", action="store", default=None, dest="directory",
                       help="Directory to enumerate looking for Carbon Black event log files")
+    parser.add_option("-r", "--remove", action="store_true", default=False, dest="remove",
+                      help="Remove event log file(s) after processing; use with caution!")
     return parser
 
 def json_encode(data):
@@ -46,16 +48,16 @@ def dumpEvent(event, outputformat):
     print "%-19s | %12s" % (time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(event["timestamp"])),\
                             event['type'])
 
-def processEventLogDir(directory, outputformat):
+def processEventLogDir(directory, outputformat, remove):
     """
     recursively enumerate a directory, processing each file as a 
     Carbon Black sensor event log
     """
     for root, dirnames, filenames in os.walk(directory):
         for filename in filenames:
-            processEventLogFile(os.path.join(root, filename), outputformat)
+            processEventLogFile(os.path.join(root, filename), outputformat, remove)
 
-def processEventLogFile(filename, outputformat):
+def processEventLogFile(filename, outputformat, remove):
     """
     read an entire event log file from disk, break it into its
     component protobuf events, re-package each protobuf event as
@@ -107,6 +109,11 @@ def processEventLogFile(filename, outputformat):
     print "Events Sent        : %d" % (num_events_succeeded,)
     print "Events Send Failed : %d" % (num_events_attempted - num_events_succeeded,)
 
+    f.close()
+
+    if remove:
+        os.remove(filename)
+
 if __name__ == '__main__':
 
     parser = build_cli_parser()
@@ -116,6 +123,6 @@ if __name__ == '__main__':
         sys.exit(-1)
 
     if opts.filename:
-        processEventLogFile(opts.filename, opts.outputformat)
+        processEventLogFile(opts.filename, opts.outputformat, opts.remove)
     elif opts.directory:
-        processEventLogDir(opts.directory, opts.outputformat)
+        processEventLogDir(opts.directory, opts.outputformat, opts.remove)
