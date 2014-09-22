@@ -186,6 +186,7 @@ class CbFileModEvent(CbBaseEvent):
         self.filepath = self._lookup_filepath(self.filepath_string_guid)
         self.process_guid = self.process_guid
         self.action = filemod_action_to_str(self.msg.action)
+        self.actiontype = self.msg.action
 
     def to_obj(self):
 
@@ -197,6 +198,8 @@ class CbFileModEvent(CbBaseEvent):
         
         dict['path'] = self.filepath
         dict['action'] = self.action
+        dict['actiontype'] = self.actiontype
+
         # todo add md5 for filewrite_complete
 
         return dict
@@ -209,6 +212,7 @@ class CbRegModEvent(CbBaseEvent):
         self.registry_path = msg.utf8_regpath
         self.process_guid = self.process_guid
         self.action = regmod_action_to_str(self.msg.action)
+        self.actiontype = self.msg.action
 
     def to_obj(self):
 
@@ -220,6 +224,7 @@ class CbRegModEvent(CbBaseEvent):
         
         dict['path'] = self.registry_path
         dict['action'] = self.action
+        dict['actiontype'] = self.actiontype
 
         return dict
 

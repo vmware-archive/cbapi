@@ -37,6 +37,28 @@ def json_encode(data):
     except Exception, e:
         return json.dumps(data)
 
+def getPathFromEvent(event):
+    """
+    Get a "path" represenation of a sensor event
+    """
+    if "filemod" == event["type"]:
+        return event["path"]
+    elif "proc" == event["type"]:
+        return event["path"]
+    elif "regmod" == event["type"]:
+        return event["path"]
+    elif "modload" == event["type"]:
+        return event["path"]
+
+    return ""
+
+def getMd5FromEvent(event):
+    """
+    Get a md5 representation of a sensor event
+    Only (most) process creation, modload, module (modinfo), and filewrite subtype 8 events will have an MD5
+    """
+    return event.get("md5", "")
+
 def dumpEvent(event, outputformat):
     """
     dump a JSON-ified protobuf event to console for debugging
@@ -45,8 +67,10 @@ def dumpEvent(event, outputformat):
         pprint.pprint(event)
         return
 
-    print "%-19s | %12s" % (time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(event["timestamp"])),\
-                            event['type'])
+    print "%-19s | %12s | %33s | %s" % (time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(event["timestamp"])),\
+                                        event['type'],\
+                                        getMd5FromEvent(event),
+                                        getPathFromEvent(event))
 
 def processEventLogDir(directory, outputformat, remove):
     """
@@ -63,13 +87,12 @@ def processEventLogFile(filename, outputformat, remove):
     component protobuf events, re-package each protobuf event as
     json, and deliver to TCP endpoint 
     """
- 
-    print "-> Opening input file [%s]..." % (filename)
+
+    sys.stderr.write("-> Processing %s...\n" % (filename,)) 
     f = open(filename)
 
     events = []
 
-    print "-> Reading raw protobuf log from file..."
     while True:
         cb = f.read(4)
         if 0 == len(cb):
@@ -78,19 +101,12 @@ def processEventLogFile(filename, outputformat, remove):
         msg = f.read(cb)
         events.append(msg)
 
-    print "-> Read %d events" % (len(events),)
-    time.sleep(1)
-
-    one_percent = len(events) / 100 + 1   
-    print '[' + '-' * 98 + ']' 
+    sys.stderr.write("->   Read %d events\n" % (len(events),))
 
     num_events_attempted = 0
     num_events_succeeded = 0
  
     for event in events:
-        if 0 == num_events_attempted % one_percent:
-            sys.stdout.write('.')
-            sys.stdout.flush()
 
         try:
             event_as_obj = protobuf_to_obj(event)
@@ -104,10 +120,8 @@ def processEventLogFile(filename, outputformat, remove):
 
         num_events_attempted = num_events_attempted + 1
 
-    print
-
-    print "Events Sent        : %d" % (num_events_succeeded,)
-    print "Events Send Failed : %d" % (num_events_attempted - num_events_succeeded,)
+    sys.stderr.write("->   Events Sent        : %d\n" % (num_events_succeeded,))
+    sys.stderr.write("->   Events Send Failed : %d\n" % (num_events_attempted - num_events_succeeded,))
 
     f.close()
 
