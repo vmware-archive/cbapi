@@ -20,6 +20,8 @@ def build_cli_parser():
                       help="Output format; must be one of [json|table]; default is table")
     parser.add_option("-f", "--filename", action="store", default=None, dest="filename",
                       help="Single CB sensor event log filename to process")
+    parser.add_option("-d", "--directory", action="store", default=None, dest="directory",
+                      help="Directory to enumerate looking for Carbon Black event log files")
     return parser
 
 def json_encode(data):
@@ -43,6 +45,15 @@ def dumpEvent(event, outputformat):
 
     print "%-19s | %12s" % (time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(event["timestamp"])),\
                             event['type'])
+
+def processEventLogDir(directory, outputformat):
+    """
+    recursively enumerate a directory, processing each file as a 
+    Carbon Black sensor event log
+    """
+    for root, dirnames, filenames in os.walk(directory):
+        for filename in filenames:
+            processEventLogFile(os.path.join(root, filename), outputformat)
 
 def processEventLogFile(filename, outputformat):
     """
@@ -100,8 +111,11 @@ if __name__ == '__main__':
 
     parser = build_cli_parser()
     opts, args = parser.parse_args(sys.argv)
-    if not opts.outputformat or not opts.filename:
+    if not opts.outputformat or not (opts.filename or opts.directory):
         print "Missing required param; run with --help for usage"
         sys.exit(-1)
 
-    processEventLogFile(opts.filename, opts.outputformat)
+    if opts.filename:
+        processEventLogFile(opts.filename, opts.outputformat)
+    elif opts.directory:
+        processEventLogDir(opts.directory, opts.outputformat)
