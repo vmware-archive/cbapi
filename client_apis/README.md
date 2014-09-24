@@ -921,7 +921,7 @@ Sensor / remote client details
 
 ##### Returns:
 
-- With no parameters (`GET /api/v1/sensor/`) returns a list of sensor structures, one per registered sensor.
+- With no parameters (`GET /api/v1/sensor`) returns a list of sensor structures, one per registered sensor.
 - With a sensor id, (`GET /api/v1/sensor/12`) returns a sensor structure for the specified sensor.
 - With a query string, (`GET /api/v1/sensor?hostname=foo`) returns a list of all sensors matching criteria
 
