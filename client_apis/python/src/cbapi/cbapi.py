@@ -231,6 +231,16 @@ class CbApi(object):
         r.raise_for_status()
         return r._content
 
+    def sensor(self, sensor_id):
+        '''
+        get information about a single sensor
+        '''
+
+        r = requests.get("%s/api/v1/sensor/%s" % (self.server, sensor_id),
+                         headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
     def sensors(self, query_parameters={}):
         '''
         get sensors, optionally specifying search criteria
