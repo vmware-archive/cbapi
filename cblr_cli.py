@@ -29,6 +29,12 @@ class CmdSensorWindowsError(Exception):
 class CliArgsException(Exception):
     pass
 
+class CliHelpException(Exception):
+    pass
+
+class CliAttachError(Exception):
+    pass
+
 def split_cli(line):
     '''
     we'd like to use shlex.split() but that doesn't work well for
@@ -44,7 +50,6 @@ def split_cli(line):
     while len(parts) > 0:
 
         tok = parts.pop(0)
-
         if (tok[:1] == '"'):
             tok = tok[1:]
             next = parts.pop(0)
@@ -56,25 +61,45 @@ def split_cli(line):
                 tok += ' ' + next[:-1]
 
         final.append(tok)
-
     return final
 
-def parse_argv(target):
+API_CMD_TO_CLI_CMD = { 'create process' : 'exec',
+                    'delete file': 'del',
+                    'put file': 'put',
+                    'directory list' : 'dir',
+                    'get file' : 'get',
+                    'kill' : 'kill',
+                    'process list' : 'ps',
+                    'reg create key' : 'reg',
+                    'reg enum key' : 'reg',
+                    'reg query key' : 'reg',
+                    'reg query value' : 'reg',
+                    'reg delete value' : 'reg',
+                    'reg delete key' : 'reg',
+                    'reg set value' : 'reg' }
 
-    def wrapper(self, line):
-        return target(self, split_cli(line))
+class CliArgs (OptionParser):
 
-    return wrapper
+    def __init__(self, usage=''):
+        OptionParser.__init__(self, add_help_option=False, usage=usage)
 
-def needs_attached(target):
+        self.add_option('-h', '--help', action='store_true', help='Display this help message.')
 
-    def wrapper(self, *args, **kwargs):
-        if (self.session is None):
-            return self.attach_warning(*args, **kwargs)
-        else:
-            return target(self, *args, **kwargs)
+    def parse_line(self, line):
+        args = split_cli(line)
+        return self.parse_args(args)
 
-    return wrapper
+    def parse_args(self, args, values=None):
+        (opts, args) = OptionParser.parse_args(self, args=args, values=values)
+
+        if (opts.help):
+            self.print_help()
+            raise CliHelpException()
+
+        return (opts, args)
+
+    def error(self, msg):
+        raise CliArgsException(msg)
 
 class CblrCli(cmd.Cmd):
 
@@ -120,8 +145,13 @@ class CblrCli(cmd.Cmd):
         while(True):
             try:
                 cmd.Cmd.cmdloop(self, intro)
+            except CliHelpException:
+                pass
             except QuitException:
                 sys.exit(0)
+            except CliAttachError as e:
+                print "You must attach to a session"
+                continue
             except CliArgsException as e:
                 print "Error parsing arguments!\n %s" % e
                 continue
@@ -136,6 +166,7 @@ class CblrCli(cmd.Cmd):
                 import traceback
                 traceback.print_exc()
                 return
+
     ##########
     # keepalive function
     #########
@@ -167,6 +198,11 @@ class CblrCli(cmd.Cmd):
     ######################
     # Helper functions
     ######################
+
+
+    def _needs_attached(self):
+        if (self.session is None):
+            raise CliAttachError()
 
     def _loghttp(self, msg):
         if self.logfile:
@@ -364,13 +400,6 @@ class CblrCli(cmd.Cmd):
                 out.append(r)
         return out
 
-    ######################
-    # command processing functions
-    ######################
-
-    def attach_warning(self, *args, **kwargs):
-        print "Must be attached to a session"
-
     ################################
     # pseduo commands and session commands
     #
@@ -378,14 +407,30 @@ class CblrCli(cmd.Cmd):
     # (except start a session)
     #####################
 
-    @parse_argv
-    def do_session(self, args):
+    def do_session(self, line):
+        '''
+        Command: Session
 
-        p = OptionParser()
+        Description:
+        Create, quit, and list CB Live Response Sessions.
+
+        session [OPTIONS]
+
+        Where OPTIONS are:
+        -q <SessionId> - Quit/Close the given session id
+        -c <SensorId> - Create a new session for the given sensor id.
+        -a - List all the session on the server.  Event ones closed out
+
+        If no options are present the list of relevent sessions.  That means:
+        - any session that is pending or active
+        - any session that was closed AFTER this program started
+        '''
+
+        p = CliArgs(usage='session [OPTIONS] <SessionId>')
         p.add_option('-q', '--quit', default=None, help='Quit a given session')
         p.add_option('-c', '--create', default=None, help='Create a new session given the sensor id')
         p.add_option('-a', '--all', default=False, action='store_true', help='Show all sessions')
-        (opts, args) = p.parse_args(args=args)
+        (opts, args) = p.parse_line(line)
 
         if (opts.quit is not None):
             sessid = int(opts.quit)
@@ -414,10 +459,23 @@ class CblrCli(cmd.Cmd):
             for s in ret:
                 print "Session: %d\n  status: %s\n  sensorId: %d\n" % (s['id'], s['status'], s['sensor_id'])
 
-    @needs_attached
-    def do_cd(self, arg):
+    def do_cd(self, line):
+        '''
+        Pseudo Command: cd
 
-        path = self._file_path_fixup(arg)
+        Description:
+        Change the psuedo current working directory
+
+        Note: The shell keeps a pseudo working directory
+        that allows the user to change directory without
+        changing the directory of the working process on sensor.
+
+        Args:
+        cd <Directory>
+        '''
+        self._needs_attached()
+
+        path = self._file_path_fixup(line)
         path = ntpath.abspath(path)
         type = self._stat(path)
         if (type != "dir"):
@@ -431,17 +489,44 @@ class CblrCli(cmd.Cmd):
             self.cwd = self.cwd[:-1]
 
     def do_pwd(self, line):
+        '''
+        Pseudo Command: pwd
+
+        Description:
+        Print the pseudo current working directory
+
+        Note: The shell keeps a pseudo working directory
+        that allows the user to change directory without
+        changing the directory of the working process on sensor.
+
+        Args:
+        pwd
+
+        '''
+
+        self._needs_attached()
+
         print self.cwd
         print ""
 
-    @parse_argv
-    def do_attach(self, args):
+    def do_attach(self, line):
         '''
-        attach [opts] SESSION_ID
+        Pseudo Command: attach
+
+        Description:
+        Attach to a given session.  If the session is not active
+        an error will be printed to the screen.  The --wait option
+        can be used to wait for the session to become active.
+
+        Args:
+        attach [OPTIONS] <SessionId>
+
+        where OPTIONS are:
+        -w, --wait - Wait for the session to be come active.
         '''
-        p = OptionParser()
+        p = CliArgs(usage='attach [OPTIONS] <SessionId>')
         p.add_option('-w', '--wait', action="store_true", default=False,  help='Quit a given session')
-        (opts, args) = p.parse_args(args=args)
+        (opts, args) = p.parse_line(line)
 
         if (len(args) != 1):
             CliArgsException("Invalid number of arguments to attached (got %d expected %d)" % (len(args), 1))
@@ -493,16 +578,42 @@ class CblrCli(cmd.Cmd):
         self.keepaliveThread.daemon = True
         self.keepaliveThread.start()
 
-    @needs_attached
+        print "Session: %d" % sessid
+        print "  Available Drives: %s" % ' '.join(sessioninfo['drives'])
+
+        # look up supported commands
+        ret = {}
+        for c in sessioninfo['supported_commands']:
+            ret[API_CMD_TO_CLI_CMD[c]] = 1
+
+        print "  Supported Commands: %s" % ' '.join(ret.keys())
+
     def do_detach(self, line):
+        self._needs_attached()
         self.keepaliveEvent.set()
         self.session = None
         self.prompt = '>'
         self.cwd = None
         self.keepaliveThread.join()
 
-    @needs_attached
     def do_files(self, line):
+        '''
+        Pseduo Command: files
+
+        Description:
+        List the files placed in the server session space.
+        Files are placed in the session space before the
+        are get/put on the sensor.
+
+        Note: This command does not cause any action to
+        occur on the sensor.
+
+        Args:
+        files
+        '''
+
+        self._needs_attached()
+
         url = '%s/api/v1/cblr/session/%d/file' % (self.url, self.session)
         ret = self._doGet(url)
 
@@ -522,21 +633,26 @@ class CblrCli(cmd.Cmd):
     # these change state on the senesor
     ##############################
 
-    @needs_attached
-    @parse_argv
-    def do_ps(self, args):
+    def do_ps(self, line):
         '''
-        ps [OPTS]
+        Command: ps
 
-        where OPTS are:
-        -v - Display verbose info about each process
-        -p [PID] - Display only the given pid
+        Description:
+        List the processes running on the sensor.
+
+        Args:
+        ps [OPTIONS]
+
+        OPTIONS:
+        -v  - Display verbose info about each process
+        -p <Pid> - Display only the given pid
         '''
+        self._needs_attached()
 
-        p = OptionParser()
+        p = CliArgs(usage='ps [OPTIONS]')
         p.add_option('-v', '--verbose', default=False, action='store_true', help='Display verbose info about each process')
         p.add_option('-p', '--pid', default=None, help='Display only the given pid')
-        (opts, args) = p.parse_args(args=args)
+        (opts, args) = p.parse_line(line)
 
         if (opts.pid): opts.pid = int(opts.pid)
 
@@ -558,23 +674,31 @@ class CblrCli(cmd.Cmd):
         if not opts.verbose:
             print ""
 
-    @needs_attached
     def do_exec(self, line):
         '''
+        Command: exec
+
+        Description:
+        Execute a process on the sensor.  This assumes the executable is
+        already on the sensor.
+
+        Args:
         exec [OPTS] [process command line and arguments]
 
         where OPTS are:
-         -o [OutputFile] - Redirect standard out and standard error to
+         -o <OutputFile> - Redirect standard out and standard error to
               the given file path.
-         -d [WorkingDir] - Use the following directory as the process working
+         -d <WorkingDir> - Use the following directory as the process working
               directory
          -w - Wait for the process to complete execution before returning.
         '''
 
+        self._needs_attached()
         #
         # note: option parsing is VERY specific to ensure command args are left
         # as untouched as possible
         #
+
         OPTS = ['-o', '-d', '-w']
         optOut = None
         optWorkDir = None
@@ -638,23 +762,47 @@ class CblrCli(cmd.Cmd):
 
         print "Process Pid: %d %s\n" % (ret['pid'], retstr)
 
-    @needs_attached
-    @parse_argv
-    def do_get(self, argv):
+    def do_get(self, line):
         '''
-        get [REMOTE PATH] [LOCAL_PATH]
+        Command: get
+
+        Description:
+        Get (copy) a file, or parts of file, from the sensor.
+
+        Args:
+        get [OPTIONS] <RemotePath> <LocalPath>
+
+        where OPTIONS are:
+        -o, --offset : The offset to start getting the file at
+        -b, --bytes : How many bytes of the file to get.  The default is all bytes.
         '''
-        if (len(argv) != 2):
+        self._needs_attached()
+
+        p = CliArgs(usage='get [OPTIONS] <RemoteFile> <LocalFile>')
+        p.add_option('-o', '--offset', default="0",  help='Offset of the file to start grabbing')
+        p.add_option('-b', '--bytes', default=None, help='How many bytes to grab')
+        (opts, args) = p.parse_line(line)
+
+        if (len(args) != 2):
             raise CliArgsException("Wrong number of args to get command")
 
         # open the local path first to error cleanly
         bDidWrite = False
-        fout = open(argv[1], 'wb')
+        fout = open(args[1], 'wb')
 
-        gfile = self._file_path_fixup(argv[0])
+        gfile = self._file_path_fixup(args[0])
+
+        hargs = {}
+
+        offset = 0
+        if (opts.offset != 0):
+            hargs['offset'] = int(opts.offset)
+
+        if (opts.bytes):
+            hargs['get_count'] = int(opts.bytes)
 
         try:
-            ret = self._postCommandAndWait("get file", gfile)
+            ret = self._postCommandAndWait("get file", gfile, args=hargs)
             fid = ret["file_id"]
             url = '%s/api/v1/cblr/session/%d/file/%d/content' % (self.url, self.session, fid)
             fdata = self._doGet(url, retJSON=False)
@@ -664,11 +812,22 @@ class CblrCli(cmd.Cmd):
         except:
             #delete the output file on error
             fout.close()
-            os.remove(argv[1])
+            os.remove(args[1])
             raise
 
-    @needs_attached
     def do_del(self, line):
+        '''
+        Command: del
+
+        Description:
+        Delete a file on the sensor
+
+        Args:
+        del <FileToDelete>
+        '''
+
+
+        self._needs_attached()
 
         if line is None or line == '':
             raise CliArgsException("Must provide argument to del command")
@@ -677,9 +836,19 @@ class CblrCli(cmd.Cmd):
 
         self._postCommandAndWait("delete file", path)
 
-    @needs_attached
-    @parse_argv
-    def do_put(self, argv):
+    def do_put(self, line):
+        '''
+        Command: put
+
+        Description
+        Put a file onto the sensor
+
+        Args:
+        put <LocalFile> <RemotePath>
+        '''
+        self._needs_attached()
+
+        argv = split_cli(line)
 
         if (len(argv) != 2):
             raise CliArgsException("Wrong number of args to put command (need 2)")
@@ -699,8 +868,9 @@ class CblrCli(cmd.Cmd):
 
         return time.strftime("%m/%d/%Y %I:%M:%S %p", time.gmtime(unixtime))
 
-    @needs_attached
     def do_dir(self, line):
+        self._needs_attached()
+
         if line is None or line == '':
             line = self.cwd + "\\"
 
@@ -722,13 +892,44 @@ class CblrCli(cmd.Cmd):
 
         print ""
 
-    @needs_attached
-    @parse_argv
-    def do_reg(self, args):
+    def do_kill(self, line):
         '''
-        reg [SUB_COMMAND] [SUB_SPECIFIC_OPTS]
+        Command: kill
 
-        subs:
+        Description:
+        Kill a process on the sensor
+
+        Args:
+        kill <Pid>
+        '''
+
+        if line is None or line == '':
+            raise CliArgsException("Invalid argument passed to kill (%s)" % line)
+
+        self._postCommandAndWait('kill process', line)
+
+
+    def do_reg(self, line):
+        '''
+        Command: reg
+
+        Description:
+        Perform registry actions (query/add/delete) against
+        the sensor registry.
+
+        Args:
+        reg [SUB_COMMAND] [SUB_SPECIFIC_OPTIONS]
+
+        where SUB_COMMAND is:
+
+        add - Add a registry key or value
+
+        delete - Delete a registry key or value
+
+        query - Query a registry key or value
+
+        SUB_SPECIFIC_OPTIONS:
+
         reg add [key] [opts]
             -v : add the value instead of the key
             -t : value type (REG_DWORD, ....) requires -v
@@ -743,6 +944,9 @@ class CblrCli(cmd.Cmd):
             -v : query a value instead of just a key
         '''
 
+        self._needs_attached()
+
+        args = split_cli(line)
         REG_OPTS = ['add', 'delete', 'query']
         # pop the first arg off for the sub-command
 
@@ -750,17 +954,15 @@ class CblrCli(cmd.Cmd):
         if (subcmd not in REG_OPTS):
             raise CliArgsException("Invalid reg subcommand! (%s)" % subcmd)
 
-        print ""
-
         # parse out the args
-        p = OptionParser()
         if (subcmd == 'add'):
+            p = CliArgs("reg add <Key> [OPTIONS]")
             p.add_option('-v', '--value', default=None, help='The value to add (instead of a key)')
             p.add_option('-t', '--type', default=None, help='The value type to add')
             p.add_option('-d', '--data', default=None, help='The data value to add')
             p.add_option('-f', '--force', default=False, action='store_true', help='Overwrite existing value')
 
-            (opts, args) = p.parse_args(args=args)
+            (opts, args) = p.parse_args(args)
 
             if (opts.value):
                 if (not opts.type):
@@ -783,8 +985,8 @@ class CblrCli(cmd.Cmd):
                 self._postCommandAndWait('reg create key', args[0])
 
         elif (subcmd == 'delete'):
+            p = CliArgs("reg delete <Key> [OPTIONS]")
             p.add_option('-v', '--value', default=None, help='The value to delete (instead of a key)')
-
             (opts, args) = p.parse_args(args=args)
 
             if (opts.value):
@@ -797,6 +999,7 @@ class CblrCli(cmd.Cmd):
                 self._postCommandAndWait('reg delete key', args[0])
 
         else: # query
+            p = CliArgs('reg query <Key> [OPTIONS]')
             p.add_option('-v', '--value', default=None, help='The value to query (instead of a key)')
 
             (opts, args) = p.parse_args(args=args)
@@ -838,8 +1041,16 @@ class CblrCli(cmd.Cmd):
 
     # call the system shell
     def do_shell(self, line):
-        print subprocess.Popen(line, shell=True, stdout=subprocess.PIPE).stdout.read()
+        '''
+        Command: shell
 
+        Description:
+        Run a command locally and display the output
+
+        Args:
+        shell <Arguments>
+        '''
+        print subprocess.Popen(line, shell=True, stdout=subprocess.PIPE).stdout.read()
 
     # quit handlers
     def do_exit(self, line):
@@ -892,6 +1103,5 @@ if __name__ == "__main__":
             print e
             print ""
             traceback.print_exc()
-            #traceback.print_tb()
             print "Hit Ctl-c to quit or [enter] to try again."
             sys.stdin.readline()
