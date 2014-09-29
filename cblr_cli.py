@@ -35,6 +35,9 @@ class CliHelpException(Exception):
 class CliAttachError(Exception):
     pass
 
+class CliCommandCanceled(Exception):
+    pass
+
 def split_cli(line):
     '''
     we'd like to use shlex.split() but that doesn't work well for
@@ -147,6 +150,8 @@ class CblrCli(cmd.Cmd):
                 cmd.Cmd.cmdloop(self, intro)
             except CliHelpException:
                 pass
+            except CliCommandCanceled:
+                pass
             except QuitException:
                 sys.exit(0)
             except CliAttachError as e:
@@ -161,6 +166,7 @@ class CblrCli(cmd.Cmd):
             except CmdSensorWindowsError as e:
                 print "Command Failed: %s" % e
                 continue
+
             except Exception as e:
                 print "Error: %s" % e
                 import traceback
@@ -354,7 +360,7 @@ class CblrCli(cmd.Cmd):
             self._doPut(url, data_dict=cancel)
 
             print "Command Canceled"
-            return
+            raise CliCommandCanceled("Command canceled")
 
         err = ret.get('result_code', 0)
         if (err != 0):
@@ -587,6 +593,7 @@ class CblrCli(cmd.Cmd):
             ret[API_CMD_TO_CLI_CMD[c]] = 1
 
         print "  Supported Commands: %s" % ' '.join(ret.keys())
+        print "  Working Directory: %s" % self.cwd
 
     def do_detach(self, line):
         self._needs_attached()
@@ -633,6 +640,44 @@ class CblrCli(cmd.Cmd):
     # these change state on the senesor
     ##############################
 
+    def do_archive(self, line):
+        '''
+        Command: archive
+
+        Description:
+        Get an archive (gzip tarball) of all the session data
+        for this session.  This includes the results of all commands
+        run and all files uploaded and download
+
+        Args:
+        archive <OutFile> [SessionId]
+
+        Session is optional.  If not provided and currently attached
+        that session will be archived.
+        '''
+
+        p = CliArgs(usage='archive <OutputFile> [SessionId]')
+        (opts, args) = p.parse_line(line)
+
+        if (len(args) <1 or len(args) > 2 ):
+            raise CliArgsException("Unexpected number of args passed to archive command!")
+
+        if (len(args) == 2):
+            sessId = int(args[1])
+
+        else :
+            if (self.session):
+                sessId = self.session
+            else:
+                raise CliArgsException("A session id must be provided if not attached to a session")
+
+        url = '%s/api/v1/cblr/session/%d/archive' % (self.url, sessId)
+        fdata = self._doGet(url, retJSON=False)
+
+        outf = open(args[0], 'wb+')
+        outf.write(fdata)
+        outf.close()
+
     def do_ps(self, line):
         '''
         Command: ps
@@ -662,10 +707,13 @@ class CblrCli(cmd.Cmd):
             if ((opts.pid and p['pid'] == opts.pid) or opts.pid is None):
                 if (opts.verbose):
                     print "Process: %5d : %s" % (p['pid'], ntpath.basename(p['path']))
+                    print "  Guid:        %s" % p['proc_guid']
+                    print "  CreateTime:  %s (GMT)" % self._time_dir_gmt(p['create_time'])
+                    print "  ParentPid:   %d" % p['parent']
+                    print "  ParentGuid:  %s" % p['parent_guid']
+                    print "  SID:         %s" % p['sid'].upper()
                     print "  UserName:    %s" % p['username']
                     print "  ExePath:     %s" % p['path']
-                    print "  ParentPid:   %d" % p['parent']
-                    print "  SID:         %s" % p['sid']
                     print "  CommandLine: %s" % p['command_line']
                     print ""
                 else:
@@ -1021,7 +1069,6 @@ class CblrCli(cmd.Cmd):
                 for k in subs:
                     print "%s" % k
 
-                print ""
                 values = ret.get('values', [])
                 if (len(values) > 0):
                     print "Values:"
@@ -1037,7 +1084,7 @@ class CblrCli(cmd.Cmd):
         if (name == ''):
             name = '(Default)'
 
-        print "\t%-30s %10s %s" %(name, type, rawdata)
+        print "  %-30s %10s %s" %(name, type, rawdata)
 
     # call the system shell
     def do_shell(self, line):
