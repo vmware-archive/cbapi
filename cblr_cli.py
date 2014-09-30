@@ -67,6 +67,7 @@ def split_cli(line):
     return final
 
 API_CMD_TO_CLI_CMD = { 'create process' : 'exec',
+                       'create directory' : 'mkdir',
                     'delete file': 'del',
                     'put file': 'put',
                     'directory list' : 'dir',
@@ -133,7 +134,7 @@ class CblrCli(cmd.Cmd):
         self.stale_sessions = []
         sess = self._session_list(hideStale=False)
         for s in sess:
-            if s['status'] == 'close':
+            if s['status'] == 'close' or s['status'] == 'timeout':
                 self.stale_sessions.append(s['id'])
 
     def emptyline(self):
@@ -423,8 +424,9 @@ class CblrCli(cmd.Cmd):
         session [OPTIONS]
 
         Where OPTIONS are:
-        -q <SessionId> - Quit/Close the given session id
-        -c <SensorId> - Create a new session for the given sensor id.
+        -q, --quit <SessionId> - Quit/Close the given session id
+        -c, --create <SensorId> - Create a new session for the given sensor id.
+        -t, --timeout <TimeoutSeconds> - Sets the timeout for a session - only valid with -c
         -a - List all the session on the server.  Event ones closed out
 
         If no options are present the list of relevent sessions.  That means:
@@ -435,6 +437,7 @@ class CblrCli(cmd.Cmd):
         p = CliArgs(usage='session [OPTIONS] <SessionId>')
         p.add_option('-q', '--quit', default=None, help='Quit a given session')
         p.add_option('-c', '--create', default=None, help='Create a new session given the sensor id')
+        p.add_option('-t', '--timeout', default=None, help='Set the sensor timeout when creating a session')
         p.add_option('-a', '--all', default=False, action='store_true', help='Show all sessions')
         (opts, args) = p.parse_line(line)
 
@@ -452,7 +455,11 @@ class CblrCli(cmd.Cmd):
 
         elif (opts.create is not None):
             sessid = int(opts.create)
+
             postdata = {"sensor_id" : sessid}
+            if (opts.timeout):
+                postdata['session_timeout'] = opts.timeout
+
             url = "%s/api/v1/cblr/session" % self.url
 
             ret = self._doPost(url, postdata)
@@ -463,7 +470,10 @@ class CblrCli(cmd.Cmd):
             # no args - full listing
             ret = self._session_list(hideStale=not opts.all)
             for s in ret:
-                print "Session: %d\n  status: %s\n  sensorId: %d\n" % (s['id'], s['status'], s['sensor_id'])
+                print "Session: %d" % s['id']
+                print "  status: %s" % s['status']
+                print "  sensorId: %d" % s['sensor_id']
+                print "  timeout: %d" % s['session_timeout']
 
     def do_cd(self, line):
         '''
@@ -768,6 +778,8 @@ class CblrCli(cmd.Cmd):
 
         exe = tok
 
+        print "EXEC: %s" % repr(exe)
+
         #ok - now the command (exe) is in tok
         # we need to do some crappy path manipulation
         # to see what we are supposed to execute
@@ -790,7 +802,10 @@ class CblrCli(cmd.Cmd):
                 pass
 
         # re-format the list and put tok at the front
-        cmdline = exe + ' ' + ' '.join(parts)
+        if (len(parts) > 0):
+            cmdline = exe + ' ' + ' '.join(parts)
+        else:
+            cmdline = exe
         #print "CMD: %s" % cmdline
 
         args = {}
@@ -884,6 +899,28 @@ class CblrCli(cmd.Cmd):
 
         self._postCommandAndWait("delete file", path)
 
+    def do_mkdir(self, line):
+        '''
+        Command: mkdir
+
+        Description:
+        Create a directory on the sensor
+
+        Args:
+        mdkir <PathToCreate>
+        '''
+
+
+        self._needs_attached()
+
+        if line is None or line == '':
+            raise CliArgsException("Must provide argument to mkdir command")
+
+        path = self._file_path_fixup(line)
+
+        self._postCommandAndWait("create directory", path)
+
+
     def do_put(self, line):
         '''
         Command: put
@@ -954,7 +991,7 @@ class CblrCli(cmd.Cmd):
         if line is None or line == '':
             raise CliArgsException("Invalid argument passed to kill (%s)" % line)
 
-        self._postCommandAndWait('kill process', line)
+        self._postCommandAndWait('kill', line)
 
 
     def do_reg(self, line):
@@ -1073,6 +1110,7 @@ class CblrCli(cmd.Cmd):
                 if (len(values) > 0):
                     print "Values:"
                 for v in values:
+                    print "REPR value: %s" + repr(v)
                     self._print_reg_value(v)
 
     def _print_reg_value(self, value):
