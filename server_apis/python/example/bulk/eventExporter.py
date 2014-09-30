@@ -87,7 +87,6 @@ def lookup_host_details(sensor_id):
         return host_simple 
 
     except Exception, e:
-        import pdb; pdb.set_trace()
         return {}
     except:
         return {}
@@ -125,8 +124,6 @@ def getPathFromEvent(event):
     elif "childproc" == event["type"]:
         return event["created"]
 
-    import pdb; pdb.set_trace()
-
     return ""
 
 def getMd5FromEvent(event):
@@ -145,10 +142,11 @@ def dumpEvent(event, outputformat):
         pprint.pprint(event)
         return
 
-    print "%-19s | %10s | %33s | %s" % (time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(event["timestamp"])),\
-                                        event['type'],\
-                                        getMd5FromEvent(event),
-                                        getPathFromEvent(event))
+    print "%-19s | %-20s | %10s | %33s | %s" % (time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(event["timestamp"])),\
+                                                event.get('computer_name', ""),
+                                                event['type'],\
+                                                getMd5FromEvent(event),
+                                                getPathFromEvent(event))
 
 def processEventLogDir(directory, outputformat, remove):
     """
@@ -163,7 +161,6 @@ def processEventLogDir(directory, outputformat, remove):
                 sensor_id = root.split('/')[-1]
                 hostinfo = lookup_host_details(sensor_id)
             except Exception, e:
-                import pdb; pdb.set_trace()
                 pass
 
             processEventLogFile(os.path.join(root, filename), outputformat, remove, hostinfo)
