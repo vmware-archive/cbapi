@@ -345,6 +345,7 @@ class CbApi(object):
         url = "%s/api/v1/watchlist/%s" % (self.server, id)
 
         r = requests.put(url, headers=self.token_header, data=json.dumps(watchlist), verify=self.ssl_verify)
+        r.raise_for_status()
 
         return r.json()
 
@@ -374,6 +375,10 @@ class CbApi(object):
         for feed in self.feed_enum():
             if feed['name'].lower() == name.lower():
                 return feed['id']
+
+        # did not find it
+        #
+        return None
 
     def feed_enum(self):
         '''
@@ -409,6 +414,17 @@ class CbApi(object):
 
         return r.json()
         
+    def feed_modify(self, id, feed):
+        '''
+        updates a watchlist
+        '''
+        url = "%s/api/v1/feed/%s" % (self.server, id)
+
+        r = requests.put(url, headers=self.token_header, data=json.dumps(feed), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
     def feed_synchronize(self, name, full_sync=True):
         '''
         force the synchronization of a feed
