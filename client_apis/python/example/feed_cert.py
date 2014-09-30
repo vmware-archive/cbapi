@@ -54,14 +54,15 @@ def main(argv):
     feed = {"id": opts.id}
 
     if opts.remove:
-        feed["ssl_client_crt"] = None 
-        feed["ssl_client_key"] = None 
+        feed["ssl_client_crt"] = "" 
+        feed["ssl_client_key"] = "" 
     else:
         feed["ssl_client_crt"] = open(opts.certificate).read().strip()
         feed["ssl_client_key"] = open(opts.key).read().strip()
 
-    print cb.feed_modify(opts.id, feed)
-    
+    cb.feed_modify(opts.id, feed)
+
+    print "-> Success!"
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
