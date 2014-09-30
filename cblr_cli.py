@@ -324,7 +324,7 @@ class CblrCli(cmd.Cmd):
         elif (self._is_path_drive_relative(path)):
             return self.cwd[:2] + path
         else:
-            return ntpath.join(self.cwd, path)
+            return ntpath.join(self.cwd + '\\', path)
 
     def _postCommandAndWait(self, name, cmdObject, args=None):
         '''
@@ -522,7 +522,11 @@ class CblrCli(cmd.Cmd):
 
         self._needs_attached()
 
-        print self.cwd
+        if (len(self.cwd) == 2):
+            # it's c: - put a slash on the end
+            print self.cwd + '\\'
+        else:
+            print self.cwd
         print ""
 
     def do_attach(self, line):
