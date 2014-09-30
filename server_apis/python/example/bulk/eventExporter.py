@@ -16,6 +16,12 @@ def build_cli_parser():
 
     # for each supported output type, add an option
     #
+    parser.add_option("-c", "--cburl", action="store", default=None, dest="url",
+                      help="CB server's URL. e.g., http://127.0.0.1; only useful when -A is specified")
+    parser.add_option("-a", "--apitoken", action="store", default=None, dest="token",
+                      help="API Token for Carbon Black server; only useful when -A and -c are specified")
+    parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
+                      help="Do not verify server SSL certificate; only useful when -c is specified.")
     parser.add_option("-o", "--outputformat", action="store", default="table", dest="outputformat",
                       help="Output format; must be one of [json|table]; default is table")
     parser.add_option("-f", "--filename", action="store", default=None, dest="filename",
@@ -24,10 +30,39 @@ def build_cli_parser():
                       help="Directory to enumerate looking for Carbon Black event log files")
     parser.add_option("-r", "--remove", action="store_true", default=False, dest="remove",
                       help="Remove event log file(s) after processing; use with caution!")
-    parser.add_option("-a", "--auto", action="store_true", default=False, dest="auto",
+    parser.add_option("-A", "--auto", action="store_true", default=False, dest="auto",
                       help="Automatically find the event log directory from CB server config")
-    return parser
 
+def lookup_host_details(sensor_id):
+    """
+    return a dictionary describing a sensor, as identifed by it's id
+    use the documented CB API, caching the results for subsequent faster lookup
+
+    return an empty dictionary on lookup failure 
+    """
+    try:
+
+        # use the cached copy if available
+        #
+        if sensorid_to_details_map.has_key(sensor_id):
+            return sensorid_to_details_map[sensor_id]
+
+        # perform the lookup
+        # this will fail if the CB server is not availalble, if the cb
+        # api parameters are incorrect, or if the sensor id does not exists
+        #
+        r = requests.get("%s/api/v1/sensor/%s" % (cbapi['url'], sensor_id),
+                         headers=cbapi['apitoken'], verify=cbapi['ssl_verify'])
+        r.raise_for_status()
+        
+        # cache off the result
+        #
+        global sensorid_to_details_map[sensor_id] = r.json()
+
+        return r.json()
+
+    except:
+        return {}
 def json_encode(data):
     """
     generic json encoding logic
@@ -75,6 +110,7 @@ def getMd5FromEvent(event):
 def dumpEvent(event, outputformat):
     """
     dump a JSON-ified protobuf event to console for debugging
+    can be in either JSON or pipe-delimited human-readable form
     """
     if "json" == outputformat:
         pprint.pprint(event)
@@ -92,7 +128,8 @@ def processEventLogDir(directory, outputformat, remove):
     """
     for root, dirnames, filenames in os.walk(directory):
         for filename in filenames:
-            processEventLogFile(os.path.join(root, filename), outputformat, remove)
+            hostinfo = {}
+            processEventLogFile(os.path.join(root, filename), outputformat, remove, hostinfo)
 
 def getEventLogDirFromCfg():
     """
