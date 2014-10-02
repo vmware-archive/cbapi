@@ -782,8 +782,6 @@ class CblrCli(cmd.Cmd):
 
         exe = tok
 
-        print "EXEC: %s" % repr(exe)
-
         #ok - now the command (exe) is in tok
         # we need to do some crappy path manipulation
         # to see what we are supposed to execute
@@ -817,6 +815,8 @@ class CblrCli(cmd.Cmd):
             args['output_file'] = optOut
         if (optWorkDir):
             args['working_directory'] = optWorkDir
+        else:
+            args['working_directory'] = self.cwd
         if (optWait):
             args['wait'] = True
 
