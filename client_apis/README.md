@@ -36,9 +36,14 @@ The following APIs are versioned.
 - [`/api/v1/sensor`](#apiv1sensoridhostnamehostnameipipaddr) - Sensor details
 - [`/api/v1/group/<groupid>/installer/windows/exe`](#windowsexeinstaller) - Signed EXE Sensor Installer for Windows
 - [`/api/v1/group/<groupid>/installer/windows/msi`](#windowsmsiinstaller) - Signed MSI Sensor Installer for Windows
+- [`/api/v1/group/<groupid>/installer/osx`](#osxinstaller) - PKG Sensor Installer for OSX
+- [`/api/v1/group/<groupid>/installer/linux`](#linuxinstaller) - Sensor Installer for Linux
 
 #### Watchlists
 - [`/api/v1/watchlist`](#apiv1watchlist) - Watchlist enumeration, addition, modification, and deletion
+
+#### Feeds
+- [`/api/v1/feed`](#apiv1feed) - Feed enumeration, addition, modification, and deletion
 
 #### Licensing
 - [`/api/v1/license`](#apiv1license) - Server license status, requests, and application of new license
@@ -917,6 +922,38 @@ GET http://192.168.206.154/api/v1/watchlist
 
 -----
 
+#### `/api/v1/feed/(id)`
+Feed enumeration, creation, modification, and deletion
+
+*Supports*: 'GET', 'PUT', 'POST', 'DELETE'
+
+##### Parameters:
+- `id`: OPTIONAL the feed id
+
+##### Returns
+
+- With no id parameter (`GET /api/v1/feed`) returns a list of configured feeds, with each list entry describing one feed 
+- With no id parameter (`POST` /api/v1/feed) returns the feed record for the newly created feed 
+- With an id parameter (`PUT` /api/v1/feed/<id>) returns the feed record for the newly updated feed 
+
+A feed record has the following structure:
+
+- `provider_url`: URL associated with the feed as a whole; this is a human-consumable link to more information about the feed provider and is not consumed by the Carbon Black server
+- `display_name`: Name of the feed as displayed in the Carbon Black web console
+- `name`: internal name of the feed; must be alphanumeric.  used when searching e.g. alliance_score_feedname:[10 to *]
+- `feed_url`: url of the feed itself; must begin with one of file:// http:// or https://
+- `enabled`: boolean indicator as to if the feed is enabled
+- `summary`: human-consumable summary of the feed
+- `tech_data`: human-consumable technical summary of the feed
+- `validate_server_cert`: boolean indicator as to if the Carbon Black server should verify the feed server certificate.  only applies to feeds provided via HTTPS
+- `id`: internal id of the feed; this id is used during feed modification and deletion
+- `icon`: base64-encoded icon representing the feed
+- `manually_added`: boolean indicator as to if the feed was added manually.  If logical false, this means the feed was provided by the Carbon Black Alliance
+- `order`: a numeric hint as to the display order in the Carbon Black web console
+- `use_proxy`: boolean indicator as to if the Carbon Black server should use a web proxy when retrieving the feed contents
+
+-----
+
 ####  `/api/v1/sensor/(id)?hostname=(hostname)&ip=(ipaddr)`
 Sensor / remote client details
 
@@ -929,7 +966,7 @@ Sensor / remote client details
 
 ##### Returns:
 
-- With no parameters (`GET /api/v1/sensor/`) returns a list of sensor structures, one per registered sensor.
+- With no parameters (`GET /api/v1/sensor`) returns a list of sensor structures, one per registered sensor.
 - With a sensor id, (`GET /api/v1/sensor/12`) returns a sensor structure for the specified sensor.
 - With a query string, (`GET /api/v1/sensor?hostname=foo`) returns a list of all sensors matching criteria
 
@@ -1071,3 +1108,38 @@ None
 
 - ZIP archive including a signed Windows MSI sensor installer and settings file  
 
+-----
+
+####  `/api/v1/group/<groupid>/installer/osx`
+Download a zip archive including a signed OSX PKG sensor installer
+
+*Supports*: `GET`
+
+##### Parameters:
+None
+
+##### Returns:
+
+- ZIP archive including a signed OSX PKG sensor installer and settings file
+
+##### Notes:
+
+- Requires Carbon Black Enterprise Server 4.2.1 or greater
+
+------
+
+#### `/api/v1/group/<groupid>/installer/linux`
+Download a zip archive including a Linux sensor installer
+
+*Supports*: `GET`
+
+##### Parameters:
+None
+
+##### Returns:
+
+- compressed tarball (tar.gz) archive including a Linux sensor installer and settings file
+
+##### Notes:
+
+- Requires Carbon Black Enterprise Server 4.2.1 or greater

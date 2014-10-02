@@ -45,18 +45,16 @@ class CbApi(object):
             Returns a python dictionary with the following field:
                 - version - version of the Carbon Black Enterprise Server
         """
+        print self.ssl_verify
         r = requests.get("%s/api/info" % self.server, headers=self.token_header, verify=self.ssl_verify)
-        if r.status_code != 200:
-            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+        r.raise_for_status()
         return json.loads(r.content)
 
     def license_status(self):
         """ Provide a summary of the current applied license
         """
         r = requests.get("%s/api/v1/license" % (self.server,),  headers=self.token_header, verify=self.ssl_verify)
-        if r.status_code != 200:
-            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
-
+        r.raise_for_status()
         return json.loads(r.content)
 
     def apply_license(self, license):
@@ -65,8 +63,7 @@ class CbApi(object):
         r = requests.post("%s/api/v1/license" % (self.server,), headers=self.token_header, \
                 data=json.dumps({'license': license}), \
                 verify=self.ssl_verify)
-        if r.status_code != 200:
-            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+        r.raise_for_status()
 
     def get_platform_server_config(self):
         """ Get Bit9 Platform Server configuration
@@ -80,9 +77,7 @@ class CbApi(object):
         r = requests.get("%s/api/v1/settings/global/platformserver" % (self.server,), \
                                                                        headers=self.token_header, \
                                                                        verify=self.ssl_verify)
-        if r.status_code != 200:
-            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
-
+        r.raise_for_status()
         return json.loads(r.content)
 
     def set_platform_server_config(self, platform_server_config):
@@ -99,8 +94,7 @@ class CbApi(object):
         r = requests.post("%s/api/v1/settings/global/platformserver" % (self.server,), \
                                                                         headers=self.token_header, \
                                                                         data = json.dumps(platform_server_config))
-        if r.status_code != 200:
-            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+        r.raise_for_status()
 
     def process_search(self, query_string, start=0, rows=10, sort="last_update desc"):
         """ Search for processes.  Arguments: 
@@ -142,8 +136,7 @@ class CbApi(object):
         #
         r = requests.post("%s/api/v1/process" % self.server, headers=self.token_header,
                           data=json.dumps(params), verify=self.ssl_verify)
-        if r.status_code != 200:
-            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+        r.raise_for_status()
         return r.json()
 
     def process_summary(self, id, segment, children_count=15):
@@ -158,25 +151,21 @@ class CbApi(object):
                 - siblings - a list of metadata structures for sibling processes
         """
         r = requests.get("%s/api/v1/process/%s/%s?children=%d" % (self.server, id, segment, children_count), headers=self.token_header, verify=self.ssl_verify)
-        if r.status_code != 200:
-            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+        r.raise_for_status()
         return r.json()
 
     def process_events(self, id, segment):
         """ get all the events (filemods, regmods, etc) for a process.  Requires the 'id' and 'segment_id' fields
             from a process search result"""
         r = requests.get("%s/api/v1/process/%s/%s/event" % (self.server, id, segment), headers=self.token_header, verify=self.ssl_verify)
-        if r.status_code != 200:
-            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+        r.raise_for_status()
         return r.json()
 
     def process_report(self, id, segment=0):
         """ download a "report" package describing the process
             the format of this report is subject to change"""
         r = requests.get("%s/api/v1/process/%s/%s/report" % (self.server, id, segment), headers=self.token_header, verify=self.ssl_verify)
-        if r.status_code != 200:
-            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
-        
+        r.raise_for_status() 
         return r.content
 
     def binary_search(self, query_string, start=0, rows=10, sort="server_added_timestamp desc"):
@@ -219,8 +208,7 @@ class CbApi(object):
         # @note GET is also supported through the use of a query string
         r = requests.post("%s/api/v1/binary" % self.server, headers=self.token_header,
                           data=json.dumps(params), verify=self.ssl_verify)
-        if r.status_code != 200:
-            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+        r.raise_for_status()
         return r.json()
 
     def binary_summary(self, md5):
@@ -229,8 +217,7 @@ class CbApi(object):
             Returns a python dictionary with the binary metadata. """
         r = requests.get("%s/api/v1/binary/%s/summary" % (self.server, md5),
                              headers=self.token_header, verify=self.ssl_verify)
-        if r.status_code != 200:
-            raise Exception("Unexpected response from endpoint: %s" % (r.status_code))
+        r.raise_for_status()
         return r.json()
 
     def binary(self, md5hash):
@@ -241,9 +228,18 @@ class CbApi(object):
         r = requests.get("%s/api/v1/binary/%s" % (self.server, md5hash),
                          headers=self.token_header, verify=self.ssl_verify)
 
-        if r.status_code != 200:
-            raise Exception("Unexpected response from /api/v1/binary: %s" % (r.status_code))
+        r.raise_for_status()
         return r._content
+
+    def sensor(self, sensor_id):
+        '''
+        get information about a single sensor
+        '''
+
+        r = requests.get("%s/api/v1/sensor/%s" % (self.server, sensor_id),
+                         headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
 
     def sensors(self, query_parameters={}):
         '''
@@ -261,8 +257,7 @@ class CbApi(object):
             url += "%s=%s&" % (query_parameter, query_parameters[query_parameter])
 
         r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
-        if r.status_code != 200:   
-            raise Exception("Unexpected response from /api/sensor: %s" % (r.status_code))
+        r.raise_for_status()
         return r.json()
 
     def sensor_installer(self, type, group_id=1):
@@ -270,7 +265,7 @@ class CbApi(object):
         get sensor installer package for a specified sensor group
 
         group_id - the group_id to download an installer for; defaults to 1 "Default Group"
-        type - the sensor installer type.  [WindowsEXE|WindowsMSI]
+        type - the sensor installer type.  [WindowsEXE|WindowsMSI|OSX|Linux]
         """
 
         # set up a mapping of types to REST endpoints
@@ -278,12 +273,14 @@ class CbApi(object):
         mapping = {\
                     'WindowsEXE': '/api/v1/group/%s/installer/windows/exe' % (group_id,),\
                     'WindowsMSI': '/api/v1/group/%s/installer/windows/msi' % (group_id,),\
+                    'OSX':        '/api/v1/group/%s/installer/osx' % (group_id,),\
+                    'Linux':      '/api/v1/group/%s/installer/linux' % (group_id,),\
                   }
 
         # verify that the type parameter is a known value
         #
         if not mapping.has_key(type):
-            raise ValueError("Unrecognized type '%s'; should be one of 'WindowsEXE' or 'WindowsMSI'" % (type,))
+            raise ValueError("Unrecognized type '%s'; should be one of 'WindowsEXE', 'WindowsMSI', 'OSX', or 'Linux'" % (type,))
 
         # build the fully-qualified URL
         #
@@ -304,19 +301,18 @@ class CbApi(object):
             url = url + "/%s" % (id,)
 
         r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
-        if r.status_code != 200:
-            raise Exception("Unexpected response from %s: %s" % (url, r.status_code))
-
+        r.raise_for_status()
         return r.json()
 
-    def watchlist_add(self, type, name, search_query, id=id):
+    def watchlist_add(self, type, name, search_query, id=id, readonly=False):
         '''
         adds a new watchlist
         '''
         request = {\
                       'index_type': type,\
                       'name': name,\
-                      'search_query': search_query\
+                      'search_query': search_query,\
+                      'readonly': readonly\
                   }
 
         if id is not None:
@@ -349,6 +345,7 @@ class CbApi(object):
         url = "%s/api/v1/watchlist/%s" % (self.server, id)
 
         r = requests.put(url, headers=self.token_header, data=json.dumps(watchlist), verify=self.ssl_verify)
+        r.raise_for_status()
 
         return r.json()
 
@@ -370,14 +367,75 @@ class CbApi(object):
 
         return r.json()
 
+    def feed_get_id_by_name(self, name):
+        '''
+        helper function to find the feed id given the feed name
+        '''
+
+        for feed in self.feed_enum():
+            if feed['name'].lower() == name.lower():
+                return feed['id']
+
+        # did not find it
+        #
+        return None
+
+    def feed_enum(self):
+        '''
+        enumerate all configured feeds
+        '''
+
+        url = "%s/api/v1/feed" % (self.server,)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def feed_info(self, id):
+        '''
+        retrieve information about an existing feed, as specified by id 
+        
+        note: the endpoint /api/v1/feed/<id> is not supported as of CB server 5.0
+        '''
+        feeds = self.feed_enum()
+        for feed in feeds:
+          if str(feed['id']) == str(id):
+              return feed 
+
+    def feed_del(self, id):
+        '''
+        delete a feed, as specified by id
+        '''
+        url = "%s/api/v1/feed/%s" % (self.server, id)
+
+        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+        
+    def feed_modify(self, id, feed):
+        '''
+        updates a watchlist
+        '''
+        url = "%s/api/v1/feed/%s" % (self.server, id)
+
+        r = requests.put(url, headers=self.token_header, data=json.dumps(feed), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
     def feed_synchronize(self, name, full_sync=True):
         '''
         force the synchronization of a feed
+        
+        this triggers the CB server to refresh the feed.  it does not result in immediate
+        tagging of any existing process or binary documents that match the feed.  it does result
+        in any new incoming data from sensors being tagged on ingress.
         '''
 
         feed_request = requests.get("%s/api/v1/feed" % self.server, headers=self.token_header, verify=self.ssl_verify)
-        if feed_request.status_code != 200:
-            raise Exception("Unexpected response from /api/v1/feed: %s" % feed_request.status_code)
+        feed_request.raise_for_status()
 
         for feed in feed_request.json():
             if feed['name'] == name:
@@ -392,5 +450,37 @@ class CbApi(object):
                 else:
                     raise Exception("Unexpected response from /api/v1/feed/%s/synchronize: %s"
                                     % (feed['id'], sync_request.status_code))
+
+                return r.json()
+
+        raise Exception("No such feed %s" % (name,))
+
+    def feed_report_enum(self, id):
+        '''
+        enumerate all reports for an existing feed
+
+        note that this will enumerate only the reports that are available on
+        the Carbon Black server.  If the feed source has changed since the
+        last time the feed was synchronized, these reports may be out-of-date.
+
+        use feed_synchronize to force a feed synchronization
+        '''
+
+        url = "%s/api/v1/feed/%s/report" % (self.server, id)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def feed_report_info(self, feedid, reportid):
+        '''
+        retrieve a single report from a feed
+        '''
+
+        url = "%s/api/v1/feed/%s/report/%s" % (self.server, feedid, reportid,)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
 
         return r.json()

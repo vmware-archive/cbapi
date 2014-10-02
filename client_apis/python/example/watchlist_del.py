@@ -10,7 +10,7 @@ sys.path.append('../src/cbapi')
 import cbapi 
 
 def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Dump Binary Info")
+    parser = optparse.OptionParser(usage="%prog [options]", description="Add a watchlist")
 
     # for each supported output type, add an option
     #
@@ -20,13 +20,9 @@ def build_cli_parser():
                       help="API Token for Carbon Black server")
     parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
                       help="Do not verify server SSL certificate.")
-    parser.add_option("-i", "--id", action="store", default=None, dest="id")
+    parser.add_option("-i", "--id", action="store", default=None, dest="id",
+                      help="Watchlist ID to delete")
     return parser
-
-def truncate(string, length):
-    if len(string) + 2 > length:
-        return string[:length] + "..."
-    return string
 
 def main(argv):
     parser = build_cli_parser()
@@ -39,21 +35,12 @@ def main(argv):
     #
     cb = cbapi.CbApi(opts.url, token=opts.token, ssl_verify=opts.ssl_verify)
 
-    # get record describing this watchlist  
+    # delete the watchlist
+    # for the purposes of this test script, hardcode the watchlist type, name, and query string
     #
-    watchlist = cb.watchlist(opts.id) 
-
-    # output the details about the watchlist
-    #
-    print '%-20s | %s' % ('field', 'value')
-    print '%-20s + %s' % ('-' * 20, '-' * 60)
-    print '%-20s | %s' % ('id', watchlist['id'])
-    print '%-20s | %s' % ('name', watchlist['name'])
-    print '%-20s | %s' % ('date_added', watchlist['date_added'])
-    print '%-20s | %s' % ('last_hit', watchlist['last_hit'])
-    print '%-20s | %s' % ('last_hit_count', watchlist['last_hit_count'])
-    print '%-20s | %s' % ('search_query', watchlist['search_query'])
-    print '%-20s | %s' % ('readonly', watchlist['readonly'])
+    print "-> Deleting watchlist [id=%s]..." % (opts.id,)
+    watchlist = cb.watchlist_del(opts.id)
+    print "-> Watchlist deleted" 
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

@@ -18,14 +18,18 @@ def build_cli_parser():
                       help="CB server's URL.  e.g., http://127.0.0.1 ")
     parser.add_option("-a", "--apitoken", action="store", default=None, dest="token",
                       help="API Token for Carbon Black server")
+    parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
+                      help="Do not verify server SSL certificate.")
     parser.add_option("-q", "--query", action="store", default=None, dest="query",
                       help="Watchlist query string, start with q=  e.g. q=process_name:notepad.exe")
     parser.add_option("-t", "--type", action="store", default=None, dest="type",
                       help="Watchlist type 'events' or 'modules'")
-    parser.add_option("-n", "--name", action="store", default=None, dest="name",
+    parser.add_option("-N", "--name", action="store", default=None, dest="name",
                       help="Watchlist name")
     parser.add_option("-i", "--id", action="store", default=None, dest="id",
                       help="Watchlist ID (optional)")
+    parser.add_option("-r", "--readonly", action="store_true", default=False, dest="readonly",
+                      help="When set, marks the new watchlist as 'read-only' so that it cannot be deleted from the console")
     return parser
 
 def watchlist_output(watchlist):
@@ -44,6 +48,7 @@ def watchlist_output(watchlist):
     print '    %-20s | %s' % ('last_hit', watchlist['last_hit'])
     print '    %-20s | %s' % ('last_hit_count', watchlist['last_hit_count'])
     print '    %-20s | %s' % ('search_query', watchlist['search_query'])
+    print '    %-20s | %s' % ('readonly', watchlist['readonly'])
     print '\n'
 
 def main(argv):
@@ -64,13 +69,13 @@ def main(argv):
 
     # build a cbapi object
     #
-    cb = cbapi.CbApi(opts.url, token=opts.token)
+    cb = cbapi.CbApi(opts.url, token=opts.token, ssl_verify=opts.ssl_verify)
 
     # add a watchlist
     # for the purposes of this test script, hardcode the watchlist type, name, and query string
     #
     print "-> Adding watchlist..."
-    watchlist = cb.watchlist_add(opts.type, opts.name, opts.query, id=opts.id)
+    watchlist = cb.watchlist_add(opts.type, opts.name, opts.query, id=opts.id, readonly=opts.readonly)
     print "-> Watchlist added [id=%s]" % (watchlist['id'])
 
     # get record describing this watchlist  
