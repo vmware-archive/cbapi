@@ -11,7 +11,7 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = descriptor.FileDescriptor(
   name='eventsv2.proto',
   package='kyrus.carbonblack.events',
-  serialized_pb='\n\x0e\x65ventsv2.proto\x12\x18kyrus.carbonblack.events\"\xe9\x01\n\rCbLinStatsMsg\x12\x11\n\tlin_total\x18\x01 \x01(\x05\x12\x16\n\x0elin_successful\x18\x02 \x01(\x05\x12\x15\n\rlin_no_scanid\x18\x03 \x01(\x05\x12\x18\n\x10lin_total_pended\x18\x04 \x01(\x05\x12&\n\x1elin_current_scanid_pended_size\x18\x05 \x01(\x05\x12*\n\"lin_current_handlepath_pended_size\x18\x06 \x01(\x05\x12(\n lin_current_filepath_pended_size\x18\x07 \x01(\x05\"\xe4\x01\n\x0b\x43\x62HeaderMsg\x12\x0f\n\x07version\x18\x01 \x02(\x05\x12\x0e\n\x06\x62ootid\x18\x02 \x01(\x05\x12\x0f\n\x07\x65ventid\x18\x03 \x01(\x05\x12\x11\n\ttimestamp\x18\x04 \x01(\x03\x12\x14\n\x0cprocess_guid\x18\x05 \x01(\x03\x12\x1c\n\x14\x66ilepath_string_guid\x18\x06 \x01(\x03\x12\x19\n\x05magic\x18\x07 \x01(\r:\n3735928559\x12$\n\x1cprocess_filepath_string_guid\x18\x08 \x01(\x03\x12\x1b\n\x13process_create_time\x18\t \x01(\x03\"\xca\x01\n\x0b\x43\x62StringMsg\x12\x0c\n\x04guid\x18\x01 \x01(\x03\x12\x12\n\nutf8string\x18\x02 \x01(\x0c\x12U\n\x0bstring_type\x18\x03 \x01(\x0e\x32\x32.kyrus.carbonblack.events.CbStringMsg.CbStringType:\x0ctypeFilepath\"B\n\x0c\x43\x62StringType\x12\x10\n\x0ctypeFilepath\x10\x01\x12\x0f\n\x0btypeRegpath\x10\x02\x12\x0f\n\x0btypeNetpath\x10\x03\"\xb5\x02\n\x0c\x43\x62ProcessMsg\x12\x0b\n\x03pid\x18\x01 \x01(\x05\x12\x0f\n\x07\x63reated\x18\x02 \x01(\x08\x12\x12\n\nparent_pid\x18\x03 \x01(\x05\x12\x1a\n\x12parent_create_time\x18\x04 \x01(\x03\x12\x13\n\x0bparent_guid\x18\x05 \x01(\x03\x12\x0f\n\x07md5hash\x18\x06 \x01(\x0c\x12\x18\n\x10have_seen_before\x18\x07 \x01(\x08\x12\x12\n\ndeprecated\x18\x08 \x01(\x03\x12\x13\n\x0b\x63ommandline\x18\t \x01(\x0c\x12\x12\n\nparent_md5\x18\n \x01(\x0c\x12\x13\n\x0bparent_path\x18\x0b \x01(\t\x12\x1f\n\x10\x63reationobserved\x18\x0c \x01(\x08:\x05\x66\x61lse\x12$\n\x15\x65xpect_followon_w_md5\x18\r \x01(\x08:\x05\x66\x61lse\"y\n\x11\x43\x62\x43hildProcessMsg\x12\x0f\n\x07\x63reated\x18\x01 \x01(\x08\x12\x13\n\x0bparent_guid\x18\x02 \x01(\x03\x12\x0f\n\x07md5hash\x18\x03 \x01(\x0c\x12\x12\n\nchild_guid\x18\x04 \x01(\x03\x12\x0c\n\x04path\x18\x05 \x01(\t\x12\x0b\n\x03pid\x18\x06 \x01(\x03\"\xa8\x01\n\x0f\x43\x62ModuleLoadMsg\x12\x0c\n\x04guid\x18\x01 \x01(\x03\x12\x1e\n\x16handlepath_string_guid\x18\x02 \x01(\x03\x12\x0f\n\x07md5hash\x18\x03 \x01(\x0c\x12\x0e\n\x06scanid\x18\x04 \x01(\x05\x12\x1e\n\x16is_process_base_module\x18\x05 \x01(\x08\x12\x12\n\nimage_base\x18\x06 \x01(\x03\x12\x12\n\nimage_size\x18\x07 \x01(\r\"\x88\x02\n\x0c\x43\x62\x46ileModMsg\x12\x0c\n\x04guid\x18\x01 \x01(\x03\x12\x46\n\x06\x61\x63tion\x18\x02 \x01(\x0e\x32\x36.kyrus.carbonblack.events.CbFileModMsg.CbFileModAction\x12\x18\n\x10have_seen_before\x18\x03 \x01(\x08\x12\x0f\n\x07md5hash\x18\x04 \x01(\x0c\"w\n\x0f\x43\x62\x46ileModAction\x12\x17\n\x13\x61\x63tionFileModCreate\x10\x01\x12\x16\n\x12\x61\x63tionFileModWrite\x10\x02\x12\x17\n\x13\x61\x63tionFileModDelete\x10\x04\x12\x1a\n\x16\x61\x63tionFileModLastWrite\x10\x08\"\x92\x02\n\x0b\x43\x62RegModMsg\x12\x0c\n\x04guid\x18\x01 \x01(\x03\x12\x44\n\x06\x61\x63tion\x18\x02 \x01(\x0e\x32\x34.kyrus.carbonblack.events.CbRegModMsg.CbRegModAction\x12\x18\n\x10have_seen_before\x18\x03 \x01(\x08\x12\x14\n\x0cutf8_regpath\x18\x04 \x01(\x0c\"\x7f\n\x0e\x43\x62RegModAction\x12\x19\n\x15\x61\x63tionRegModCreateKey\x10\x01\x12\x1a\n\x16\x61\x63tionRegModWriteValue\x10\x02\x12\x19\n\x15\x61\x63tionRegModDeleteKey\x10\x04\x12\x1b\n\x17\x61\x63tionRegModDeleteValue\x10\x08\"\xa1\x02\n\x0c\x43\x62NetConnMsg\x12\x0c\n\x04guid\x18\x01 \x01(\x03\x12\x13\n\x0bipv4Address\x18\x02 \x01(\r\x12\x12\n\nipv6LoPart\x18\x03 \x01(\x04\x12\x12\n\nipv6HiPart\x18\x04 \x01(\x04\x12\x0c\n\x04port\x18\x05 \x01(\r\x12\x45\n\x08protocol\x18\x06 \x01(\x0e\x32\x33.kyrus.carbonblack.events.CbNetConnMsg.ProtocolType\x12\x14\n\x0cutf8_netpath\x18\x07 \x01(\x0c\x12\x16\n\x08outbound\x18\x08 \x01(\x08:\x04true\x12\x17\n\x0fviaproxy_target\x18\t \x01(\t\"*\n\x0cProtocolType\x12\x0c\n\x08ProtoTcp\x10\x06\x12\x0c\n\x08ProtoUdp\x10\x11\"M\n\x0f\x43\x62StatisticsMsg\x12:\n\tlin_stats\x18\x01 \x01(\x0b\x32\'.kyrus.carbonblack.events.CbLinStatsMsg\"\xe2\x05\n\x0f\x43\x62ModuleInfoMsg\x12\x0b\n\x03md5\x18\x01 \x01(\x0c\x12\x1a\n\x12\x43opiedModuleLength\x18\x02 \x01(\r\x12\x1c\n\x14OriginalModuleLength\x18\x03 \x01(\x04\x12\x1c\n\x14utf8_FileDescription\x18\x04 \x01(\t\x12\x18\n\x10utf8_CompanyName\x18\x05 \x01(\t\x12\x18\n\x10utf8_ProductName\x18\x06 \x01(\t\x12\x18\n\x10utf8_FileVersion\x18\x07 \x01(\t\x12\x15\n\rutf8_Comments\x18\x08 \x01(\t\x12\x1b\n\x13utf8_LegalCopyright\x18\t \x01(\t\x12\x1b\n\x13utf8_LegalTrademark\x18\n \x01(\t\x12\x19\n\x11utf8_InternalName\x18\x0b \x01(\t\x12\x1d\n\x15utf8_OriginalFileName\x18\x0c \x01(\t\x12\x1f\n\x17utf8_ProductDescription\x18\r \x01(\t\x12\x1b\n\x13utf8_ProductVersion\x18\x0e \x01(\t\x12\x19\n\x11utf8_PrivateBuild\x18\x0f \x01(\t\x12\x19\n\x11utf8_SpecialBuild\x18\x10 \x01(\t\x12\x1d\n\x15utf8_DigSig_Publisher\x18\x11 \x01(\t\x12\x1f\n\x17utf8_DigSig_ProgramName\x18\x12 \x01(\t\x12\x1e\n\x16utf8_DigSig_IssuerName\x18\x13 \x01(\t\x12\x1f\n\x17utf8_DigSig_SubjectName\x18\x14 \x01(\t\x12\x1a\n\x12utf8_DigSig_Result\x18\x15 \x01(\t\x12\x1e\n\x16utf8_DigSig_ResultCode\x18\x16 \x01(\t\x12\x1c\n\x14utf8_DigSig_SignTime\x18\x17 \x01(\t\x12\x0c\n\x04Icon\x18\x18 \x01(\x0c\x12\x17\n\x0fImageFileHeader\x18\x19 \x01(\x0c\x12\x1b\n\x13utf8_OnDiskFilename\x18\x1a \x01(\t\"\xa4\x01\n\x0c\x43\x62VtWriteMsg\x12\x1c\n\x14WritingProcessExeMd5\x18\x01 \x01(\x0c\x12\x16\n\x0e\x46ileWrittenMd5\x18\x02 \x01(\x0c\x12!\n\x19\x46ileWrittenIsPeModuleHint\x18\x03 \x01(\x08\x12\x1e\n\x16WritingProcessFilename\x18\x04 \x01(\t\x12\x1b\n\x13\x46ileWrittenFilename\x18\x05 \x01(\t\"C\n\x0b\x43\x62VtLoadMsg\x12\x1b\n\x13LoaderProcessExeMd5\x18\x01 \x01(\x0c\x12\x17\n\x0fLoadedModuleMd5\x18\x02 \x01(\x0c\"\xbe\x05\n\nCbEventMsg\x12\x35\n\x06header\x18\x01 \x02(\x0b\x32%.kyrus.carbonblack.events.CbHeaderMsg\x12\x36\n\x07strings\x18\x02 \x03(\x0b\x32%.kyrus.carbonblack.events.CbStringMsg\x12\x37\n\x07process\x18\x03 \x01(\x0b\x32&.kyrus.carbonblack.events.CbProcessMsg\x12:\n\x07modload\x18\x04 \x01(\x0b\x32).kyrus.carbonblack.events.CbModuleLoadMsg\x12\x37\n\x07\x66ilemod\x18\x05 \x01(\x0b\x32&.kyrus.carbonblack.events.CbFileModMsg\x12\x37\n\x07network\x18\x06 \x01(\x0b\x32&.kyrus.carbonblack.events.CbNetConnMsg\x12\x35\n\x06regmod\x18\x07 \x01(\x0b\x32%.kyrus.carbonblack.events.CbRegModMsg\x12\x38\n\x05stats\x18\x08 \x01(\x0b\x32).kyrus.carbonblack.events.CbStatisticsMsg\x12\x39\n\x06module\x18\t \x01(\x0b\x32).kyrus.carbonblack.events.CbModuleInfoMsg\x12\x37\n\x07vtwrite\x18\n \x01(\x0b\x32&.kyrus.carbonblack.events.CbVtWriteMsg\x12\x35\n\x06vtload\x18\x0b \x01(\x0b\x32%.kyrus.carbonblack.events.CbVtLoadMsg\x12>\n\tchildproc\x18\x0c \x01(\x0b\x32+.kyrus.carbonblack.events.CbChildProcessMsgB*\n\x14\x63om.carbonblack.cbfsB\x12\x43\x62\x45ventsV2Protocol')
+  serialized_pb='\n\x0e\x65ventsv2.proto\x12\x18kyrus.carbonblack.events\"\xa4\x02\n\x0b\x43\x62HeaderMsg\x12\x0f\n\x07version\x18\x01 \x02(\x05\x12\x0e\n\x06\x62ootid\x18\x02 \x01(\x05\x12\x0f\n\x07\x65ventid\x18\x03 \x01(\x05\x12\x11\n\ttimestamp\x18\x04 \x01(\x03\x12\x14\n\x0cprocess_guid\x18\x05 \x01(\x03\x12\x1c\n\x14\x66ilepath_string_guid\x18\x06 \x01(\x03\x12\x19\n\x05magic\x18\x07 \x01(\r:\n3735928559\x12$\n\x1cprocess_filepath_string_guid\x18\x08 \x01(\x03\x12\x1b\n\x13process_create_time\x18\t \x01(\x03\x12\x13\n\x0bprocess_pid\x18\n \x01(\x05\x12\x13\n\x0bprocess_md5\x18\x0b \x01(\x0c\x12\x14\n\x0cprocess_path\x18\x0c \x01(\t\"\xca\x01\n\x0b\x43\x62StringMsg\x12\x0c\n\x04guid\x18\x01 \x01(\x03\x12\x12\n\nutf8string\x18\x02 \x01(\x0c\x12U\n\x0bstring_type\x18\x03 \x01(\x0e\x32\x32.kyrus.carbonblack.events.CbStringMsg.CbStringType:\x0ctypeFilepath\"B\n\x0c\x43\x62StringType\x12\x10\n\x0ctypeFilepath\x10\x01\x12\x0f\n\x0btypeRegpath\x10\x02\x12\x0f\n\x0btypeNetpath\x10\x03\"\xd4\x02\n\x0c\x43\x62ProcessMsg\x12\x0b\n\x03pid\x18\x01 \x01(\x05\x12\x0f\n\x07\x63reated\x18\x02 \x01(\x08\x12\x12\n\nparent_pid\x18\x03 \x01(\x05\x12\x1a\n\x12parent_create_time\x18\x04 \x01(\x03\x12\x13\n\x0bparent_guid\x18\x05 \x01(\x03\x12\x0f\n\x07md5hash\x18\x06 \x01(\x0c\x12\x18\n\x10have_seen_before\x18\x07 \x01(\x08\x12\x12\n\ndeprecated\x18\x08 \x01(\x03\x12\x13\n\x0b\x63ommandline\x18\t \x01(\x0c\x12\x12\n\nparent_md5\x18\n \x01(\x0c\x12\x13\n\x0bparent_path\x18\x0b \x01(\t\x12\x1f\n\x10\x63reationobserved\x18\x0c \x01(\x08:\x05\x66\x61lse\x12$\n\x15\x65xpect_followon_w_md5\x18\r \x01(\x08:\x05\x66\x61lse\x12\x0b\n\x03uid\x18\x0e \x01(\t\x12\x10\n\x08username\x18\x0f \x01(\t\"\xa5\x01\n\x11\x43\x62\x43hildProcessMsg\x12\x0f\n\x07\x63reated\x18\x01 \x01(\x08\x12\x13\n\x0bparent_guid\x18\x02 \x01(\x03\x12\x0f\n\x07md5hash\x18\x03 \x01(\x0c\x12\x12\n\nchild_guid\x18\x04 \x01(\x03\x12\x0c\n\x04path\x18\x05 \x01(\t\x12\x0b\n\x03pid\x18\x06 \x01(\x03\x12\x13\n\x0b\x63reate_time\x18\x07 \x01(\x03\x12\x15\n\x06tamper\x18\x08 \x01(\x08:\x05\x66\x61lse\"\xa8\x01\n\x0f\x43\x62ModuleLoadMsg\x12\x0c\n\x04guid\x18\x01 \x01(\x03\x12\x1e\n\x16handlepath_string_guid\x18\x02 \x01(\x03\x12\x0f\n\x07md5hash\x18\x03 \x01(\x0c\x12\x0e\n\x06scanid\x18\x04 \x01(\x05\x12\x1e\n\x16is_process_base_module\x18\x05 \x01(\x08\x12\x12\n\nimage_base\x18\x06 \x01(\x03\x12\x12\n\nimage_size\x18\x07 \x01(\r\"\xc4\x05\n\x0c\x43\x62\x46ileModMsg\x12\x0c\n\x04guid\x18\x01 \x01(\x03\x12\x46\n\x06\x61\x63tion\x18\x02 \x01(\x0e\x32\x36.kyrus.carbonblack.events.CbFileModMsg.CbFileModAction\x12\x18\n\x10have_seen_before\x18\x03 \x01(\x08\x12\x0f\n\x07md5hash\x18\x04 \x01(\x0c\x12?\n\x04type\x18\x05 \x01(\x0e\x32\x31.kyrus.carbonblack.events.CbFileModMsg.CbFileType\x12\x15\n\x06tamper\x18\x06 \x01(\x08:\x05\x66\x61lse\"\x8e\x01\n\x0f\x43\x62\x46ileModAction\x12\x17\n\x13\x61\x63tionFileModCreate\x10\x01\x12\x16\n\x12\x61\x63tionFileModWrite\x10\x02\x12\x17\n\x13\x61\x63tionFileModDelete\x10\x04\x12\x1a\n\x16\x61\x63tionFileModLastWrite\x10\x08\x12\x15\n\x11\x61\x63tionFileModOpen\x10\x10\"\xc9\x02\n\nCbFileType\x12\x13\n\x0f\x66iletypeUnknown\x10\x00\x12\x0e\n\nfiletypePe\x10\x01\x12\x0f\n\x0b\x66iletypeElf\x10\x02\x12\x19\n\x15\x66iletypeUniverasalBin\x10\x03\x12\x11\n\rfiletypeEicar\x10\x08\x12\x18\n\x14\x66iletypeOfficeLegacy\x10\x10\x12\x19\n\x15\x66iletypeOfficeOpenXml\x10\x11\x12\x0f\n\x0b\x66iletypePdf\x10\x30\x12\x18\n\x14\x66iletypeArchivePkzip\x10@\x12\x16\n\x12\x66iletypeArchiveLzh\x10\x41\x12\x16\n\x12\x66iletypeArchiveLzw\x10\x42\x12\x16\n\x12\x66iletypeArchiveRar\x10\x43\x12\x16\n\x12\x66iletypeArchiveTar\x10\x44\x12\x17\n\x13\x66iletypeArchive7zip\x10\x45\"\xa9\x02\n\x0b\x43\x62RegModMsg\x12\x0c\n\x04guid\x18\x01 \x01(\x03\x12\x44\n\x06\x61\x63tion\x18\x02 \x01(\x0e\x32\x34.kyrus.carbonblack.events.CbRegModMsg.CbRegModAction\x12\x18\n\x10have_seen_before\x18\x03 \x01(\x08\x12\x14\n\x0cutf8_regpath\x18\x04 \x01(\x0c\x12\x15\n\x06tamper\x18\x05 \x01(\x08:\x05\x66\x61lse\"\x7f\n\x0e\x43\x62RegModAction\x12\x19\n\x15\x61\x63tionRegModCreateKey\x10\x01\x12\x1a\n\x16\x61\x63tionRegModWriteValue\x10\x02\x12\x19\n\x15\x61\x63tionRegModDeleteKey\x10\x04\x12\x1b\n\x17\x61\x63tionRegModDeleteValue\x10\x08\"\xeb\x02\n\x0c\x43\x62NetConnMsg\x12\x0c\n\x04guid\x18\x01 \x01(\x03\x12\x13\n\x0bipv4Address\x18\x02 \x01(\r\x12\x12\n\nipv6LoPart\x18\x03 \x01(\x04\x12\x12\n\nipv6HiPart\x18\x04 \x01(\x04\x12\x0c\n\x04port\x18\x05 \x01(\r\x12\x45\n\x08protocol\x18\x06 \x01(\x0e\x32\x33.kyrus.carbonblack.events.CbNetConnMsg.ProtocolType\x12\x14\n\x0cutf8_netpath\x18\x07 \x01(\x0c\x12\x16\n\x08outbound\x18\x08 \x01(\x08:\x04true\x12\x1e\n\x0fproxyConnection\x18\t \x01(\x08:\x05\x66\x61lse\x12\x18\n\x10proxyIpv4Address\x18\n \x01(\r\x12\x11\n\tproxyPort\x18\x0b \x01(\r\x12\x14\n\x0cproxyNetPath\x18\x0c \x01(\t\"*\n\x0cProtocolType\x12\x0c\n\x08ProtoTcp\x10\x06\x12\x0c\n\x08ProtoUdp\x10\x11\"\xea\x01\n\rCbLinStatsMsg\x12\x11\n\tlin_total\x18\x01 \x01(\x05\x12\x16\n\x0elin_successful\x18\x02 \x01(\x05\x12\x16\n\x0elin_no_scanidi\x18\x03 \x01(\x05\x12\x18\n\x10lin_total_pended\x18\x04 \x01(\x05\x12&\n\x1elin_current_scanid_pended_size\x18\x05 \x01(\x05\x12*\n\"lin_current_handlepath_pended_size\x18\x06 \x01(\x05\x12(\n lin_current_filepath_pended_size\x18\x07 \x01(\x05\"\x91\x02\n\x15\x43\x62\x43rossProcessOpenMsg\x12\x46\n\x04type\x18\x01 \x01(\x0e\x32\x38.kyrus.carbonblack.events.CbCrossProcessOpenMsg.OpenType\x12\x11\n\ttargetPid\x18\x02 \x01(\r\x12\x1c\n\x14targetProcCreateTime\x18\x03 \x01(\x04\x12\x17\n\x0frequestedAccess\x18\x04 \x01(\r\x12\x16\n\x0etargetProcPath\x18\x05 \x01(\t\x12\x15\n\rtargetProcMd5\x18\x06 \x01(\x0c\"7\n\x08OpenType\x12\x15\n\x11OpenProcessHandle\x10\x01\x12\x14\n\x10OpenThreadHandle\x10\x02\"}\n\x17\x43\x62\x43reateRemoteThreadMsg\x12\x15\n\rremoteProcPid\x18\x01 \x01(\r\x12\x1c\n\x14remoteProcCreateTime\x18\x02 \x01(\x04\x12\x16\n\x0eremoteProcPath\x18\x03 \x01(\t\x12\x15\n\rremoteProcMd5\x18\x04 \x01(\x0c\"\xab\x01\n\x11\x43\x62\x43rossProcessMsg\x12=\n\x04open\x18\x01 \x01(\x0b\x32/.kyrus.carbonblack.events.CbCrossProcessOpenMsg\x12G\n\x0cremotethread\x18\x02 \x01(\x0b\x32\x31.kyrus.carbonblack.events.CbCreateRemoteThreadMsg\x12\x0e\n\x06tamper\x18\x03 \x01(\x08\"\xb2\x02\n\x16\x43\x62ProtectionBlockedMsg\x12O\n\x0b\x62lockedType\x18\x01 \x01(\x0e\x32:.kyrus.carbonblack.events.CbProtectionBlockedMsg.BlockType\x12Q\n\x0c\x62lockedEvent\x18\x02 \x01(\x0e\x32;.kyrus.carbonblack.events.CbProtectionBlockedMsg.BlockEvent\x12\x16\n\x0e\x62lockedmd5Hash\x18\x03 \x01(\x0c\".\n\tBlockType\x12\x0b\n\x07MD5Hash\x10\x01\x12\x14\n\x10NetworkIsolation\x10\x02\",\n\nBlockEvent\x12\x11\n\rProcessCreate\x10\x01\x12\x0b\n\x07NetConn\x10\x02\"M\n\x0f\x43\x62StatisticsMsg\x12:\n\tlin_stats\x18\x01 \x01(\x0b\x32\'.kyrus.carbonblack.events.CbLinStatsMsg\"\xe2\x05\n\x0f\x43\x62ModuleInfoMsg\x12\x0b\n\x03md5\x18\x01 \x01(\x0c\x12\x1a\n\x12\x43opiedModuleLength\x18\x02 \x01(\r\x12\x1c\n\x14OriginalModuleLength\x18\x03 \x01(\x04\x12\x1c\n\x14utf8_FileDescription\x18\x04 \x01(\t\x12\x18\n\x10utf8_CompanyName\x18\x05 \x01(\t\x12\x18\n\x10utf8_ProductName\x18\x06 \x01(\t\x12\x18\n\x10utf8_FileVersion\x18\x07 \x01(\t\x12\x15\n\rutf8_Comments\x18\x08 \x01(\t\x12\x1b\n\x13utf8_LegalCopyright\x18\t \x01(\t\x12\x1b\n\x13utf8_LegalTrademark\x18\n \x01(\t\x12\x19\n\x11utf8_InternalName\x18\x0b \x01(\t\x12\x1d\n\x15utf8_OriginalFileName\x18\x0c \x01(\t\x12\x1f\n\x17utf8_ProductDescription\x18\r \x01(\t\x12\x1b\n\x13utf8_ProductVersion\x18\x0e \x01(\t\x12\x19\n\x11utf8_PrivateBuild\x18\x0f \x01(\t\x12\x19\n\x11utf8_SpecialBuild\x18\x10 \x01(\t\x12\x1d\n\x15utf8_DigSig_Publisher\x18\x11 \x01(\t\x12\x1f\n\x17utf8_DigSig_ProgramName\x18\x12 \x01(\t\x12\x1e\n\x16utf8_DigSig_IssuerName\x18\x13 \x01(\t\x12\x1f\n\x17utf8_DigSig_SubjectName\x18\x14 \x01(\t\x12\x1a\n\x12utf8_DigSig_Result\x18\x15 \x01(\t\x12\x1e\n\x16utf8_DigSig_ResultCode\x18\x16 \x01(\t\x12\x1c\n\x14utf8_DigSig_SignTime\x18\x17 \x01(\t\x12\x0c\n\x04Icon\x18\x18 \x01(\x0c\x12\x17\n\x0fImageFileHeader\x18\x19 \x01(\x0c\x12\x1b\n\x13utf8_OnDiskFilename\x18\x1a \x01(\t\"\xa4\x01\n\x0c\x43\x62VtWriteMsg\x12\x1c\n\x14WritingProcessExeMd5\x18\x01 \x01(\x0c\x12\x16\n\x0e\x46ileWrittenMd5\x18\x02 \x01(\x0c\x12!\n\x19\x46ileWrittenIsPeModuleHint\x18\x03 \x01(\x08\x12\x1e\n\x16WritingProcessFilename\x18\x04 \x01(\t\x12\x1b\n\x13\x46ileWrittenFilename\x18\x05 \x01(\t\"C\n\x0b\x43\x62VtLoadMsg\x12\x1b\n\x13LoaderProcessExeMd5\x18\x01 \x01(\x0c\x12\x17\n\x0fLoadedModuleMd5\x18\x02 \x01(\x0c\"T\n\x18\x43\x62\x45ndpointEnvironmentMsg\x12\x10\n\x08SensorId\x18\x01 \x01(\x05\x12\x16\n\x0eSensorHostName\x18\x02 \x01(\t\x12\x0e\n\x06HostId\x18\x03 \x01(\x03\"(\n\x16\x43\x62ServerEnvironmentMsg\x12\x0e\n\x06NodeId\x18\x01 \x01(\x05\"\x9a\x01\n\x10\x43\x62\x45nvironmentMsg\x12\x44\n\x08\x65ndpoint\x18\x01 \x01(\x0b\x32\x32.kyrus.carbonblack.events.CbEndpointEnvironmentMsg\x12@\n\x06server\x18\x02 \x01(\x0b\x32\x30.kyrus.carbonblack.events.CbServerEnvironmentMsg\"\x84\x02\n\x10\x43\x62TamperAlertMsg\x12J\n\x04type\x18\x01 \x01(\x0e\x32<.kyrus.carbonblack.events.CbTamperAlertMsg.CbTamperAlertType\"\xa3\x01\n\x11\x43\x62TamperAlertType\x12\x1b\n\x17\x41lertCoreDriverUnloaded\x10\x01\x12\x1e\n\x1a\x41lertNetworkDriverUnloaded\x10\x02\x12\x19\n\x15\x41lertCbServiceStopped\x10\x03\x12\x1c\n\x18\x41lertCbProcessTerminated\x10\x04\x12\x18\n\x14\x41lertCbCodeInjection\x10\x05\"\xbb\x07\n\nCbEventMsg\x12\x35\n\x06header\x18\x01 \x02(\x0b\x32%.kyrus.carbonblack.events.CbHeaderMsg\x12\x36\n\x07strings\x18\x02 \x03(\x0b\x32%.kyrus.carbonblack.events.CbStringMsg\x12\x37\n\x07process\x18\x03 \x01(\x0b\x32&.kyrus.carbonblack.events.CbProcessMsg\x12:\n\x07modload\x18\x04 \x01(\x0b\x32).kyrus.carbonblack.events.CbModuleLoadMsg\x12\x37\n\x07\x66ilemod\x18\x05 \x01(\x0b\x32&.kyrus.carbonblack.events.CbFileModMsg\x12\x37\n\x07network\x18\x06 \x01(\x0b\x32&.kyrus.carbonblack.events.CbNetConnMsg\x12\x35\n\x06regmod\x18\x07 \x01(\x0b\x32%.kyrus.carbonblack.events.CbRegModMsg\x12\x38\n\x05stats\x18\x08 \x01(\x0b\x32).kyrus.carbonblack.events.CbStatisticsMsg\x12\x39\n\x06module\x18\t \x01(\x0b\x32).kyrus.carbonblack.events.CbModuleInfoMsg\x12\x37\n\x07vtwrite\x18\n \x01(\x0b\x32&.kyrus.carbonblack.events.CbVtWriteMsg\x12\x35\n\x06vtload\x18\x0b \x01(\x0b\x32%.kyrus.carbonblack.events.CbVtLoadMsg\x12>\n\tchildproc\x18\x0c \x01(\x0b\x32+.kyrus.carbonblack.events.CbChildProcessMsg\x12\x37\n\x03\x65nv\x18\r \x01(\x0b\x32*.kyrus.carbonblack.events.CbEnvironmentMsg\x12>\n\tcrossproc\x18\x0e \x01(\x0b\x32+.kyrus.carbonblack.events.CbCrossProcessMsg\x12?\n\x0btamperAlert\x18\x0f \x01(\x0b\x32*.kyrus.carbonblack.events.CbTamperAlertMsg\x12\x41\n\x07\x62locked\x18\x10 \x01(\x0b\x32\x30.kyrus.carbonblack.events.CbProtectionBlockedMsgB*\n\x14\x63om.carbonblack.cbfsB\x12\x43\x62\x45ventsV2Protocol')
 
 
 
@@ -36,8 +36,8 @@ _CBSTRINGMSG_CBSTRINGTYPE = descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=648,
-  serialized_end=714,
+  serialized_start=476,
+  serialized_end=542,
 )
 
 _CBFILEMODMSG_CBFILEMODACTION = descriptor.EnumDescriptor(
@@ -62,11 +62,84 @@ _CBFILEMODMSG_CBFILEMODACTION = descriptor.EnumDescriptor(
       name='actionFileModLastWrite', index=3, number=8,
       options=None,
       type=None),
+    descriptor.EnumValueDescriptor(
+      name='actionFileModOpen', index=4, number=16,
+      options=None,
+      type=None),
   ],
   containing_type=None,
   options=None,
-  serialized_start=1468,
-  serialized_end=1587,
+  serialized_start=1461,
+  serialized_end=1603,
+)
+
+_CBFILEMODMSG_CBFILETYPE = descriptor.EnumDescriptor(
+  name='CbFileType',
+  full_name='kyrus.carbonblack.events.CbFileModMsg.CbFileType',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    descriptor.EnumValueDescriptor(
+      name='filetypeUnknown', index=0, number=0,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='filetypePe', index=1, number=1,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='filetypeElf', index=2, number=2,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='filetypeUniverasalBin', index=3, number=3,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='filetypeEicar', index=4, number=8,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='filetypeOfficeLegacy', index=5, number=16,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='filetypeOfficeOpenXml', index=6, number=17,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='filetypePdf', index=7, number=48,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='filetypeArchivePkzip', index=8, number=64,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='filetypeArchiveLzh', index=9, number=65,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='filetypeArchiveLzw', index=10, number=66,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='filetypeArchiveRar', index=11, number=67,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='filetypeArchiveTar', index=12, number=68,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='filetypeArchive7zip', index=13, number=69,
+      options=None,
+      type=None),
+  ],
+  containing_type=None,
+  options=None,
+  serialized_start=1606,
+  serialized_end=1935,
 )
 
 _CBREGMODMSG_CBREGMODACTION = descriptor.EnumDescriptor(
@@ -94,8 +167,8 @@ _CBREGMODMSG_CBREGMODACTION = descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1737,
-  serialized_end=1864,
+  serialized_start=2108,
+  serialized_end=2235,
 )
 
 _CBNETCONNMSG_PROTOCOLTYPE = descriptor.EnumDescriptor(
@@ -115,78 +188,104 @@ _CBNETCONNMSG_PROTOCOLTYPE = descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=2114,
-  serialized_end=2156,
+  serialized_start=2559,
+  serialized_end=2601,
 )
 
-
-_CBLINSTATSMSG = descriptor.Descriptor(
-  name='CbLinStatsMsg',
-  full_name='kyrus.carbonblack.events.CbLinStatsMsg',
+_CBCROSSPROCESSOPENMSG_OPENTYPE = descriptor.EnumDescriptor(
+  name='OpenType',
+  full_name='kyrus.carbonblack.events.CbCrossProcessOpenMsg.OpenType',
   filename=None,
   file=DESCRIPTOR,
+  values=[
+    descriptor.EnumValueDescriptor(
+      name='OpenProcessHandle', index=0, number=1,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='OpenThreadHandle', index=1, number=2,
+      options=None,
+      type=None),
+  ],
   containing_type=None,
-  fields=[
-    descriptor.FieldDescriptor(
-      name='lin_total', full_name='kyrus.carbonblack.events.CbLinStatsMsg.lin_total', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='lin_successful', full_name='kyrus.carbonblack.events.CbLinStatsMsg.lin_successful', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='lin_no_scanid', full_name='kyrus.carbonblack.events.CbLinStatsMsg.lin_no_scanid', index=2,
-      number=3, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='lin_total_pended', full_name='kyrus.carbonblack.events.CbLinStatsMsg.lin_total_pended', index=3,
-      number=4, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='lin_current_scanid_pended_size', full_name='kyrus.carbonblack.events.CbLinStatsMsg.lin_current_scanid_pended_size', index=4,
-      number=5, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='lin_current_handlepath_pended_size', full_name='kyrus.carbonblack.events.CbLinStatsMsg.lin_current_handlepath_pended_size', index=5,
-      number=6, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='lin_current_filepath_pended_size', full_name='kyrus.carbonblack.events.CbLinStatsMsg.lin_current_filepath_pended_size', index=6,
-      number=7, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
   options=None,
-  is_extendable=False,
-  extension_ranges=[],
-  serialized_start=45,
-  serialized_end=278,
+  serialized_start=3059,
+  serialized_end=3114,
+)
+
+_CBPROTECTIONBLOCKEDMSG_BLOCKTYPE = descriptor.EnumDescriptor(
+  name='BlockType',
+  full_name='kyrus.carbonblack.events.CbProtectionBlockedMsg.BlockType',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    descriptor.EnumValueDescriptor(
+      name='MD5Hash', index=0, number=1,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='NetworkIsolation', index=1, number=2,
+      options=None,
+      type=None),
+  ],
+  containing_type=None,
+  options=None,
+  serialized_start=3632,
+  serialized_end=3678,
+)
+
+_CBPROTECTIONBLOCKEDMSG_BLOCKEVENT = descriptor.EnumDescriptor(
+  name='BlockEvent',
+  full_name='kyrus.carbonblack.events.CbProtectionBlockedMsg.BlockEvent',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    descriptor.EnumValueDescriptor(
+      name='ProcessCreate', index=0, number=1,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='NetConn', index=1, number=2,
+      options=None,
+      type=None),
+  ],
+  containing_type=None,
+  options=None,
+  serialized_start=3680,
+  serialized_end=3724,
+)
+
+_CBTAMPERALERTMSG_CBTAMPERALERTTYPE = descriptor.EnumDescriptor(
+  name='CbTamperAlertType',
+  full_name='kyrus.carbonblack.events.CbTamperAlertMsg.CbTamperAlertType',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    descriptor.EnumValueDescriptor(
+      name='AlertCoreDriverUnloaded', index=0, number=1,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='AlertNetworkDriverUnloaded', index=1, number=2,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='AlertCbServiceStopped', index=2, number=3,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='AlertCbProcessTerminated', index=3, number=4,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='AlertCbCodeInjection', index=4, number=5,
+      options=None,
+      type=None),
+  ],
+  containing_type=None,
+  options=None,
+  serialized_start=5165,
+  serialized_end=5328,
 )
 
 
@@ -260,6 +359,27 @@ _CBHEADERMSG = descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    descriptor.FieldDescriptor(
+      name='process_pid', full_name='kyrus.carbonblack.events.CbHeaderMsg.process_pid', index=9,
+      number=10, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='process_md5', full_name='kyrus.carbonblack.events.CbHeaderMsg.process_md5', index=10,
+      number=11, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value="",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='process_path', full_name='kyrus.carbonblack.events.CbHeaderMsg.process_path', index=11,
+      number=12, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -269,8 +389,8 @@ _CBHEADERMSG = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=281,
-  serialized_end=509,
+  serialized_start=45,
+  serialized_end=337,
 )
 
 
@@ -312,8 +432,8 @@ _CBSTRINGMSG = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=512,
-  serialized_end=714,
+  serialized_start=340,
+  serialized_end=542,
 )
 
 
@@ -415,6 +535,20 @@ _CBPROCESSMSG = descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    descriptor.FieldDescriptor(
+      name='uid', full_name='kyrus.carbonblack.events.CbProcessMsg.uid', index=13,
+      number=14, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='username', full_name='kyrus.carbonblack.events.CbProcessMsg.username', index=14,
+      number=15, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -424,8 +558,8 @@ _CBPROCESSMSG = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=717,
-  serialized_end=1026,
+  serialized_start=545,
+  serialized_end=885,
 )
 
 
@@ -478,6 +612,20 @@ _CBCHILDPROCESSMSG = descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    descriptor.FieldDescriptor(
+      name='create_time', full_name='kyrus.carbonblack.events.CbChildProcessMsg.create_time', index=6,
+      number=7, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='tamper', full_name='kyrus.carbonblack.events.CbChildProcessMsg.tamper', index=7,
+      number=8, type=8, cpp_type=7, label=1,
+      has_default_value=True, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -487,8 +635,8 @@ _CBCHILDPROCESSMSG = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=1028,
-  serialized_end=1149,
+  serialized_start=888,
+  serialized_end=1053,
 )
 
 
@@ -557,8 +705,8 @@ _CBMODULELOADMSG = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=1152,
-  serialized_end=1320,
+  serialized_start=1056,
+  serialized_end=1224,
 )
 
 
@@ -597,18 +745,33 @@ _CBFILEMODMSG = descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    descriptor.FieldDescriptor(
+      name='type', full_name='kyrus.carbonblack.events.CbFileModMsg.type', index=4,
+      number=5, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='tamper', full_name='kyrus.carbonblack.events.CbFileModMsg.tamper', index=5,
+      number=6, type=8, cpp_type=7, label=1,
+      has_default_value=True, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
     _CBFILEMODMSG_CBFILEMODACTION,
+    _CBFILEMODMSG_CBFILETYPE,
   ],
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=1323,
-  serialized_end=1587,
+  serialized_start=1227,
+  serialized_end=1935,
 )
 
 
@@ -647,6 +810,13 @@ _CBREGMODMSG = descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    descriptor.FieldDescriptor(
+      name='tamper', full_name='kyrus.carbonblack.events.CbRegModMsg.tamper', index=4,
+      number=5, type=8, cpp_type=7, label=1,
+      has_default_value=True, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -657,8 +827,8 @@ _CBREGMODMSG = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=1590,
-  serialized_end=1864,
+  serialized_start=1938,
+  serialized_end=2235,
 )
 
 
@@ -726,8 +896,29 @@ _CBNETCONNMSG = descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='viaproxy_target', full_name='kyrus.carbonblack.events.CbNetConnMsg.viaproxy_target', index=8,
-      number=9, type=9, cpp_type=9, label=1,
+      name='proxyConnection', full_name='kyrus.carbonblack.events.CbNetConnMsg.proxyConnection', index=8,
+      number=9, type=8, cpp_type=7, label=1,
+      has_default_value=True, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='proxyIpv4Address', full_name='kyrus.carbonblack.events.CbNetConnMsg.proxyIpv4Address', index=9,
+      number=10, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='proxyPort', full_name='kyrus.carbonblack.events.CbNetConnMsg.proxyPort', index=10,
+      number=11, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='proxyNetPath', full_name='kyrus.carbonblack.events.CbNetConnMsg.proxyNetPath', index=11,
+      number=12, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=unicode("", "utf-8"),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -742,8 +933,277 @@ _CBNETCONNMSG = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=1867,
-  serialized_end=2156,
+  serialized_start=2238,
+  serialized_end=2601,
+)
+
+
+_CBLINSTATSMSG = descriptor.Descriptor(
+  name='CbLinStatsMsg',
+  full_name='kyrus.carbonblack.events.CbLinStatsMsg',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='lin_total', full_name='kyrus.carbonblack.events.CbLinStatsMsg.lin_total', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='lin_successful', full_name='kyrus.carbonblack.events.CbLinStatsMsg.lin_successful', index=1,
+      number=2, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='lin_no_scanidi', full_name='kyrus.carbonblack.events.CbLinStatsMsg.lin_no_scanidi', index=2,
+      number=3, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='lin_total_pended', full_name='kyrus.carbonblack.events.CbLinStatsMsg.lin_total_pended', index=3,
+      number=4, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='lin_current_scanid_pended_size', full_name='kyrus.carbonblack.events.CbLinStatsMsg.lin_current_scanid_pended_size', index=4,
+      number=5, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='lin_current_handlepath_pended_size', full_name='kyrus.carbonblack.events.CbLinStatsMsg.lin_current_handlepath_pended_size', index=5,
+      number=6, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='lin_current_filepath_pended_size', full_name='kyrus.carbonblack.events.CbLinStatsMsg.lin_current_filepath_pended_size', index=6,
+      number=7, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=2604,
+  serialized_end=2838,
+)
+
+
+_CBCROSSPROCESSOPENMSG = descriptor.Descriptor(
+  name='CbCrossProcessOpenMsg',
+  full_name='kyrus.carbonblack.events.CbCrossProcessOpenMsg',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='type', full_name='kyrus.carbonblack.events.CbCrossProcessOpenMsg.type', index=0,
+      number=1, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=1,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='targetPid', full_name='kyrus.carbonblack.events.CbCrossProcessOpenMsg.targetPid', index=1,
+      number=2, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='targetProcCreateTime', full_name='kyrus.carbonblack.events.CbCrossProcessOpenMsg.targetProcCreateTime', index=2,
+      number=3, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='requestedAccess', full_name='kyrus.carbonblack.events.CbCrossProcessOpenMsg.requestedAccess', index=3,
+      number=4, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='targetProcPath', full_name='kyrus.carbonblack.events.CbCrossProcessOpenMsg.targetProcPath', index=4,
+      number=5, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='targetProcMd5', full_name='kyrus.carbonblack.events.CbCrossProcessOpenMsg.targetProcMd5', index=5,
+      number=6, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value="",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+    _CBCROSSPROCESSOPENMSG_OPENTYPE,
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=2841,
+  serialized_end=3114,
+)
+
+
+_CBCREATEREMOTETHREADMSG = descriptor.Descriptor(
+  name='CbCreateRemoteThreadMsg',
+  full_name='kyrus.carbonblack.events.CbCreateRemoteThreadMsg',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='remoteProcPid', full_name='kyrus.carbonblack.events.CbCreateRemoteThreadMsg.remoteProcPid', index=0,
+      number=1, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='remoteProcCreateTime', full_name='kyrus.carbonblack.events.CbCreateRemoteThreadMsg.remoteProcCreateTime', index=1,
+      number=2, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='remoteProcPath', full_name='kyrus.carbonblack.events.CbCreateRemoteThreadMsg.remoteProcPath', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='remoteProcMd5', full_name='kyrus.carbonblack.events.CbCreateRemoteThreadMsg.remoteProcMd5', index=3,
+      number=4, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value="",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=3116,
+  serialized_end=3241,
+)
+
+
+_CBCROSSPROCESSMSG = descriptor.Descriptor(
+  name='CbCrossProcessMsg',
+  full_name='kyrus.carbonblack.events.CbCrossProcessMsg',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='open', full_name='kyrus.carbonblack.events.CbCrossProcessMsg.open', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='remotethread', full_name='kyrus.carbonblack.events.CbCrossProcessMsg.remotethread', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='tamper', full_name='kyrus.carbonblack.events.CbCrossProcessMsg.tamper', index=2,
+      number=3, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=3244,
+  serialized_end=3415,
+)
+
+
+_CBPROTECTIONBLOCKEDMSG = descriptor.Descriptor(
+  name='CbProtectionBlockedMsg',
+  full_name='kyrus.carbonblack.events.CbProtectionBlockedMsg',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='blockedType', full_name='kyrus.carbonblack.events.CbProtectionBlockedMsg.blockedType', index=0,
+      number=1, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=1,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='blockedEvent', full_name='kyrus.carbonblack.events.CbProtectionBlockedMsg.blockedEvent', index=1,
+      number=2, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=1,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='blockedmd5Hash', full_name='kyrus.carbonblack.events.CbProtectionBlockedMsg.blockedmd5Hash', index=2,
+      number=3, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value="",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+    _CBPROTECTIONBLOCKEDMSG_BLOCKTYPE,
+    _CBPROTECTIONBLOCKEDMSG_BLOCKEVENT,
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=3418,
+  serialized_end=3724,
 )
 
 
@@ -770,8 +1230,8 @@ _CBSTATISTICSMSG = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=2158,
-  serialized_end=2235,
+  serialized_start=3726,
+  serialized_end=3803,
 )
 
 
@@ -973,8 +1433,8 @@ _CBMODULEINFOMSG = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=2238,
-  serialized_end=2976,
+  serialized_start=3806,
+  serialized_end=4544,
 )
 
 
@@ -1029,8 +1489,8 @@ _CBVTWRITEMSG = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=2979,
-  serialized_end=3143,
+  serialized_start=4547,
+  serialized_end=4711,
 )
 
 
@@ -1064,8 +1524,142 @@ _CBVTLOADMSG = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=3145,
-  serialized_end=3212,
+  serialized_start=4713,
+  serialized_end=4780,
+)
+
+
+_CBENDPOINTENVIRONMENTMSG = descriptor.Descriptor(
+  name='CbEndpointEnvironmentMsg',
+  full_name='kyrus.carbonblack.events.CbEndpointEnvironmentMsg',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='SensorId', full_name='kyrus.carbonblack.events.CbEndpointEnvironmentMsg.SensorId', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='SensorHostName', full_name='kyrus.carbonblack.events.CbEndpointEnvironmentMsg.SensorHostName', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='HostId', full_name='kyrus.carbonblack.events.CbEndpointEnvironmentMsg.HostId', index=2,
+      number=3, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=4782,
+  serialized_end=4866,
+)
+
+
+_CBSERVERENVIRONMENTMSG = descriptor.Descriptor(
+  name='CbServerEnvironmentMsg',
+  full_name='kyrus.carbonblack.events.CbServerEnvironmentMsg',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='NodeId', full_name='kyrus.carbonblack.events.CbServerEnvironmentMsg.NodeId', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=4868,
+  serialized_end=4908,
+)
+
+
+_CBENVIRONMENTMSG = descriptor.Descriptor(
+  name='CbEnvironmentMsg',
+  full_name='kyrus.carbonblack.events.CbEnvironmentMsg',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='endpoint', full_name='kyrus.carbonblack.events.CbEnvironmentMsg.endpoint', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='server', full_name='kyrus.carbonblack.events.CbEnvironmentMsg.server', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=4911,
+  serialized_end=5065,
+)
+
+
+_CBTAMPERALERTMSG = descriptor.Descriptor(
+  name='CbTamperAlertMsg',
+  full_name='kyrus.carbonblack.events.CbTamperAlertMsg',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='type', full_name='kyrus.carbonblack.events.CbTamperAlertMsg.type', index=0,
+      number=1, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=1,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+    _CBTAMPERALERTMSG_CBTAMPERALERTTYPE,
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=5068,
+  serialized_end=5328,
 )
 
 
@@ -1160,6 +1754,34 @@ _CBEVENTMSG = descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    descriptor.FieldDescriptor(
+      name='env', full_name='kyrus.carbonblack.events.CbEventMsg.env', index=12,
+      number=13, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='crossproc', full_name='kyrus.carbonblack.events.CbEventMsg.crossproc', index=13,
+      number=14, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='tamperAlert', full_name='kyrus.carbonblack.events.CbEventMsg.tamperAlert', index=14,
+      number=15, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='blocked', full_name='kyrus.carbonblack.events.CbEventMsg.blocked', index=15,
+      number=16, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -1169,19 +1791,33 @@ _CBEVENTMSG = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=3215,
-  serialized_end=3917,
+  serialized_start=5331,
+  serialized_end=6286,
 )
 
 _CBSTRINGMSG.fields_by_name['string_type'].enum_type = _CBSTRINGMSG_CBSTRINGTYPE
 _CBSTRINGMSG_CBSTRINGTYPE.containing_type = _CBSTRINGMSG;
 _CBFILEMODMSG.fields_by_name['action'].enum_type = _CBFILEMODMSG_CBFILEMODACTION
+_CBFILEMODMSG.fields_by_name['type'].enum_type = _CBFILEMODMSG_CBFILETYPE
 _CBFILEMODMSG_CBFILEMODACTION.containing_type = _CBFILEMODMSG;
+_CBFILEMODMSG_CBFILETYPE.containing_type = _CBFILEMODMSG;
 _CBREGMODMSG.fields_by_name['action'].enum_type = _CBREGMODMSG_CBREGMODACTION
 _CBREGMODMSG_CBREGMODACTION.containing_type = _CBREGMODMSG;
 _CBNETCONNMSG.fields_by_name['protocol'].enum_type = _CBNETCONNMSG_PROTOCOLTYPE
 _CBNETCONNMSG_PROTOCOLTYPE.containing_type = _CBNETCONNMSG;
+_CBCROSSPROCESSOPENMSG.fields_by_name['type'].enum_type = _CBCROSSPROCESSOPENMSG_OPENTYPE
+_CBCROSSPROCESSOPENMSG_OPENTYPE.containing_type = _CBCROSSPROCESSOPENMSG;
+_CBCROSSPROCESSMSG.fields_by_name['open'].message_type = _CBCROSSPROCESSOPENMSG
+_CBCROSSPROCESSMSG.fields_by_name['remotethread'].message_type = _CBCREATEREMOTETHREADMSG
+_CBPROTECTIONBLOCKEDMSG.fields_by_name['blockedType'].enum_type = _CBPROTECTIONBLOCKEDMSG_BLOCKTYPE
+_CBPROTECTIONBLOCKEDMSG.fields_by_name['blockedEvent'].enum_type = _CBPROTECTIONBLOCKEDMSG_BLOCKEVENT
+_CBPROTECTIONBLOCKEDMSG_BLOCKTYPE.containing_type = _CBPROTECTIONBLOCKEDMSG;
+_CBPROTECTIONBLOCKEDMSG_BLOCKEVENT.containing_type = _CBPROTECTIONBLOCKEDMSG;
 _CBSTATISTICSMSG.fields_by_name['lin_stats'].message_type = _CBLINSTATSMSG
+_CBENVIRONMENTMSG.fields_by_name['endpoint'].message_type = _CBENDPOINTENVIRONMENTMSG
+_CBENVIRONMENTMSG.fields_by_name['server'].message_type = _CBSERVERENVIRONMENTMSG
+_CBTAMPERALERTMSG.fields_by_name['type'].enum_type = _CBTAMPERALERTMSG_CBTAMPERALERTTYPE
+_CBTAMPERALERTMSG_CBTAMPERALERTTYPE.containing_type = _CBTAMPERALERTMSG;
 _CBEVENTMSG.fields_by_name['header'].message_type = _CBHEADERMSG
 _CBEVENTMSG.fields_by_name['strings'].message_type = _CBSTRINGMSG
 _CBEVENTMSG.fields_by_name['process'].message_type = _CBPROCESSMSG
@@ -1194,7 +1830,10 @@ _CBEVENTMSG.fields_by_name['module'].message_type = _CBMODULEINFOMSG
 _CBEVENTMSG.fields_by_name['vtwrite'].message_type = _CBVTWRITEMSG
 _CBEVENTMSG.fields_by_name['vtload'].message_type = _CBVTLOADMSG
 _CBEVENTMSG.fields_by_name['childproc'].message_type = _CBCHILDPROCESSMSG
-DESCRIPTOR.message_types_by_name['CbLinStatsMsg'] = _CBLINSTATSMSG
+_CBEVENTMSG.fields_by_name['env'].message_type = _CBENVIRONMENTMSG
+_CBEVENTMSG.fields_by_name['crossproc'].message_type = _CBCROSSPROCESSMSG
+_CBEVENTMSG.fields_by_name['tamperAlert'].message_type = _CBTAMPERALERTMSG
+_CBEVENTMSG.fields_by_name['blocked'].message_type = _CBPROTECTIONBLOCKEDMSG
 DESCRIPTOR.message_types_by_name['CbHeaderMsg'] = _CBHEADERMSG
 DESCRIPTOR.message_types_by_name['CbStringMsg'] = _CBSTRINGMSG
 DESCRIPTOR.message_types_by_name['CbProcessMsg'] = _CBPROCESSMSG
@@ -1203,17 +1842,20 @@ DESCRIPTOR.message_types_by_name['CbModuleLoadMsg'] = _CBMODULELOADMSG
 DESCRIPTOR.message_types_by_name['CbFileModMsg'] = _CBFILEMODMSG
 DESCRIPTOR.message_types_by_name['CbRegModMsg'] = _CBREGMODMSG
 DESCRIPTOR.message_types_by_name['CbNetConnMsg'] = _CBNETCONNMSG
+DESCRIPTOR.message_types_by_name['CbLinStatsMsg'] = _CBLINSTATSMSG
+DESCRIPTOR.message_types_by_name['CbCrossProcessOpenMsg'] = _CBCROSSPROCESSOPENMSG
+DESCRIPTOR.message_types_by_name['CbCreateRemoteThreadMsg'] = _CBCREATEREMOTETHREADMSG
+DESCRIPTOR.message_types_by_name['CbCrossProcessMsg'] = _CBCROSSPROCESSMSG
+DESCRIPTOR.message_types_by_name['CbProtectionBlockedMsg'] = _CBPROTECTIONBLOCKEDMSG
 DESCRIPTOR.message_types_by_name['CbStatisticsMsg'] = _CBSTATISTICSMSG
 DESCRIPTOR.message_types_by_name['CbModuleInfoMsg'] = _CBMODULEINFOMSG
 DESCRIPTOR.message_types_by_name['CbVtWriteMsg'] = _CBVTWRITEMSG
 DESCRIPTOR.message_types_by_name['CbVtLoadMsg'] = _CBVTLOADMSG
+DESCRIPTOR.message_types_by_name['CbEndpointEnvironmentMsg'] = _CBENDPOINTENVIRONMENTMSG
+DESCRIPTOR.message_types_by_name['CbServerEnvironmentMsg'] = _CBSERVERENVIRONMENTMSG
+DESCRIPTOR.message_types_by_name['CbEnvironmentMsg'] = _CBENVIRONMENTMSG
+DESCRIPTOR.message_types_by_name['CbTamperAlertMsg'] = _CBTAMPERALERTMSG
 DESCRIPTOR.message_types_by_name['CbEventMsg'] = _CBEVENTMSG
-
-class CbLinStatsMsg(message.Message):
-  __metaclass__ = reflection.GeneratedProtocolMessageType
-  DESCRIPTOR = _CBLINSTATSMSG
-  
-  # @@protoc_insertion_point(class_scope:kyrus.carbonblack.events.CbLinStatsMsg)
 
 class CbHeaderMsg(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
@@ -1263,6 +1905,36 @@ class CbNetConnMsg(message.Message):
   
   # @@protoc_insertion_point(class_scope:kyrus.carbonblack.events.CbNetConnMsg)
 
+class CbLinStatsMsg(message.Message):
+  __metaclass__ = reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _CBLINSTATSMSG
+  
+  # @@protoc_insertion_point(class_scope:kyrus.carbonblack.events.CbLinStatsMsg)
+
+class CbCrossProcessOpenMsg(message.Message):
+  __metaclass__ = reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _CBCROSSPROCESSOPENMSG
+  
+  # @@protoc_insertion_point(class_scope:kyrus.carbonblack.events.CbCrossProcessOpenMsg)
+
+class CbCreateRemoteThreadMsg(message.Message):
+  __metaclass__ = reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _CBCREATEREMOTETHREADMSG
+  
+  # @@protoc_insertion_point(class_scope:kyrus.carbonblack.events.CbCreateRemoteThreadMsg)
+
+class CbCrossProcessMsg(message.Message):
+  __metaclass__ = reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _CBCROSSPROCESSMSG
+  
+  # @@protoc_insertion_point(class_scope:kyrus.carbonblack.events.CbCrossProcessMsg)
+
+class CbProtectionBlockedMsg(message.Message):
+  __metaclass__ = reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _CBPROTECTIONBLOCKEDMSG
+  
+  # @@protoc_insertion_point(class_scope:kyrus.carbonblack.events.CbProtectionBlockedMsg)
+
 class CbStatisticsMsg(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _CBSTATISTICSMSG
@@ -1286,6 +1958,30 @@ class CbVtLoadMsg(message.Message):
   DESCRIPTOR = _CBVTLOADMSG
   
   # @@protoc_insertion_point(class_scope:kyrus.carbonblack.events.CbVtLoadMsg)
+
+class CbEndpointEnvironmentMsg(message.Message):
+  __metaclass__ = reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _CBENDPOINTENVIRONMENTMSG
+  
+  # @@protoc_insertion_point(class_scope:kyrus.carbonblack.events.CbEndpointEnvironmentMsg)
+
+class CbServerEnvironmentMsg(message.Message):
+  __metaclass__ = reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _CBSERVERENVIRONMENTMSG
+  
+  # @@protoc_insertion_point(class_scope:kyrus.carbonblack.events.CbServerEnvironmentMsg)
+
+class CbEnvironmentMsg(message.Message):
+  __metaclass__ = reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _CBENVIRONMENTMSG
+  
+  # @@protoc_insertion_point(class_scope:kyrus.carbonblack.events.CbEnvironmentMsg)
+
+class CbTamperAlertMsg(message.Message):
+  __metaclass__ = reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _CBTAMPERALERTMSG
+  
+  # @@protoc_insertion_point(class_scope:kyrus.carbonblack.events.CbTamperAlertMsg)
 
 class CbEventMsg(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
