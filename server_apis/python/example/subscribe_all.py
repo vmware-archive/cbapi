@@ -3,6 +3,7 @@ import pika
 import pprint
 import random
 import optparse
+import eventsv2_pb2 as cpb
 
 def on_message(channel, method_frame, header_frame, body):
 
@@ -11,7 +12,10 @@ def on_message(channel, method_frame, header_frame, body):
         print method_frame.routing_key
 
         if "application/protobuf" == header_frame.content_type:
-            print "protobuf"
+            x = cpb.CbEventMsg()
+            x.ParseFromString(body)
+            print "EVENT: %s" % x
+
         elif "application/json" == header_frame.content_type:
             print "json"
         else:
@@ -21,6 +25,10 @@ def on_message(channel, method_frame, header_frame, body):
 
     except Exception, e:
         print e
+    finally:
+        # need to make sure we ack the messages so they don't get left un-acked in the queue
+        # we set multiple to true to ensure that we ack all previous messages
+        channel.basic_ack(delivery_tag=method_frame.delivery_tag, multiple=True)
 
     return
 
@@ -61,11 +69,13 @@ if __name__ == "__main__":
 
     queue_name = generate_queue_name()
 
-    channel.queue_declare(queue=queue_name)
+    # make sure you use auto_delete so the queue isn't left filling
+    # with events when this program exists.
+    channel.queue_declare(queue=queue_name, auto_delete=True)
 
     channel.queue_bind(exchange='api.events', queue=queue_name, routing_key='#')
 
-    channel.basic_consume(on_message, queue=queue_name, no_ack=True)
+    channel.basic_consume(on_message, queue=queue_name)
    
     print "-> Subscribed!"
  

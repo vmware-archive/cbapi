@@ -3,8 +3,12 @@
 import os
 import sys
 import time
+import json
+import random
 import pprint
+import socket
 import struct
+import syslog
 import requests
 import optparse
 
@@ -14,29 +18,128 @@ from eventHelpers import *
 
 sensorid_to_details_map = {}
 cbapi = {}
+g_output = None
 
-def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Process Carbon Black Sensor Event Logs")
+class EventOutput(object):
 
-    # for each supported output type, add an option
-    #
-    parser.add_option("-c", "--cburl", action="store", default=None, dest="url",
-                      help="CB server's URL. e.g., http://127.0.0.1; only useful when -A is specified")
-    parser.add_option("-a", "--apitoken", action="store", default=None, dest="token",
-                      help="API Token for Carbon Black server; only useful when -A and -c are specified")
-    parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
-                      help="Do not verify server SSL certificate; only useful when -c is specified.")
-    parser.add_option("-o", "--outputformat", action="store", default="table", dest="outputformat",
-                      help="Output format; must be one of [json|table]; default is table")
-    parser.add_option("-f", "--filename", action="store", default=None, dest="filename",
-                      help="Single CB sensor event log filename to process")
-    parser.add_option("-d", "--directory", action="store", default=None, dest="directory",
-                      help="Directory to enumerate looking for Carbon Black event log files")
-    parser.add_option("-r", "--remove", action="store_true", default=False, dest="remove",
-                      help="Remove event log file(s) after processing; use with caution!")
-    parser.add_option("-A", "--auto", action="store_true", default=False, dest="auto",
-                      help="Automatically find the event log directory from CB server config")
-    return parser
+    FORMATS = ['json', 'table', 'csv']
+    DESTINATIONS = ['udp', 'tcp', 'syslog', 'file', 'stdout']
+
+    def __init__(self, out_format, out_dest):
+
+        if out_format not in EventOutput.FORMATS:
+            raise ValueError("output format (%s) not a valid format value" % out_format)
+
+        if out_dest not in EventOutput.DESTINATIONS:
+            raise ValueError("output destination (%s) not a valid destination value" % out_dest)
+
+        self.oformat = out_format
+        self.dest = out_dest
+
+    def _getPathFromEvent(self, event):
+        """
+        Get a "path" represenation of a sensor event
+        """
+        if "filemod" == event["type"]:
+            return event["path"]
+        elif "proc" == event["type"]:
+            return event["path"]
+        elif "regmod" == event["type"]:
+            return event["path"]
+        elif "modload" == event["type"]:
+            return event["path"]
+        elif "netconn" == event["type"]:
+            if event.get('protocol', 17) == 6:
+                proto = "tcp"
+            else:
+                proto = "udp"
+
+            return "%s:%s (%s) via %s %s" % (event.get("ipv4", "<no IP>"), event["port"], event.get("domain", "<no domain>"), proto, event.get("direction", "<unknown direction>"))
+        elif "childproc" == event["type"]:
+            return event["created"]
+
+        return ""
+
+    def format(self, event):
+        if "json" == self.oformat:
+            try:
+                import cjson
+                return cjson.encode(event)
+            except Exception, e:
+                return json.dumps(event)
+
+        elif 'table' == self.oformat:
+            ret = "%-19s | %-20s | %10s | %33s | %s" % (time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(event["timestamp"])),\
+                                                        event.get('computer_name', ""),
+                                                        event['type'],
+                                                        event.get("md5", "").encode('hex'),
+                                                        self._getPathFromEvent(event))
+        elif 'csv' == self.oformat:
+            ret = "%s ; %s ; %s ; %s ; %s" % (time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(event["timestamp"])), \
+                                                        event.get('computer_name', ""),
+                                                        event['type'],
+                                                        event.get("md5", "").encode('hex'),
+                                                        self._getPathFromEvent(event))
+
+
+        return ret
+
+    def output(self, eventdata):
+        raise Exception("Not Implimented")
+
+class StdOutOutput(EventOutput):
+
+    def __init__(self, format):
+        super(StdOutOutput, self).__init__(format, 'stdout')
+
+    def output(self, eventdata):
+        print eventdata
+
+class FileOutput(EventOutput):
+
+    def __init__(self, format, outfile):
+        super(FileOutput, self).__init__(format, 'file')
+
+        self.fout = open(outfile, 'a')
+
+
+    def output(self, eventdata):
+        self.fout.write(eventdata + '\n')
+
+class SyslogOutput(EventOutput):
+
+    def __init__(self, format, identity='eventExporter.py', facility=syslog.LOG_LOCAL0, priority=syslog.LOG_INFO):
+        super(SyslogOutput, self).__init__(format, 'syslog')
+
+        self.priority = priority
+        syslog.openlog(identity, syslog.LOG_PID, facility)
+
+    def output(self, eventdata):
+        syslog.syslog(self.priority, eventdata)
+
+class UdpOutput(EventOutput):
+
+    def __init__(self, format, host, port):
+        super(UdpOutput, self).__init__(format, 'udp')
+
+        self.ip = socket.gethostbyname(host)
+        self.port = port
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    def output(self, eventdata):
+        self.sock.sendto(eventdata+'\n', (self.ip, self.port))
+
+
+class TcpOutput(EventOutput):
+    def __init__(self, format, host, port):
+        super(TcpOutput, self).__init__(format, 'tcp')
+
+        ip = socket.gethostbyname(host)
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.connect((ip, port))
+
+    def output(self, eventdata):
+        self.sock.send(eventdata + '\n')
 
 def lookup_host_details(sensor_id):
     """
@@ -45,6 +148,7 @@ def lookup_host_details(sensor_id):
 
     return an empty dictionary on lookup failure 
     """
+    global sensorid_to_details_map
     try:
         # without cbapi access, nothing to do
         #
@@ -66,8 +170,7 @@ def lookup_host_details(sensor_id):
         
         # cache off the result
         #
-        global sensorid_to_details_map
-        
+
         host_details = r.json()
         
         # the sensor endpoint provides a lot more detail than is required
@@ -91,62 +194,13 @@ def lookup_host_details(sensor_id):
     except:
         return {}
 
-def json_encode(data):
-    """
-    generic json encoding logic
-    uses cjson if available; json if not
-    """
-    try:
-        import cjson
-        return cjson.encode(data)
-    except Exception, e:
-        return json.dumps(data)
+def dumpEvent(event):
 
-def getPathFromEvent(event):
-    """
-    Get a "path" represenation of a sensor event
-    """
-    if "filemod" == event["type"]:
-        return event["path"]
-    elif "proc" == event["type"]:
-        return event["path"]
-    elif "regmod" == event["type"]:
-        return event["path"]
-    elif "modload" == event["type"]:
-        return event["path"]
-    elif "netconn" == event["type"]:
-        if event.get('protocol', 17) == 6:
-            proto = "tcp"
-        else:
-            proto = "udp"
+    global g_output
 
-        return "%s:%s (%s) via %s %s" % (event.get("ipv4", "<no IP>"), event["port"], event.get("domain", "<no domain>"), proto, event.get("direction", "<unknown direction>"))
-    elif "childproc" == event["type"]:
-        return event["created"]
+    fevent = g_output.format(event)
+    g_output.output(fevent)
 
-    return ""
-
-def getMd5FromEvent(event):
-    """
-    Get a md5 representation of a sensor event
-    Only (most) process creation, modload, module (modinfo), and filewrite subtype 8 events will have an MD5
-    """
-    return event.get("md5", "")
-
-def dumpEvent(event, outputformat):
-    """
-    dump a JSON-ified protobuf event to console for debugging
-    can be in either JSON or pipe-delimited human-readable form
-    """
-    if "json" == outputformat:
-        pprint.pprint(event)
-        return
-
-    print "%-19s | %-20s | %10s | %33s | %s" % (time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(event["timestamp"])),\
-                                                event.get('computer_name', ""),
-                                                event['type'],\
-                                                getMd5FromEvent(event),
-                                                getPathFromEvent(event))
 
 def processEventLogDir(directory, outputformat, remove):
     """
@@ -174,6 +228,16 @@ def getEventLogDirFromCfg():
             return line.split('=')[1].strip()
 
     raise Exception("Unable to determine value of the cbfs-http.log-archive.filesystem.location config option")
+
+def getBusUsernameFromConfig():
+    for line in open('/etc/cb/cb.conf').readlines():
+        if line.strip.starswith('RabbitMQUser'):
+            return line.split('=')[1].strip()
+
+def getBusPasswordFromConfig():
+    for line in open('/etc/cb/cb.conf').readlines():
+        if line.strip.starswith('RabbitMQPassword'):
+            return line.split('=')[1].strip()
 
 def processEventLogFile(filename, outputformat, remove, hostinfo):
     """
@@ -209,7 +273,7 @@ def processEventLogFile(filename, outputformat, remove, hostinfo):
            
             event_as_obj.update(hostinfo)
  
-            dumpEvent(event_as_obj, outputformat)
+            dumpEvent(event_as_obj)
 
             num_events_succeeded = num_events_succeeded + 1
         except Exception, e:
@@ -225,16 +289,133 @@ def processEventLogFile(filename, outputformat, remove, hostinfo):
     if remove:
         os.remove(filename)
 
+def handle_event_pb(protobuf_bytes):
+
+    (sensorid, event_obj) = protobuf_to_obj_and_host(protobuf_bytes)
+
+    hostinnfo = lookup_host_details(sensorid)
+    event_obj.update(hostinnfo)
+
+    dumpEvent(event_obj)
+
+def on_bus_msg(channel, method_frame, header_frame, body):
+    '''
+    callback that gets called for any event on the CB pub/sub event bus
+    '''
+
+    try:
+        if "application/protobuf" == header_frame.content_type:
+            handle_event_pb(body)
+
+    except Exception, e:
+        sys.stderr.write("-> Exception processing bus msg: %s\n" % e)
+
+    finally:
+        # need to make sure we ack the messages so they don't get left un-acked in the queue
+        # we set multiple to true to ensure that we ack all previous messages
+        channel.basic_ack(delivery_tag=method_frame.delivery_tag, multiple=True)
+
+def processEventsFromBus(rabbit_mq_user, rabbit_mq_pass):
+
+    #import this here so the other functions (file, directory)
+    # work without pika installed
+    import pika
+
+    credentials = pika.PlainCredentials(rabbit_mq_user, rabbit_mq_pass)
+    parameters = pika.ConnectionParameters('localhost',
+                                           5004,
+                                           '/',
+                                           credentials)
+
+    connection = pika.BlockingConnection(parameters)
+    channel = connection.channel()
+
+    queue_name = 'event_exporter_pid_%d' % os.getpid()
+
+    # make sure you use auto_delete so the queue isn't left filling
+    # with events when this program exists.
+    channel.queue_declare(queue=queue_name, auto_delete=True)
+
+    channel.queue_bind(exchange='api.events', queue=queue_name, routing_key='#')
+
+    channel.basic_consume(on_bus_msg, queue=queue_name)
+
+    sys.stderr.write("-> Subscribed to Pub/Sub bus (press Ctl-C to quit)\n")
+
+    try:
+        channel.start_consuming()
+    except KeyboardInterrupt:
+        channel.stop_consuming()
+
+    connection.close()
+
+
+def build_cli_parser():
+    parser = optparse.OptionParser(usage="%prog [options]", description="Process Carbon Black Sensor Event Logs")
+
+    #
+    # CB server info (needed for host information lookups)
+    #
+    group = optparse.OptionGroup(parser, "CB server options")
+    group.add_option("-c", "--cburl", action="store", default=None, dest="url",
+                      help="CB server's URL. e.g., http://127.0.0.1; only useful when -A is specified")
+    group.add_option("-a", "--apitoken", action="store", default=None, dest="token",
+                      help="API Token for Carbon Black server; only useful when -A and -c are specified")
+    group.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
+                      help="Do not verify server SSL certificate; only useful when -c is specified.")
+    parser.add_option_group(group)
+
+    #
+    # Input options (ie - where should I grab the raw events from)
+    #
+    group = optparse.OptionGroup(parser, "Event input source options")
+    group.add_option("-i", "--in-file", action="store", default=None, dest="infile",
+                      help="Single CB sensor event log filename to process")
+    group.add_option("-d", "--directory", action="store", default=None, dest="directory",
+                      help="Directory to enumerate looking for Carbon Black event log files")
+    group.add_option("-r", "--remove", action="store_true", default=False, dest="remove",
+                      help="Remove event log file(s) after processing; use with caution!")
+    group.add_option("-A", "--auto", action="store_true", default=False, dest="auto",
+                      help="Automatically find the event log directory from CB server config")
+    group.add_option("-b", "--bus", action="store_true", default=False, dest="bus",
+                      help="Pull events out of the CB pub/sub event bus")
+    group.add_option("-u", "--user", action="store", default=None, dest="user",
+                      help="The username for the rabbitMQ pub/sub event bus (default is to pull it from config)")
+    group.add_option("-p", "--pass", action="store", default=None, dest="pwd",
+                      help="The password for the rabbitMQ pub/sub event bus (default is to pull it from config)")
+    parser.add_option_group(group)
+
+
+    #
+    # Output options (ie - where do we put the formatted events and how are they formatted)
+    #
+    group = optparse.OptionGroup(parser, "Output source options",
+                                 "Output options for events that control both the formatting and destination")
+    group.add_option("-f", "--format", action="store", default="table", dest="format",
+                      help="Output format; must be one of [json|table|csv]; default is table")
+    group.add_option("-o", "--out-file", action="store", default=None, dest="outfile",
+                      help="Write the formatted events to a log file (default is writting to stdout)")
+    group.add_option("-s", "--syslog", action="store_true", default=False, dest="syslog",
+                      help="Write the formatted events to the syslog file (default is writting to stdout)")
+    group.add_option('-t', '--tcp-out', action='store', default=None, dest='tcpout',
+                     help='Write the formatted events to a tcp host and port (format is HOST:IP)')
+    group.add_option('-U', '--udp-out', action='store', default=None, dest='udpout',
+                     help='Write the formatted events to a udp host and port (format is HOST:IP)')
+    parser.add_option_group(group)
+    return parser
+
+
+
 if __name__ == '__main__':
 
     parser = build_cli_parser()
     opts, args = parser.parse_args(sys.argv)
-    if not opts.outputformat or not (opts.filename or opts.directory or opts.auto):
-        print "Missing required param; run with --help for usage"
+
+    # check for input
+    if (not opts.infile and not opts.bus and not opts.directory and not opts.auto):
+        print "Missing required input paramter.  See help (-h) for correct usage."
         sys.exit(-1)
 
-    global cbapi 
-    cbapi = {}
     if opts.url is not None:
         cbapi['url'] = opts.url
     if opts.token is not None:
@@ -242,9 +423,35 @@ if __name__ == '__main__':
     if opts.ssl_verify is not None:
         cbapi['ssl_verify'] = opts.ssl_verify
 
-    if opts.filename:
-        processEventLogFile(opts.filename, opts.outputformat, opts.remove)
+    if (opts.outfile):
+        g_output = FileOutput(opts.format, opts.outfile)
+    elif (opts.syslog):
+        g_output = SyslogOutput(opts.format)
+    elif (opts.tcpout):
+        (host, port) = opts.tcpout.split(':')
+        g_output = TcpOutput(opts.format, host, int(port))
+    elif (opts.udpout):
+        (host, port) = opts.udpout.split(':')
+        g_output = UdpOutput(opts.format, host, int(port))
+    else:
+        g_output = StdOutOutput(opts.format)
+
+    if opts.infile:
+        processEventLogFile(opts.filename, opts.remove)
     elif opts.directory:
-        processEventLogDir(opts.directory, opts.outputformat, opts.remove)
+        processEventLogDir(opts.directory, opts.remove)
     elif opts.auto:
-        processEventLogDir(getEventLogDirFromCfg(), opts.outputformat, opts.remove)
+        processEventLogDir(getEventLogDirFromCfg(), opts.remove)
+    elif opts.bus:
+        user = opts.user
+        pwd = opts.pwd
+
+        if (user is None):
+            user = getBusUsernameFromConfig()
+
+        if (pwd is None):
+            pwd = getBusPasswordFromConfig()
+
+        processEventsFromBus(user, pwd)
+
+
