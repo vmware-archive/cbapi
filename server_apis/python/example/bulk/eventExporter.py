@@ -231,12 +231,12 @@ def getEventLogDirFromCfg():
 
 def getBusUsernameFromConfig():
     for line in open('/etc/cb/cb.conf').readlines():
-        if line.strip.starswith('RabbitMQUser'):
+        if line.strip().starswith('RabbitMQUser'):
             return line.split('=')[1].strip()
 
 def getBusPasswordFromConfig():
     for line in open('/etc/cb/cb.conf').readlines():
-        if line.strip.starswith('RabbitMQPassword'):
+        if line.strip().starswith('RabbitMQPassword'):
             return line.split('=')[1].strip()
 
 def processEventLogFile(filename, outputformat, remove, hostinfo):
@@ -391,7 +391,7 @@ def build_cli_parser():
     #
     group = optparse.OptionGroup(parser, "Output source options",
                                  "Output options for events that control both the formatting and destination")
-    group.add_option("-f", "--format", action="store", default="table", dest="format",
+    group.add_option("-f", "--format", action="store", default="json", dest="format",
                       help="Output format; must be one of [json|table|csv]; default is table")
     group.add_option("-o", "--out-file", action="store", default=None, dest="outfile",
                       help="Write the formatted events to a log file (default is writting to stdout)")
