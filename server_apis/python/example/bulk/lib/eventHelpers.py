@@ -65,6 +65,29 @@ def convert_protobuf_to_cb_type(msg):
 
     raise Exception("unknown type of message: '%s'" % str(msg))
 
+def protobuf_to_obj_and_host(serialized_pb_event):
+    '''
+    converts a serialized protobuff from the event bus.
+
+    These are different because the have host info embedded
+    as part of the CbEnvironmentMsg (which doesn't exist in the files)
+
+    returns the cb_type object and the host info (as a tuple)
+
+    (sensor_id, cb_object)
+    '''
+    msg = cbevents.CbEventMsg()
+    msg.ParseFromString(serialized_pb_event)
+
+    sensor_id = None
+
+    if (msg.HasField('env')):
+        sensor_id = msg.env.endpoint.SensorId
+
+    cb_type = convert_protobuf_to_cb_type(msg)
+
+    return (sensor_id, cb_type.to_obj())
+
 def protobuf_to_obj(serialized_protobuf_event):
     """
     converts a serialized protobuf CB event to a
