@@ -1,7 +1,7 @@
 import sys, struct, socket, pprint, argparse, time, datetime, warnings
 # in the github repo, cbapi is not in the example directory
 # if cbapi.py is local then comment out the sys.path.append statement
-#sys.path.append('../src/cbapi')
+sys.path.append('../src/cbapi')
 import cbapi
 
 def get_local_time_offset():
@@ -67,11 +67,7 @@ def main():
     
     print "Sensor_id|Hostname|Last_CheckIn_Time"
     for sensor in sensors:
-        if sensor['uninstalled'] :
-            pass
-        elif sensor['status'] == 'Uninstall Pending':
-            pass
-        else:
+        if not (sensor['uninstalled'] or sensor['status'] == 'Uninstall Pending'):
             sensor_zulu_time = sensor_last_checkin_time_to_zulu(sensor['last_checkin_time'])
             if sensor_zulu_time < alert_datetime:
                 print "%s|%s|%s" % (sensor['id'], sensor['computer_name'], sensor['last_checkin_time'] )
