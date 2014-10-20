@@ -1,8 +1,4 @@
-import sys
-import struct
-import socket
-import pprint
-import optparse 
+import sys,struct,socket,pprint,argparse,warnings
 
 # in the github repo, cbapi is not in the example directory
 sys.path.append('../src/cbapi')
@@ -10,25 +6,25 @@ sys.path.append('../src/cbapi')
 import cbapi 
 
 def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Add a watchlist")
+    parser = argparse.ArgumentParser(description="Add a watchlist")
 
     # for each supported output type, add an option
     #
-    parser.add_option("-c", "--cburl", action="store", default=None, dest="url",
-                      help="CB server's URL.  e.g., http://127.0.0.1 ")
-    parser.add_option("-a", "--apitoken", action="store", default=None, dest="token",
+    parser.add_argument("-c", "--cburl", action="store", default=None, dest="url",
+                      help="CB server's URL.  e.g., https://127.0.0.1 ")
+    parser.add_argument("-a", "--apitoken", action="store", default=None, dest="token",
                       help="API Token for Carbon Black server")
-    parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
+    parser.add_argument("-n", "--no-ssl-verify", action="store_false", default=False, dest="ssl_verify",
                       help="Do not verify server SSL certificate.")
-    parser.add_option("-q", "--query", action="store", default=None, dest="query",
+    parser.add_argument("-q", "--query", action="store", default=None, dest="query",
                       help="Watchlist query string, start with q=  e.g. q=process_name:notepad.exe")
-    parser.add_option("-t", "--type", action="store", default=None, dest="type",
+    parser.add_argument("-t", "--type", action="store", default=None, dest="type",
                       help="Watchlist type 'events' or 'modules'")
-    parser.add_option("-N", "--name", action="store", default=None, dest="name",
+    parser.add_argument("-N", "--name", action="store", default=None, dest="name",
                       help="Watchlist name")
-    parser.add_option("-i", "--id", action="store", default=None, dest="id",
+    parser.add_argument("-i", "--id", action="store", default=None, dest="id",
                       help="Watchlist ID (optional)")
-    parser.add_option("-r", "--readonly", action="store_true", default=False, dest="readonly",
+    parser.add_argument("-r", "--readonly", action="store_true", default=False, dest="readonly",
                       help="When set, marks the new watchlist as 'read-only' so that it cannot be deleted from the console")
     return parser
 
@@ -51,9 +47,9 @@ def watchlist_output(watchlist):
     print '    %-20s | %s' % ('readonly', watchlist['readonly'])
     print '\n'
 
-def main(argv):
+def main():
     parser = build_cli_parser()
-    opts, args = parser.parse_args(argv)
+    opts = parser.parse_args()
     if not opts.url or not opts.token or not opts.name or not opts.type or not opts.query:
         print "Missing required param; run with --help for usage"
         sys.exit(-1)
@@ -75,15 +71,21 @@ def main(argv):
     # for the purposes of this test script, hardcode the watchlist type, name, and query string
     #
     print "-> Adding watchlist..."
-    watchlist = cb.watchlist_add(opts.type, opts.name, opts.query, id=opts.id, readonly=opts.readonly)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        watchlist = cb.watchlist_add(opts.type, opts.name, opts.query, id=opts.id, readonly=opts.readonly)
+    
     print "-> Watchlist added [id=%s]" % (watchlist['id'])
-
+    
     # get record describing this watchlist  
     #
     print "-> Querying for watchlist information..."
-    watchlist = cb.watchlist(watchlist['id'])
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        watchlist_details = cb.watchlist(watchlist['id'])
+    
     print "-> Watchlist queried; details:" 
-    watchlist_output(watchlist)
+    watchlist_output(watchlist_details)
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+    sys.exit(main())
