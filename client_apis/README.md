@@ -38,6 +38,7 @@ The following APIs are versioned.
 - [`/api/v1/group/<groupid>/installer/windows/msi`](#windowsmsiinstaller) - Signed MSI Sensor Installer for Windows
 - [`/api/v1/group/<groupid>/installer/osx`](#osxinstaller) - PKG Sensor Installer for OSX
 - [`/api/v1/group/<groupid>/installer/linux`](#linuxinstaller) - Sensor Installer for Linux
+- [`/api/v1/sensor/statistics`](#sensorstatistics) - Global sensor status, including aggregate sensor data backlog
 
 #### Watchlists
 - [`/api/v1/watchlist`](#apiv1watchlist) - Watchlist enumeration, addition, modification, and deletion
@@ -1098,3 +1099,25 @@ None
 ##### Notes:
 
 - Requires Carbon Black Enterprise Server 4.2.1 or greater
+
+#### `/api/v1/sensor/statistics`
+Get global sensor statistics
+
+*Supports*: `GET`
+
+##### Parameters:
+None
+
+##### Notes:
+
+- Requires Carbon Black Enterprise Server 4.1.0 or greater
+- Backlog counts are as of sensor checkin time.  Any bytes pushed post-checkin, in response to a server directive, are not accounted for.  This means total backlog appears artificially high and will never reach zero while sensors are active. 
+
+##### Returns:
+
+Returns a JSON dictionary with fields as follows:
+
+sensor_count: total registered sensors
+active_sensor_count: number of sensors active within the last 24 hours
+num_eventlog_bytes: total backlog, in bytes, of eventlogs on active sensors.  See notes.
+num_storefile_bytes: total backlog, in bytes, of binary files (store files) on active sensors.  See notes.
