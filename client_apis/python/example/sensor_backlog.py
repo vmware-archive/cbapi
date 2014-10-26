@@ -1,5 +1,6 @@
 import sys
 import time
+import json
 import struct
 import socket
 import pprint
@@ -23,16 +24,41 @@ def build_cli_parser():
                       help="Do not verify server SSL certificate.")
     parser.add_option("-i", "--interval", action="store", default=0, dest="interval",
                       help="period, in seconds, in whicy to requery to use this script as a monitoring agent")
+    parser.add_option("-u", "--udp", action="store", default=None, dest="udp",
+                      help="ip:port or name:port to which do deliver output via UDP, e.g. splunk.my.org:514  only applicable with -i")
     return parser
 
-def query_forever(cb, interval):
+def output(data, udp):
+    """
+    output the sensor backlog data, in JSON format
+    always output to stdout
+    output to udp if so specified
+    """
+    print data
+
+    if udp is None:
+        return
+
+    try:
+        sockaddr_components = udp.split(':')
+        ip = socket.gethostbyname(sockaddr_components[0])
+        port = int(sockaddr_components[1])
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
+        sock.sendto(data + '\n', (ip, port))
+    except Exception, e:
+        print e
+
+    return
+
+def query_forever(cb, interval, udp):
     
     while True:
 
         try:
             backlog = cb.sensor_backlog()
-            print backlog
-        except:
+            output(json.dumps(backlog), udp)
+        except Exception, e:
+            print e
             pass 
 
         time.sleep(float(interval))
@@ -53,7 +79,7 @@ def main(argv):
     # if a period is specified, handle that specially
     #
     if 0 != opts.interval:
-        return query_forever(cb, opts.interval)
+        return query_forever(cb, opts.interval, opts.udp)
 
     # grab the global statistics 
     #
