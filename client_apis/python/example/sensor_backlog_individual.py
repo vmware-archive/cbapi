@@ -12,7 +12,7 @@ sys.path.append('../src/cbapi')
 import cbapi 
 
 def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Output information about a single sensor")
+    parser = optparse.OptionParser(usage="%prog [options]", description="Output information sensor backlog state on a sensor-by-sensor basis")
 
     # for each supported output type, add an option
     #
@@ -55,8 +55,17 @@ def query_forever(cb, interval, udp):
     while True:
 
         try:
-            backlog = cb.sensor_backlog()
-            output(json.dumps(backlog), udp)
+            sensors = cb.sensors()
+            for sensor in sensors:
+            
+                summary = {}
+                summary['computer_name'] = sensor['computer_name'].strip()
+                summary['id'] = sensor['id']
+                summary['computer_sid'] = sensor['computer_sid'].strip()
+                summary['num_storefiles_bytes'] = sensor['num_storefiles_bytes']
+                summary['num_eventlog_bytes'] = sensor['num_eventlog_bytes']
+
+                output(json.dumps(summary), udp)
         except Exception, e:
             print e
             pass 
@@ -81,14 +90,19 @@ def main(argv):
     if 0 != opts.interval:
         return query_forever(cb, opts.interval, opts.udp)
 
-    # grab the global statistics 
+    # grab the global list of sensors
+    # this includes backlog data for each sensor 
     #
-    backlog = cb.sensor_backlog()
+    sensors = cb.sensors()
 
     # output
     #
-    for key in backlog.keys():
-        print "%-35s : %s" % (key, backlog[key])
-
+    print "%-30s | %-5s | %-50s | %-10s | %10s" % ("Hostname", "Id", "SID", "Events", "Binaries") 
+    for sensor in sensors:
+       print "%-30s | %-5s | %-50s | %-10s | %10s" % (sensor['computer_name'],
+                                                      sensor['id'],
+                                                      sensor['computer_sid'].strip(),
+                                                      sensor['num_storefiles_bytes'],
+                                                      sensor['num_eventlog_bytes']) 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
