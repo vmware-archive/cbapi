@@ -34,7 +34,7 @@ def build_cli_parser():
     parser = optparse.OptionParser(usage="%prog [options]", description="Example CBSAPI script to consume published events")
     parser.add_option("-p", "--password", action="store", default=None, dest="password",
                       help="RabbitMQ password; see /etc/cb/cb.conf")
-    parser.add_option("-u", "--usename", action="store", default="cb", dest="username",
+    parser.add_option("-u", "--username", action="store", default="cb", dest="username",
                       help="RabbitMQ username; see /etc/cb/cb.conf")
     return parser
 

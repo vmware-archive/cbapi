@@ -1,8 +1,4 @@
-import sys
-import struct
-import socket
-import pprint
-import optparse 
+import sys, struct, socket, pprint, argparse , warnings
 
 # in the github repo, cbapi is not in the example directory
 sys.path.insert(0,'../src/cbapi')
@@ -10,25 +6,25 @@ sys.path.insert(0,'../src/cbapi')
 import cbapi 
 
 def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Dump All MD5s from the binary index")
+    parser = argparse.ArgumentParser(description="Dump All MD5s from the binary index")
 
-    # for each supported output type, add an option
+    # for each supported output type, add an argument
     #
-    parser.add_option("-c", "--cburl", action="store", default=None, dest="url",
+    parser.add_argument("-c", "--cburl", action="store", default=None, dest="url",
                       help="CB server's URL.  e.g., http://127.0.0.1 ")
-    parser.add_option("-a", "--apitoken", action="store", default=None, dest="token",
+    parser.add_argument("-a", "--apitoken", action="store", default=None, dest="token",
                       help="API Token for Carbon Black server")
-    parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
+    parser.add_argument("-n", "--no-ssl-verify", action="store_false", default=False, dest="ssl_verify",
                       help="Do not verify server SSL certificate.")
-    parser.add_option("-p", "--pagesize", action="store", default=128, dest="pagesize",
+    parser.add_argument("-p", "--pagesize", action="store", default=128, dest="pagesize",
                       help="Number of MD5s to retrieve during each API invocation")
-    parser.add_option("-f", "--file", action="store", default=None, dest="filename",
+    parser.add_argument("-f", "--file", action="store", default=None, dest="filename",
                       help="filename of file to write all md5s to")
     return parser
 
-def main(argv):
+def main():
     parser = build_cli_parser()
-    opts, args = parser.parse_args(argv)
+    opts = parser.parse_args()
     if not opts.url or not opts.token or not opts.pagesize or not opts.filename:
         print "Missing required param; run with --help for usage"
         sys.exit(-1)
@@ -45,7 +41,9 @@ def main(argv):
    
         # perform a single binary search
         #
-        binaries = cb.binary_search("", rows=int(opts.pagesize), start=start)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            binaries = cb.binary_search("", rows=int(opts.pagesize), start=start)
         
         if 0 == start:
             total = int(binaries['total_results'])
@@ -70,4 +68,4 @@ def main(argv):
     f.close()
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+    sys.exit(main())
