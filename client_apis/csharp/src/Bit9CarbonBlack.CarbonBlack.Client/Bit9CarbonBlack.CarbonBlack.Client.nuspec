@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <projectUrl>https://github.com/carbonblack/cbapi</projectUrl>
+    <iconUrl>https://www.bit9.com/wp-content/themes/bit92014/images/bit9-plus-carbon-black-tagline.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes>Initial release of CarbonBlack API .NET Client</releaseNotes>
+    <copyright>Copyright 2014</copyright>
+    <tags>CarbonBlack Bit9 Security</tags>
+  </metadata>
+</package>

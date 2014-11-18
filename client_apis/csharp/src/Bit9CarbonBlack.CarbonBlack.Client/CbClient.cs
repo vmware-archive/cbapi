@@ -24,12 +24,12 @@ namespace Bit9CarbonBlack.CarbonBlack.Client
         /// </summary>
         /// <param name="serverUri">The URI string for the CarbonBlack server.</param>
         /// <param name="token">The user API token for connecting to the CarbonBlack API.</param>
-        /// <param name="sslVerify">True to perform SSL verification; otherwise, false.  Default is true.</param>
+        /// <param name="sslVerify">True to perform SSL verification; otherwise, false.</param>
         /// <exception cref="ArgumentException">
         /// serverUri or token is not a valid string.
         /// serverUri is not a valid absolute URI.
         /// </exception>
-        public CbClient(string serverUri, string token, bool sslVerify = true)
+        public CbClient(string serverUri, string token, bool sslVerify)
             : this(serverUri, token, sslVerify ? HttpClientMessageHandler.DefaultHandler() : HttpClientMessageHandler.SslIgnoreHandler())
         {
         }
