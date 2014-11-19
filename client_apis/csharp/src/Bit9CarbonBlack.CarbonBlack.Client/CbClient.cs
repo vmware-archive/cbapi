@@ -12,7 +12,7 @@ namespace Bit9CarbonBlack.CarbonBlack.Client
     /// <summary>
     /// Represents a client to the CarbonBlack server api.
     /// </summary>
-    public class CbClient : IDisposable
+    public class CbClient : ICbClient
     {
         private readonly Uri serverUri = null;
         private readonly string token = null;
