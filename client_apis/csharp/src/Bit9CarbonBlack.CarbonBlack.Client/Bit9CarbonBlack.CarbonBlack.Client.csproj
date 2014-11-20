@@ -76,6 +76,7 @@
       <Link>Bit9CarbonBlack.CarbonBlack.Client.snk</Link>
     </None>
     <None Include="app.config" />
+    <None Include="Bit9CarbonBlack.CarbonBlack.Client.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

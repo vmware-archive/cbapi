@@ -13,5 +13,8 @@
     <releaseNotes>Initial release of CarbonBlack API .NET Client</releaseNotes>
     <copyright>Copyright 2014</copyright>
     <tags>CarbonBlack Bit9 Security</tags>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System.Net.Http" />
+    </frameworkAssemblies>
   </metadata>
 </package>
