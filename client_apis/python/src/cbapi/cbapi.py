@@ -451,9 +451,7 @@ class CbApi(object):
                     raise Exception("Unexpected response from /api/v1/feed/%s/synchronize: %s"
                                     % (feed['id'], sync_request.status_code))
 
-                return r.json()
-
-        raise Exception("No such feed %s" % (name,))
+        return {"result": False, "reason": "feed not found"}
 
     def feed_report_enum(self, id):
         '''
