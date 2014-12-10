@@ -17,6 +17,36 @@ The Sensor API is a subset of the broader Cb Client REST APIs.  Authentication u
 
 All Live Response APIs require you to first establish a "session" with a sensor. A sensor with an active session will keep an open connection to the Carbon Black server for as long as the session is active. All Live Response command APIs require a session id.
 
+## Example
+
+#### Start a new session
+``POST`` to `/api/v1/cblr/session` with requested sensor_id:
+
+```
+[root@guy-cbdev-6 ~]# curl -H "Content-Type: application/json" -H "X-Auth-Token: d91b00774b2b903b49d8d9caa57ce9fcde16973a" -d '{"sensor_id": 10}' http://127.0.0.1/api/v1/cblr/session
+{"status": "pending", "sensor_id": 10, "supported_commands": [], "drives": [], "storage_size": 0, "create_time": 1418247933.634789, "sensor_wait_timeout": 120, "address": null, "check_in_timeout": 1200, "id": 2, "hostname": "WIN-EP7RMLTCLAJ", "storage_ttl": 7, "os_version": "", "session_timeout": 300, "current_working_directory": ""}
+```
+Note `status` is pending and the session id is 2.   Wait a few seconds, then `GET` status of session 2:
+
+```
+[root@guy-cbdev-6 ~]# curl -H "Content-Type: application/json" -H "X-Auth-Token: d91b00774b2b903b49d8d9caa57ce9fcde16973a" http://127.0.0.1/api/v1/cblr/session/2
+{"status": "active", "sensor_id": 10, "supported_commands": ["delete file", "put file", "reg delete key", "directory list", "reg create key", "get file", "reg enum key", "reg query value", "kill", "create process", "process list", "reg delete value", "reg set value", "create directory"], "drives": ["A:\\", "C:\\", "D:\\"], "storage_size": 0, "create_time": 1418247933.634789, "sensor_wait_timeout": 120, "address": "::ffff:192.168.206.128", "check_in_timeout": 1200, "id": 2, "hostname": "WIN-EP7RMLTCLAJ", "storage_ttl": 7, "os_version": "", "session_timeout": 300, "current_working_directory": "C:\\Windows\\CarbonBlack"}
+```
+#### Issue command
+Note `status` is active and session object now has context from the endpoint - `supported_commands`, `current_working_directory`, etc.   Create new process list command by `POST`ing to `/api/v1/cblr/session/2/command`:
+
+```
+[root@guy-cbdev-6 ~]# curl -H "Content-Type: application/json" -H "X-Auth-Token: d91b00774b2b903b49d8d9caa57ce9fcde16973a" -d '{"session_id": 2, "name": "process list"}' http://127.0.0.1/api/v1/cblr/session/2/command
+{"status": "pending", "username": "admin", "sensor_id": 10, "create_time": 1418248098.5540111, "name": "process list", "object": null, "id": 1, "session_id": 2}
+```
+
+Note `status` is pending and command id is 1.   Wait a few seconds, then `GET` status of command 1 in session 2:
+
+```
+[root@guy-cbdev-6 ~]# curl -H "Content-Type: application/json" -H "X-Auth-Token: d91b00774b2b903b49d8d9caa57ce9fcde16973a" http://127.0.0.1/api/v1/cblr/session/2/command/1
+{"status": "complete", "username": "admin", "sensor_id": 10, "object": null, "create_time": 1418248098.5540111, "id": 1, "completion": 1418248098.5710759, "processes": [{"username": "NT AUTHORITY\\SYSTEM", "create_time": 1418247141, "parent_guid": "0000000a-0000-0000-0000-000000000000", "parent": 0, "sid": "s-1-5-18", "path": "", "command_line": "", "pid": 4, "proc_guid": "0000000a-0000-0004-01d0-14c0c80ce18b"}, {"username": "NT AUTHORITY\\SYSTEM", "create_time": 1418247141, "parent_guid": "0000000a-0000-0004-01d0-14c0c80ce18b", "parent": 4, "sid": "s-1-5-18", "path": "c:\\windows\\system32\\smss.exe", "command_line": "\\systemroot\\system32\\smss.exe", "pid": 276, "proc_guid": "0000000a-0000-0114-01d0-14c0c80f42ec"}, ... }
+```
+
 ## API Summary
 
 ### Sessions
@@ -95,14 +125,14 @@ Returns a compressed archive of all the session contents: log of all commands, t
 - `status`: OPTIONAL completed/in progress/canceled - filter results based on command status
 - `count`: OPTIONAL int - limit to X results returned
 
-See [Command Objects](#commandobjects) below for command object details.
+See [Command Objects](#command-objects) below for command object details.
 
 #### `/api/v1/cblr/session/(id)/command/(cmdid)`
 *Supports*: `GET`, `PUT`
 - `GET` - with (cmdid) - returns the status for the specified command
 - `PUT` - with (cmdid) - cancel the specified command if status is `pending`
 
-See [Command Objects](#commandobjects) below for command object details.
+See [Command Objects](#command-objects) below for command object details.
 
 #### `/api/v1/cblr/session/(id)/file/(file_id)`
 *Supports*: `GET`, `PUT`
