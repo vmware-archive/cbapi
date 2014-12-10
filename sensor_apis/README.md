@@ -20,7 +20,7 @@ All Live Response APIs require you to first establish a "session" with a sensor.
 ## Example
 
 #### Start a new session
-``POST`` to `/api/v1/cblr/session` with requested sensor_id:
+All CBLR activity requires you first start a session with a sensor by `POST`ing to `/api/v1/cblr/session` with requested sensor_id.  For example:
 
 ```
 [root@guy-cbdev-6 ~]# curl -H "Content-Type: application/json" -H "X-Auth-Token: d91b00774b2b903b49d8d9caa57ce9fcde16973a" -d '{"sensor_id": 10}' http://127.0.0.1/api/v1/cblr/session
@@ -32,8 +32,9 @@ Note `status` is pending and the session id is 2.   Wait a few seconds, then `GE
 [root@guy-cbdev-6 ~]# curl -H "Content-Type: application/json" -H "X-Auth-Token: d91b00774b2b903b49d8d9caa57ce9fcde16973a" http://127.0.0.1/api/v1/cblr/session/2
 {"status": "active", "sensor_id": 10, "supported_commands": ["delete file", "put file", "reg delete key", "directory list", "reg create key", "get file", "reg enum key", "reg query value", "kill", "create process", "process list", "reg delete value", "reg set value", "create directory"], "drives": ["A:\\", "C:\\", "D:\\"], "storage_size": 0, "create_time": 1418247933.634789, "sensor_wait_timeout": 120, "address": "::ffff:192.168.206.128", "check_in_timeout": 1200, "id": 2, "hostname": "WIN-EP7RMLTCLAJ", "storage_ttl": 7, "os_version": "", "session_timeout": 300, "current_working_directory": "C:\\Windows\\CarbonBlack"}
 ```
+Note `status` is active and session object now has context from the endpoint - `supported_commands`, `current_working_directory`, etc.   
 #### Issue command
-Note `status` is active and session object now has context from the endpoint - `supported_commands`, `current_working_directory`, etc.   Create new process list command by `POST`ing to `/api/v1/cblr/session/2/command`:
+Once a session is active, you can create commands by `POST`ing a command object to the session via  `/api/v1/cblr/session/2/command`. For example, to get a process list:
 
 ```
 [root@guy-cbdev-6 ~]# curl -H "Content-Type: application/json" -H "X-Auth-Token: d91b00774b2b903b49d8d9caa57ce9fcde16973a" -d '{"session_id": 2, "name": "process list"}' http://127.0.0.1/api/v1/cblr/session/2/command
