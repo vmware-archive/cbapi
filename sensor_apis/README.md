@@ -17,6 +17,29 @@ The Sensor API is a subset of the broader Cb Client REST APIs.  Authentication u
 
 All Live Response APIs require you to first establish a "session" with a sensor. A sensor with an active session will keep an open connection to the Carbon Black server for as long as the session is active. All Live Response command APIs require a session id.
 
+## API Summary
+
+### Sessions
+
+- [`/api/v1/cblr/session/(id)`](#apiv1cblrsessionid) - Manage current sessions
+- [`/api/v1/cblr/session/(id)/keepalive`](#apiv1cblrsessionidkeeaplive) - Send keepalive for specified session
+- [`/api/v1/cblr/session/(id)/archive`](#apiv1cblrsessionidarchive) - Download complete session log as a compressed archive
+
+### Commands 
+
+- [`/api/v1/cblr/session/(id)/command`](#apiv1cblrsessionidcommand) - Create new command, list current commands
+- [`/api/v1/cblr/session/(id)/command/(cmd_id)`](#apiv1cblrsessionidcommandcmdid) - Get command result or cancel pending command
+
+### Files
+
+- [`/api/v1/cblr/session/(id)/file/(file_id)`](#apiv1cblrsessionidfilefileid) - Return file metadata for one or all files downloaded
+- [`/api/v1/cblr/session/(id)/file/(file_id)/content`](#apiv1cblrsessionidfilefile_id/content) - Return file bytes for specified file
+
+## Built-in Command Summary
+
+- [Command Request Objects](#command-requests) - JSON objects for requesting command
+- [Command Response Objects](#command-responses) - JSON objects for each command result
+
 ## Example
 
 #### Start a new session
@@ -50,29 +73,6 @@ Note `status` is pending and command id is 1.   Wait a few seconds, then `GET` s
 Note `status` is complete and the response includes a `processes` object that contains the list of currently running processes on sensor_id 10 WIN-EP7RMLTCLAJ.   
 
 Other commands function broadly the same way.   See the documentation below and the python reference implementation for details.   Happy hunting!
-
-## API Summary
-
-### Sessions
-
-- [`/api/v1/cblr/session/(id)`](#apiv1cblrsessionid) - Manage current sessions
-- [`/api/v1/cblr/session/(id)/keepalive`](#apiv1cblrsessionidkeeaplive) - Send keepalive for specified session
-- [`/api/v1/cblr/session/(id)/archive`](#apiv1cblrsessionidarchive) - Download complete session log as a compressed archive
-
-### Commands 
-
-- [`/api/v1/cblr/session/(id)/command`](#apiv1cblrsessionidcommand) - Create new command, list current commands
-- [`/api/v1/cblr/session/(id)/command/(cmd_id)`](#apiv1cblrsessionidcommandcmdid) - Get command result or cancel pending command
-
-### Files
-
-- [`/api/v1/cblr/session/(id)/file/(file_id)`](#apiv1cblrsessionidfilefileid) - Return file metadata for one or all files downloaded
-- [`/api/v1/cblr/session/(id)/file/(file_id)/content`](#apiv1cblrsessionidfilefile_id/content) - Return file bytes for specified file
-
-## Built-in Command Summary
-
-- [Command Request Objects](#command-requests) - JSON objects for requesting command
-- [Command Response Objects](#command-responses) - JSON objects for each command result
 
 ## API Reference
 
