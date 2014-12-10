@@ -37,6 +37,9 @@ All Live Response APIs require you to first establish a "session" with a sensor.
 
 ## Built-in Command Summary
 
+- [Command Request Objects](#command-requests) - JSON objects for requesting command
+- [Command Response Objects](#command-responses) - JSON objects for each command result
+
 ## API Reference
 
 #### `/api/v1/cblr/session/(id)`
