@@ -47,6 +47,9 @@ Note `status` is pending and command id is 1.   Wait a few seconds, then `GET` s
 [root@guy-cbdev-6 ~]# curl -H "Content-Type: application/json" -H "X-Auth-Token: d91b00774b2b903b49d8d9caa57ce9fcde16973a" http://127.0.0.1/api/v1/cblr/session/2/command/1
 {"status": "complete", "username": "admin", "sensor_id": 10, "object": null, "create_time": 1418248098.5540111, "id": 1, "completion": 1418248098.5710759, "processes": [{"username": "NT AUTHORITY\\SYSTEM", "create_time": 1418247141, "parent_guid": "0000000a-0000-0000-0000-000000000000", "parent": 0, "sid": "s-1-5-18", "path": "", "command_line": "", "pid": 4, "proc_guid": "0000000a-0000-0004-01d0-14c0c80ce18b"}, {"username": "NT AUTHORITY\\SYSTEM", "create_time": 1418247141, "parent_guid": "0000000a-0000-0004-01d0-14c0c80ce18b", "parent": 4, "sid": "s-1-5-18", "path": "c:\\windows\\system32\\smss.exe", "command_line": "\\systemroot\\system32\\smss.exe", "pid": 276, "proc_guid": "0000000a-0000-0114-01d0-14c0c80f42ec"}, ... }
 ```
+Note `status` is complete and the response includes a `processes` object that contains the list of currently running processes on sensor_id 10 WIN-EP7RMLTCLAJ.   
+
+Other commands function broadly the same way.   See the documentation below and the python reference implementation for details.   Happy hunting!
 
 ## API Summary
 
