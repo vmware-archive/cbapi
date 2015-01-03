@@ -182,7 +182,7 @@ namespace Bit9CarbonBlack.CarbonBlack.Client
             return await this.TransformResponse(response, async (c) =>
             {
                 var content = await c.ReadAsStringAsync();
-                dynamic dynamicObject = JObject.Parse(content);
+                dynamic dynamicObject = JsonParse(content);
                 return dynamicObject;
             });
         }
@@ -420,6 +420,18 @@ namespace Bit9CarbonBlack.CarbonBlack.Client
             else
             {
                 return new CbClientResult<T>(responseMessage.StatusCode, null);
+            }
+        }
+
+        private static dynamic JsonParse(string content)
+        {
+            try
+            {
+                return JArray.Parse(content);
+            }
+            catch (JsonException)
+            {
+                return JObject.Parse(content);
             }
         }
     }
