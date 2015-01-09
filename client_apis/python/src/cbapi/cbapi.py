@@ -304,7 +304,7 @@ class CbApi(object):
         r.raise_for_status()
         return r.json()
 
-    def watchlist_add(self, type, name, search_query, id=id, readonly=False):
+    def watchlist_add(self, type, name, search_query, id=None, readonly=False):
         '''
         adds a new watchlist
         '''
