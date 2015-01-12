@@ -50,11 +50,13 @@ Please see the "Raw Endpoint Events" section of the README.md in the root of the
 
 ## Modes Of Operation
 
-The eventExporter.py example script can be configured to run in three modes of operation:
+The eventExporter.py example script can be configured to run in three core modes of operation:
 
 1. On a single event log file with the -f option.
-2. On a single directory of log files with the -d option.
-3. Automatically identify hte event log archive directory by parsing archive.properties with the -a option.
+2. On a single directory of log files with the -d option.  A variation of this option is -a, which automatically discovers the Carbon Black global event log directory by parsing archive.properties.
+3. Pull events from the pub/sub bus using the -b option.
+
+  NOTE: Both modes (2) and (3) require changes to the Carbon Black Server configuration to enable event log archiving (mode 2) and event publishing (mode 3).  See the documentation on configuration above.
 
 ## Output Options
 
