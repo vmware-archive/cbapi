@@ -31,6 +31,9 @@ class CbApi(object):
         if not server.startswith("http"): 
             raise TypeError("Server must be URL: e.g, http://cb.example.com")
 
+        if token is None: 
+            raise TypeError("Missing required authentication token.")
+
         self.server = server.rstrip("/")
         self.ssl_verify = ssl_verify
         self.token = token
