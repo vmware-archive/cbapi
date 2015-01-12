@@ -421,7 +421,7 @@ The pipe character (`|`) delimits the fields.
 - field 4: PID of child process
 - field 5: boolean "true" if child process started; "false" if terminated
 - field 6: boolean "true" if event is flagged as potential tamper attempt; "false" otherwise
-- 
+ 
 ##### crossproc_complete
 ```
 "ProcessOpen|2014-01-23 09:19:08.331|00000177-0000-0258-01cf-c209d9f1c431|204f3f58212b3e422c90bd9691a2df28|c:\windows\system32\lsass.exe|1|2097151|false"
@@ -999,10 +999,23 @@ A sensor structure has the following fields:
 - `display`: Deprecated
 - `uninstall`: when set, indicates sensor will be directed to uninstall on next checkin
 - `parity_host_id`: Bit9 Platform Agent Host Id; zero indicates Agent is not installed
+- `network_isolation_enabled`: Boolean representing network isolation request status.  See below for details.
+- `is_isolating`: Boolean representing sensor-reported isolation status.  See below for details.
  
 If `event_log_flush_time` is set, the server will instruct the sensor to immediately send all data before this date, 
 ignoring all other throttling mechansims.  To force a host current, set this value to a value far in the future.
 When the sensor has finished sending it's queued data, this value will be null. 
+
+Network isolation is requested by setting `network_isolation_enabled` to `true`.   When the sensor receives the request and enables isolation, `is_isolating` will be set to `true`.   The combination of the two parameters creates the following potential states:
+
+| Phase | `network_isolation_enabled` | `is_isolating` | State | 
+| ----- | --------------------------- | -------------- | ----- | 
+| 0     |  False | False | normal state, isolation neither requested nor active | 
+| 1     |  True  | False | Isolation requested but not yet active | 
+| 2     | True   | True  | Isolation requested and active | 
+| 3     | False  | True  | Isolation disabled, but still active | 
+
+Transitions between states 0 to 1 and states 2 to 3 will be delayed by a few minutes, based on sensor checkin interval and online status.
 
 A complete example:
 ```
@@ -1035,7 +1048,9 @@ GET http://192.168.206.154/api/v1/sensor/1
   "cookie": 1291426991, 
   "group_id": 1, 
   "display": true, 
-  "uninstall": false
+  "uninstall": false,
+  "network_isolation_enabled": false,
+  "is_isolating": false
 }
 
 http://192.168.206.132/api/v1/sensor?hostname=A0C4
@@ -1075,7 +1090,9 @@ http://192.168.206.132/api/v1/sensor?hostname=A0C4
     "last_checkin_time": "2013-10-07 07:54:06.919446-07:00", 
     "group_id": 1, 
     "display": true, 
-    "uninstall": false
+    "uninstall": false,
+    "network_isolation_enabled": false,
+    "is_isolating": false
   }
 ]
 ```
