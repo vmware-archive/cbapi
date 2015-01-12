@@ -24,7 +24,7 @@ The events are demultiplexed on a per-process basis and passed to the Carbon Bla
 * The script must run on the Carbon Black Enterprise Server. 
 * If the Carbon Black Server deployment is a cluster deployment, the script must run on every minion node of interest
 * The script must run with root privileges
-* The server must be configured to "save off" incoming sensor event logs
+* The server must be configured to "save off" incoming sensor event logs OR the server must be configured to publish incoming events of interest over the RabbitMQ pub/sub bus.
 
 ### Configuring the Carbon Black Server to Save Off Sensor Event Logs
 
