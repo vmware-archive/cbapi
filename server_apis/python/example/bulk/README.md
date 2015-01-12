@@ -44,6 +44,10 @@ The events are demultiplexed on a per-process basis and passed to the Carbon Bla
 
 WARNING: The Carbon Black Enterprise server does NOT manage the disk usage of the event log archive directory.  Independent mechanisms must be used to avoid excessive disk usage.
 
+### Configuring the Carbon Black Server to Publish Raw Events to the Pub/Sub Bus
+
+Please see the "Raw Endpoint Events" section of the README.md in the root of the Carbon Black Server API (CBSAPI) documentation.
+
 ## Modes Of Operation
 
 The eventExporter.py example script can be configured to run in three modes of operation:
