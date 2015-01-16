@@ -1,4 +1,4 @@
-Carbon Black Enterprise Server API 
+Carbon Black Enterprise Server Client API 
 =========================
 
 http://carbonblack.com
@@ -826,6 +826,38 @@ GET http://192.168.206.154/api/binary/1C8B787BAA52DEAD1A6FEC1502D652f0/summary
   ]
 }
 ```
+-----
+
+#### `/api/v1/alert`
+
+Alert search
+
+*Supports*: 'GET', 'POST'
+
+##### Parameters:
+- `q`: REQUIRED Query string. Accepts the same data as the alert search box on the Triage Alerts page. 
+- `rows`: OPTIONAL Return this many rows, 10 by default.
+- `start`: OPTIONAL Start at this row, 0 by default.
+- `sort`: OPTIONAL Sort rows by this field and order.  `last_update desc` by default.
+- `facets`: OPTIONAL Return facet results.  'false' by default, set to 'true' for facets.
+
+##### Returns:
+
+ - JSON dictionary describing the alert search results
+
+#### `/api/v1/alert/(alertid)`
+
+Alert update and resolution
+
+*Supports*: 'POST'
+
+##### Parameters:
+- `unique_id`: REQUIRED Unique ID of alert to update
+- `status`: REQUIRED Status of the alert, as a string
+
+##### Returns:
+
+ - JSON dictionary describing alert
 
 -----
 
