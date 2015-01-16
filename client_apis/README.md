@@ -1,7 +1,7 @@
-Carbon Black Enterprise Server API 
+Carbon Black Enterprise Server Client API 
 =========================
 
-http://carbonblack.com
+https://www.bit9.com/solutions/carbon-black/
 
 ## REST API
 
