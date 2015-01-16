@@ -101,7 +101,7 @@ For example, to get the summary information for a binary with MD5 6D778E0F95447E
 
 ## API Reference
 
-####  `/api/v1/process/`
+####  `/api/v1/process`
 Process search.  Parameters passed as a query string.
 
 *Supports*:: `GET`
@@ -789,19 +789,25 @@ GET http://192.168.206.154/api/binary/1C8B787BAA52DEAD1A6FEC1502D652f0/summary
 -----
 
 #### `/api/v1/alert`
-#### `/api/v1/alert/(alertid)`
-Alert search and update
+
+Alert search
 
 *Supports*: 'GET', 'POST'
 
 ##### Parameters:
- - Search parameters via query string ('GET', 'POST')
- - Resolution parameters via JSON dictionary ('POST')
+- `q`: REQUIRED Query string. Accepts the same data as the alert search box on the Triage Alerts page. 
+- `rows`: OPTIONAL Return this many rows, 10 by default.
+- `start`: OPTIONAL Start at this row, 0 by default.
+- `sort`: OPTIONAL Sort rows by this field and order.  `last_update desc` by default.
+- `facets`: OPTIONAL Return facet results.  'false' by default, set to 'true' for facets.
 
 ##### Returns:
 
- - When no alertid is provided, a dictionary describing the alert search results is provided.
- - When an alertid is provided, a dictionary describing the updated alert is provided.
+ - JSON dictionary describing the alert search results
+
+-----
+
+#### `/api/v1/alert/(alertid)`
 
 -----
 
@@ -1130,7 +1136,6 @@ None
 
 ##### Notes:
 
-- Requires Carbon Black Enterprise Server 4.1.0 or greater
 - Backlog counts are as of sensor checkin time.  Any bytes pushed post-checkin, in response to a server directive, are not accounted for.  This means total backlog appears artificially high and will never reach zero while sensors are active. 
 
 ##### Returns:
