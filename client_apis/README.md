@@ -785,10 +785,6 @@ GET http://192.168.206.154/api/binary/1C8B787BAA52DEAD1A6FEC1502D652f0/summary
 
 -----
 
-#### `/api/v1/alert/(alertid)`
-
------
-
 #### `/api/v1/license`
 License status and application
 
