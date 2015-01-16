@@ -46,9 +46,6 @@ The following APIs are versioned.
 #### Feeds
 - [`/api/v1/feed`](#apiv1feed) - Feed enumeration, addition, modification, and deletion
 
-#### Alerts
-- [`/api/v1/alert`](#apiv1alert) - Alert search and update
-
 #### Licensing
 - [`/api/v1/license`](#apiv1license) - Server license status, requests, and application of new license
 
