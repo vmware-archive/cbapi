@@ -10,11 +10,15 @@ http://carbonblack.com
 The Carbon Black API is a RESTful API.  This means that the API can be consumed by practically any language.
 
 Example client bindings and scripts are included for reference purposes.  Both the bindings and example scripts
-are implemented in python.
+are implemented in python and C#.
 
-The core client bindings can be found at client_apis/python/src/cbapi/cbapi.py.  HTTP communication is 
-supported via the python requests library.  The client bindings require version 1.0.0 of the requests libarary,
-released 12-17-2012.  Previous versions of the requests library are not compatible with cbapi as written.
+The core client bindings can be found at:
+    python : client_apis/python/src/cbapi/cbapi.py
+    c#     : client_apis/csharp/src/Bit9CarbonBlack.CarbonBlack.Client/CbClient.cs
+
+#### Note on Dependencies
+
+For the Python client bindings, HTTP communication is supported via the python requests library.  The client bindings require version 1.0.0 of the requests libarary, released 12-17-2012.  Previous versions of the requests library are not compatible with cbapi as written.
 
 ### Versioned 
 
