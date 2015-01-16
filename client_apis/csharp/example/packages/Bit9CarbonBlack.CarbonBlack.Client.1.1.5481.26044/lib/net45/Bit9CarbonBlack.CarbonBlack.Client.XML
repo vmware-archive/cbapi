@@ -1,0 +1,465 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Bit9CarbonBlack.CarbonBlack.Client</name>
+    </assembly>
+    <members>
+        <member name="T:Bit9CarbonBlack.CarbonBlack.Client.CbClient">
+            <summary>
+            Represents a client to the CarbonBlack server api.
+            </summary>
+        </member>
+        <member name="T:Bit9CarbonBlack.CarbonBlack.Client.ICbClient">
+            <summary>
+            An interface definition for a CarbonBlack API Client.
+            </summary>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.ICbClient.HttpDelete(System.String)">
+            <summary>
+            Sends a DELETE request for the specified path.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <returns>A <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClientResult`1"/> that contains the response information.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.ICbClient.HttpDeleteAsync(System.String)">
+            <summary>
+            Sends a DELETE request for the specified path, as an asynchronous operation.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <returns>A task object representing the asynchronous operation.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.ICbClient.HttpGetAsDictionary(System.String)">
+            <summary>
+            Sends a GET request for the specified path to retrieve a <see cref="T:System.Collections.Generic.IDictionary`2"/> representation of the content.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <returns>An <see cref="T:System.Collections.Generic.IDictionary`2"/> that contains the response information.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.ICbClient.HttpGetAsDictionaryAsync(System.String)">
+            <summary>
+            Sends a GET request for the specified path to retrieve an <see cref="T:System.Collections.Generic.IDictionary`2"/> representation of the content, as an asynchronous operation.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <returns>A task object representing the asynchronous operation.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.ICbClient.HttpGetAsDynamic(System.String)">
+            <summary>
+            Sends a GET request for the specified path to retrieve a dynamic representation of the content.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <returns>A <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClientResult`1"/> that contains the response information.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.ICbClient.HttpGetAsDynamicAsync(System.String)">
+            <summary>
+            Sends a GET request for the specified path to retrieve a dynamic representation of the content, as an asynchronous operation.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <returns>A task object representing the asynchronous operation.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.ICbClient.HttpGetAsStream(System.String)">
+            <summary>
+            Sends a GET request for the specified path to retrieve a <see cref="T:System.IO.Stream"/> representation of the content.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <returns>A <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClientResult`1"/> that contains the response information.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.ICbClient.HttpGetAsStreamAsync(System.String)">
+            <summary>
+            Sends a GET request for the specified path to retrieve a <see cref="T:System.IO.Stream"/> representation of the content, as an asynchronous operation.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <returns>A task object representing the asynchronous operation.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.ICbClient.HttpGetAsString(System.String)">
+            <summary>
+            Sends a GET request for the specified path to retrieve a <see cref="T:System.String"/> representation of the content.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <returns>A <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClientResult`1"/> that contains the response information.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.ICbClient.HttpGetAsStringAsync(System.String)">
+            <summary>
+            Sends a GET request for the specified path to retrieve a <see cref="T:System.String"/> representation of the content, as an asynchronous operation.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <returns>A task object representing the asynchronous operation.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.ICbClient.HttpPostDictionary(System.String,System.Collections.Generic.IDictionary{System.String,System.Object})">
+            <summary>
+            Sends a POST request for the specified path to post <see cref="T:System.Collections.Generic.IDictionary`2"/> content.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <param name="data">The data to send.</param>
+            <returns>A <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClientResult`1"/> that contains the response information.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.ICbClient.HttpPostDictionaryAsync(System.String,System.Collections.Generic.IDictionary{System.String,System.Object})">
+            <summary>
+            Sends a POST request for the specified path to post <see cref="T:System.Collections.Generic.IDictionary`2"/> content, as an asynchronous operation.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <param name="data">The data to send.</param>
+            <returns>A task object representing the asynchronous operation.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.ICbClient.HttpPostDynamic(System.String,System.Object)">
+            <summary>
+            Sends a POST request for the specified path to post dynamic content.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <param name="data">The data to send.</param>
+            <returns>A <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClientResult`1"/> that contains the response information.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.ICbClient.HttpPostDynamicAsync(System.String,System.Object)">
+            <summary>
+            Sends a POST request for the specified path to post dynamic content, as an asynchronous operation.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <param name="data">The data to send.</param>
+            <returns>A task object representing the asynchronous operation.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.ICbClient.HttpPutDictionary(System.String,System.Collections.Generic.IDictionary{System.String,System.Object})">
+            <summary>
+            Sends a PUT request for the specified path to put <see cref="T:System.Collections.Generic.IDictionary`2"/> content.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <param name="data">The data to send.</param>
+            <returns>A <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClientResult`1"/> that contains the response information.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.ICbClient.HttpPutDictionaryAsync(System.String,System.Collections.Generic.IDictionary{System.String,System.Object})">
+            <summary>
+            Sends a PUT request for the specified path to put <see cref="T:System.Collections.Generic.IDictionary`2"/> content, as an asynchronous operation.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <param name="data">The data to send.</param>
+            <returns>A task object representing the asynchronous operation.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.ICbClient.HttpPutDynamic(System.String,System.Object)">
+            <summary>
+            Sends a PUT request for the specified path to put dynamic content.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <param name="data">The data to send.</param>
+            <returns>A <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClientResult`1"/> that contains the response information.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.ICbClient.HttpPutDynamicAsync(System.String,System.Object)">
+            <summary>
+            Sends a PUT request for the specified path to put <see cref="T:System.Collections.Generic.IDictionary`2"/> content, as an asynchronous operation.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <param name="data">The data to send.</param>
+            <returns>A task object representing the asynchronous operation.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="P:Bit9CarbonBlack.CarbonBlack.Client.ICbClient.ServerUri">
+            <summary>
+            Gets the CarbonBlack server URI that is being used by this <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.ICbClient"/> instance.
+            </summary>
+        </member>
+        <member name="P:Bit9CarbonBlack.CarbonBlack.Client.ICbClient.Token">
+            <summary>
+            Gets the CarbonBlack user API token that is being used by this <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.ICbClient"/> instance.
+            </summary>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.CbClient.#ctor(System.String,System.String,System.Boolean)">
+            <summary>
+            Creates a new instannce of <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClient"/>, and optionally specifies the ssl verification options.
+            </summary>
+            <param name="serverUri">The URI string for the CarbonBlack server.</param>
+            <param name="token">The user API token for connecting to the CarbonBlack API.</param>
+            <param name="sslVerify">True to perform SSL verification; otherwise, false.</param>
+            <exception cref="T:System.ArgumentException">
+            serverUri or token is not a valid string.
+            serverUri is not a valid absolute URI.
+            </exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.CbClient.#ctor(System.String,System.String,System.Net.Http.HttpMessageHandler)">
+            <summary>
+            Creates a new instance of <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClient"/>, with an optional <see cref="T:System.Net.Http.HttpMessageHandler"/>.
+            </summary>
+            <param name="serverUri">The URI string for the CarbonBlack server.</param>
+            <param name="token">The user API token for connecting to the CarbonBlack API.</param>
+            <param name="httpClientMessageHandler">An optional <see cref="T:System.Net.Http.HttpMessageHandler"/> instance to use with the underlying <see cref="P:Bit9CarbonBlack.CarbonBlack.Client.CbClient.HttpClient"/>.</param>
+            <exception cref="T:System.ArgumentException">
+            serverUri or token is not a valid string.
+            serverUri is not a valid absolute URI.
+            </exception>
+            <remarks>
+            The <see cref="T:System.Net.Http.HttpMessageHandler"/> instance passed as httpClientMessageHandler will be disposed when the the <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClient"/> instance is disposed.
+            </remarks>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.CbClient.#ctor(System.String,System.String,System.Net.Http.HttpClient)">
+            <summary>
+            Creates a new instance of <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClient"/> with a specific <see cref="P:Bit9CarbonBlack.CarbonBlack.Client.CbClient.HttpClient"/>.
+            This constuctor is marked as internal and used for testing.
+            </summary>
+            <param name="serverUri">The URI string for the CarbonBlack server.</param>
+            <param name="token">The user API token for connecting to the CarbonBlack API.</param>
+            <param name="httpClient">The <see cref="P:Bit9CarbonBlack.CarbonBlack.Client.CbClient.HttpClient"/> instance to use as the underlying rest client.</param>
+            <exception cref="T:System.ArgumentException">
+            serverUri or token is not a valid string.
+            serverUri is not a valid absolute URI.
+            </exception>
+            <exception cref="T:System.ArgumentNullException">
+            httpClient is null.
+            </exception>
+            <remarks>
+            The <see cref="P:Bit9CarbonBlack.CarbonBlack.Client.CbClient.HttpClient"/> instance passed as httpClient will be disposed when the the <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClient"/> instance is disposed.
+            </remarks>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.CbClient.HttpGetAsStringAsync(System.String)">
+            <summary>
+            Sends a GET request for the specified path to retrieve a <see cref="T:System.String"/> representation of the content, as an asynchronous operation.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <returns>A task object representing the asynchronous operation.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.CbClient.HttpGetAsString(System.String)">
+            <summary>
+            Sends a GET request for the specified path to retrieve a <see cref="T:System.String"/> representation of the content.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <returns>A <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClientResult`1"/> that contains the response information.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.CbClient.HttpGetAsStreamAsync(System.String)">
+            <summary>
+            Sends a GET request for the specified path to retrieve a <see cref="T:System.IO.Stream"/> representation of the content, as an asynchronous operation.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <returns>A task object representing the asynchronous operation.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.CbClient.HttpGetAsStream(System.String)">
+            <summary>
+            Sends a GET request for the specified path to retrieve a <see cref="T:System.IO.Stream"/> representation of the content.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <returns>A <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClientResult`1"/> that contains the response information.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.CbClient.HttpGetAsDynamicAsync(System.String)">
+            <summary>
+            Sends a GET request for the specified path to retrieve a dynamic representation of the content, as an asynchronous operation.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <returns>A task object representing the asynchronous operation.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.CbClient.HttpGetAsDynamic(System.String)">
+            <summary>
+            Sends a GET request for the specified path to retrieve a dynamic representation of the content.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <returns>A <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClientResult`1"/> that contains the response information.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.CbClient.HttpGetAsDictionaryAsync(System.String)">
+            <summary>
+            Sends a GET request for the specified path to retrieve an <see cref="T:System.Collections.Generic.IDictionary`2"/> representation of the content, as an asynchronous operation.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <returns>A task object representing the asynchronous operation.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.CbClient.HttpGetAsDictionary(System.String)">
+            <summary>
+            Sends a GET request for the specified path to retrieve a <see cref="T:System.Collections.Generic.IDictionary`2"/> representation of the content.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <returns>An <see cref="T:System.Collections.Generic.IDictionary`2"/> that contains the response information.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.CbClient.HttpPostDynamicAsync(System.String,System.Object)">
+            <summary>
+            Sends a POST request for the specified path to post dynamic content, as an asynchronous operation.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <param name="data">The data to send.</param>
+            <returns>A task object representing the asynchronous operation.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.CbClient.HttpPostDynamic(System.String,System.Object)">
+            <summary>
+            Sends a POST request for the specified path to post dynamic content.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <param name="data">The data to send.</param>
+            <returns>A <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClientResult`1"/> that contains the response information.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.CbClient.HttpPostDictionaryAsync(System.String,System.Collections.Generic.IDictionary{System.String,System.Object})">
+            <summary>
+            Sends a POST request for the specified path to post <see cref="T:System.Collections.Generic.IDictionary`2"/> content, as an asynchronous operation.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <param name="data">The data to send.</param>
+            <returns>A task object representing the asynchronous operation.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.CbClient.HttpPostDictionary(System.String,System.Collections.Generic.IDictionary{System.String,System.Object})">
+            <summary>
+            Sends a POST request for the specified path to post <see cref="T:System.Collections.Generic.IDictionary`2"/> content.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <param name="data">The data to send.</param>
+            <returns>A <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClientResult`1"/> that contains the response information.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.CbClient.HttpPutDynamicAsync(System.String,System.Object)">
+            <summary>
+            Sends a PUT request for the specified path to put dynamic content, as an asynchronous operation.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <param name="data">The data to send.</param>
+            <returns>A task object representing the asynchronous operation.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.CbClient.HttpPutDynamic(System.String,System.Object)">
+            <summary>
+            Sends a PUT request for the specified path to put dynamic content.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <param name="data">The data to send.</param>
+            <returns>A <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClientResult`1"/> that contains the response information.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.CbClient.HttpPutDictionaryAsync(System.String,System.Collections.Generic.IDictionary{System.String,System.Object})">
+            <summary>
+            Sends a PUT request for the specified path to put <see cref="T:System.Collections.Generic.IDictionary`2"/> content, as an asynchronous operation.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <param name="data">The data to send.</param>
+            <returns>A task object representing the asynchronous operation.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.CbClient.HttpPutDictionary(System.String,System.Collections.Generic.IDictionary{System.String,System.Object})">
+            <summary>
+            Sends a PUT request for the specified path to put <see cref="T:System.Collections.Generic.IDictionary`2"/> content.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <param name="data">The data to send.</param>
+            <returns>A <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClientResult`1"/> that contains the response information.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.CbClient.HttpDeleteAsync(System.String)">
+            <summary>
+            Sends a DELETE request for the specified path, as an asynchronous operation.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <returns>A task object representing the asynchronous operation.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.CbClient.HttpDelete(System.String)">
+            <summary>
+            Sends a DELETE request for the specified path.
+            </summary>
+            <param name="relativePath">The path to the api.</param>
+            <returns>A <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClientResult`1"/> that contains the response information.</returns>
+            <exception cref="T:System.ArgumentException">relativePath is not a valid relative URI.</exception>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.CbClient.Dispose">
+            <summary>
+            Releases any unmanaged resources and disposes of the managed resources used by this <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClient"/> instance.
+            </summary>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.CbClient.Dispose(System.Boolean)">
+            <summary>
+            Releases any unmanaged resources and optionally disposes of the managed resources used by this <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClient"/> instance.
+            </summary>
+            <param name="disposing">True to release both managed and unmanaged resources; False to release only unmanaged resources.</param>
+        </member>
+        <member name="P:Bit9CarbonBlack.CarbonBlack.Client.CbClient.ServerUri">
+            <summary>
+            Gets the CarbonBlack server URI that is being used by this <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClient"/> instance.
+            </summary>
+        </member>
+        <member name="P:Bit9CarbonBlack.CarbonBlack.Client.CbClient.Token">
+            <summary>
+            Gets the CarbonBlack user API token that is being used by this <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClient"/> instance.
+            </summary>
+        </member>
+        <member name="P:Bit9CarbonBlack.CarbonBlack.Client.CbClient.HttpClient">
+            <summary>
+            Gets the <see cref="P:Bit9CarbonBlack.CarbonBlack.Client.CbClient.HttpClient"/> instance that is being used.
+            </summary>
+        </member>
+        <member name="T:Bit9CarbonBlack.CarbonBlack.Client.CbClientResult`1">
+            <summary>
+            Represents a <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClient"/> operation response.
+            </summary>
+            <typeparam name="T">The type for the <see cref="P:Bit9CarbonBlack.CarbonBlack.Client.CbClientResult`1.Response"/> value.</typeparam>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.CbClientResult`1.#ctor(System.Net.HttpStatusCode,`0)">
+            <summary>
+            Creates a new instance of <see cref="T:Bit9CarbonBlack.CarbonBlack.Client.CbClientResult`1"/>.
+            </summary>
+            <param name="statusCode">The <see cref="T:System.Net.HttpStatusCode"/> associated with the response.</param>
+            <param name="response">The contents of the response.</param>
+        </member>
+        <member name="P:Bit9CarbonBlack.CarbonBlack.Client.CbClientResult`1.StatusCode">
+            <summary>
+            The <see cref="T:System.Net.HttpStatusCode"/> associated with the response.
+            </summary>
+        </member>
+        <member name="P:Bit9CarbonBlack.CarbonBlack.Client.CbClientResult`1.Response">
+            <summary>
+            The contents of the response.
+            </summary>
+        </member>
+        <member name="T:Bit9CarbonBlack.CarbonBlack.Client.SolrExtensions">
+            <summary>
+            Extension methods for SOLR interactions.
+            </summary>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.SolrExtensions.ConvertToSolrDateTime(System.DateTime,System.Boolean)">
+            <summary>
+            Converts a <see cref="T:System.DateTime"/> to a SOLR compatible datetime string, optionally converting to UTC.
+            </summary>
+            <param name="source">The <see cref="T:System.DateTime"/> to convert from.</param>
+            <param name="performUTCConversion">true to perform UTC conversion; otherwise, false (the default).</param>
+            <returns>A string representation of the SOLR datetime.</returns>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.SolrExtensions.TryConvertFromSolrDateTime(System.String)">
+            <summary>
+            Attempts to convert a SOLR compatible datetime string to a <see cref="T:System.Nullable`1"/> as UTC.
+            </summary>
+            <param name="source">The datetime string to convert from.</param>
+            <returns>A <see cref="T:System.Nullable`1"/> that represents the SOLR datetime, or null if the conversion failed.</returns>
+        </member>
+        <member name="T:Bit9CarbonBlack.CarbonBlack.Client.HttpClientMessageHandler">
+            <summary>
+            Contains builder methods for generating a type of <see cref="T:System.Net.Http.HttpMessageHandler"/> for using with the <see cref="T:System.Net.Http.HttpClient"/> class.
+            </summary>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.HttpClientMessageHandler.DefaultHandler">
+            <summary>
+            Generates a default handler.
+            </summary>
+            <returns>An <see cref="T:System.Net.Http.HttpClientHandler"/>.</returns>
+        </member>
+        <member name="M:Bit9CarbonBlack.CarbonBlack.Client.HttpClientMessageHandler.SslIgnoreHandler">
+            <summary>
+            Generates a handler that ignores SSL validation.
+            This handler will always validate an SSL server certificate.
+            </summary>
+            <returns>A <see cref="T:System.Net.Http.WebRequestHandler"/> that ignores certificate validation.</returns>
+        </member>
+    </members>
+</doc>

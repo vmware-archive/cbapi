@@ -15,7 +15,7 @@ class CbApi(object):
     import cbapi
     cb = cbapi.CbApi("http://cb.example.com", token="apitoken")
     # get metadata for all svchost.exe's not from c:\\windows
-    procs = cb.processes(r"process_name:svchost.exe -path:c:\\windows\\")  
+    procs = cb.process_search(r"process_name:svchost.exe -path:c:\\windows\\")  
     for proc in procs['results']:
         proc_detail = cb.process(proc['id'])
         print proc_detail['process']['start'], proc_detail['process']['hostname'], proc_detail['process']['path']
@@ -236,7 +236,7 @@ class CbApi(object):
 
     def sensor(self, sensor_id):
         '''
-        get information about a single sensor
+        get information about a single sensor, as specified by sensor id
         '''
 
         r = requests.get("%s/api/v1/sensor/%s" % (self.server, sensor_id),
@@ -293,6 +293,18 @@ class CbApi(object):
         r.raise_for_status()
        
         return r.content 
+
+    def sensor_backlog(self):
+        """
+        retrieves a summary of aggregate sensor backlog across all active sensors
+        """
+
+        url = "%s/api/v1/sensor/statistics" % (self.server,)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
 
     def watchlist(self, id=None):
         '''
