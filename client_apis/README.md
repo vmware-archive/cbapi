@@ -46,6 +46,9 @@ The following APIs are versioned.
 #### Feeds
 - [`/api/v1/feed`](#apiv1feed) - Feed enumeration, addition, modification, and deletion
 
+#### Alerts
+- [`/api/v1/alert`](#apiv1alert) - Alert search and update
+
 #### Licensing
 - [`/api/v1/license`](#apiv1license) - Server license status, requests, and application of new license
 
@@ -785,6 +788,23 @@ GET http://192.168.206.154/api/binary/1C8B787BAA52DEAD1A6FEC1502D652f0/summary
 
 -----
 
+#### `/api/v1/alert`
+#### `/api/v1/alert/(alertid)`
+Alert search and update
+
+*Supports*: 'GET', 'POST'
+
+##### Parameters:
+ - Search parameters via query string ('GET', 'POST')
+ - Resolution parameters via JSON dictionary ('POST')
+
+##### Returns:
+
+ - When no alertid is provided, a dictionary describing the alert search results is provided.
+ - When an alertid is provided, a dictionary describing the updated alert is provided.
+
+-----
+
 #### `/api/v1/license`
 License status and application
 
@@ -792,7 +812,7 @@ License status and application
 
 ##### Parameters:
  - Carbon Black-provided license (POST) 
- - 
+
 ##### Returns
 
 - A GET returns the current license status, as defined below:
