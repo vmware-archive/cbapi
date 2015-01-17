@@ -13,8 +13,8 @@ Example client bindings and scripts are included for reference purposes.  Both t
 are implemented in python and C#.
 
 The core client bindings can be found at:
-    python : client_apis/python/src/cbapi/cbapi.py
-    c#     : client_apis/csharp/src/Bit9CarbonBlack.CarbonBlack.Client/CbClient.cs
+    python (client_apis/python/src/cbapi/cbapi.py)
+    c# (client_apis/csharp/src/Bit9CarbonBlack.CarbonBlack.Client/CbClient.cs)
 
 #### Note on Dependencies
 
