@@ -36,6 +36,6 @@ The CBFAPI is a collection of documentation, example scripts, and a helper libra
 
 ## Versioning
 
-The Carbon Black API is versioned.  A new API revision is released in locksetp with each release of the Carbon Black Enterprise Server.
+The Carbon Black API is versioned.  A new API revision is released in lockstep with each release of the Carbon Black Enterprise Server.
 
 Previous version documentation can be found using git tags.
