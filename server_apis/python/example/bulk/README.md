@@ -24,7 +24,7 @@ The events are demultiplexed on a per-process basis and passed to the Carbon Bla
 * The script must run on the Carbon Black Enterprise Server. 
 * If the Carbon Black Server deployment is a cluster deployment, the script must run on every minion node of interest
 * The script must run with root privileges
-* The server must be configured to "save off" incoming sensor event logs
+* The server must be configured to "save off" incoming sensor event logs OR the server must be configured to publish incoming events of interest over the RabbitMQ pub/sub bus.
 
 ### Configuring the Carbon Black Server to Save Off Sensor Event Logs
 
@@ -44,13 +44,19 @@ The events are demultiplexed on a per-process basis and passed to the Carbon Bla
 
 WARNING: The Carbon Black Enterprise server does NOT manage the disk usage of the event log archive directory.  Independent mechanisms must be used to avoid excessive disk usage.
 
+### Configuring the Carbon Black Server to Publish Raw Events to the Pub/Sub Bus
+
+Please see the "Raw Endpoint Events" section of the README.md in the root of the Carbon Black Server API (CBSAPI) documentation.
+
 ## Modes Of Operation
 
-The eventExporter.py example script can be configured to run in three modes of operation:
+The eventExporter.py example script can be configured to run in three core modes of operation:
 
 1. On a single event log file with the -f option.
-2. On a single directory of log files with the -d option.
-3. Automatically identify hte event log archive directory by parsing archive.properties with the -a option.
+2. On a single directory of log files with the -d option.  A variation of this option is -a, which automatically discovers the Carbon Black global event log directory by parsing archive.properties.
+3. Pull events from the pub/sub bus using the -b option.
+
+  NOTE: Both modes (2) and (3) require changes to the Carbon Black Server configuration to enable event log archiving (mode 2) and event publishing (mode 3).  See the documentation on configuration above.
 
 ## Output Options
 

@@ -103,12 +103,16 @@ The Carbon Black server provides built-in mechanisms to expose these same events
   * Process Watchlist
   * Binary Watchlist
 * Feed hit
-  * Ingress
-    * Process Ingress Feed Hit
-    * Binary Ingress Feed Hit
-  * Storage
-    * Process Storage Feed Hit
-    * Binary Storage Feed Hit
+    * Ingress
+        * Process Ingress Feed Hit
+        * Binary Ingress Feed Hit
+    * Storage
+        * Process Storage Feed Hit
+        * Binary Storage Feed Hit
+    * Query
+        * Process Query Feed Hit
+        * Binary Query Feed Hit
+
 * New binary instance
   * First instance of any endpoint observing a particular binary
   * First instance of an endpoint observing a particular binary
@@ -224,7 +228,7 @@ Name: `watchlist.hit.binary`
 | `docs`            | list   | List of one or more matching process documents; see next table|
 
 Each matching binary document is a JSON structure with the following entries:
-  
+
 | name                    | type   | description | 
 | ----------------------- | -------| -------------| 
 | `copied_mod_len`        | int32  | Number of bytes copied to server|
@@ -255,8 +259,9 @@ Each matching binary document is a JSON structure with the following entries:
 | `product_version`       | string | Product Description (Windows only)|
 | `comments`              | string | Comment String (Windows only)|
 | `legal_copyright`       | string | Legal copyright string (Windows only)|
-| `legal_trademarkt`      | string | Legal trademark string (Windows only)|
-| `private_build`         | string | Private build string (Windows only)|                                                            
+| `legal_trademark`       | string | Legal trademark string (Windows only)|
+| `private_build`         | string | Private build string (Windows only)|
+
 Example:
 
 ```
@@ -309,14 +314,17 @@ The digsig_status field can be one of eight values:
 
 ### Feed Hit
 
-There are two types of feed events:
+There are three types of feed events:
 
 * Ingress
 * Storage
+* Query
 
 Ingress feed events are published as the matching endpoint data arrives from the sensor.  These ingress feed events therefore provide the earliest available notification of the endpoint activity.  Ingress events are published prior to updating the data to the backend data store (SOLR), and therefore it may be up to fifteen minutes before the data is discoverable via search.  The latency is partially dependent on the configured SOLR soft-commit (auto-commit) interval.
 
 Storage feed events are published as the data is committed to the backend data store (SOLR).  As compared to ingress feed events, storage feed events happen later in time, but when all data is fully indexed and searchable via SOLR and therefore the CB client API. 
+
+Query feed events are published when a query string provided by a query feed matches comitted data.
 
 #### Ingress Feed Hit
 
@@ -609,6 +617,229 @@ Example Event:
 ```
 
 Notes: It can be up to 15 seconds from the time of the event generation until the document is visible via CBAPI or raw SOLR query.
+
+#### Query Feed Hit
+
+##### Process Query Feed Hit
+
+Name: `feed.query.hit.process`
+
+`feed.query.hit.process` is a JSON structure with the following entries:
+
+| name             | type     | description | 
+| -----------------| ---------|-------------| 
+| `process_id`     | string   | CB process key.  See Notes.| 
+| `sensor_id`      | string   | Always 0 for event. See process document for matching values. | 
+| `segment_id`     | int32    | Process segment identifier.  See Notes.|
+| `report_id`      | string   | Identifier of the report which included the matching IOC.  See notes. |
+| `ioc_type`       | string   | Always the value "query" | 
+| `ioc_value`      | string   | The query string used to look for matches | 
+| `ioc_attr`       | JSON     | Key value pairs of additional attributes related to the hit (if present). |
+| `sensor_id`      | int32    | Sensor Id of the endpoint on which the event matching the feed occurred |
+| `hostname`       | string   | Hostname of the endpoint on which the event matching the feed occurred |
+| `cb_version`     | string   | Carbon Black server version. |
+| `server_name`    | string   | Name of Carbon Black server. |
+| `feed_id`        | int32    | Identifier of the feed that included the matching report.  See notes. | 
+| `feed_name`      | string   | The  name of the feed that included the matching report. | 
+| `event_timestamp`| float    | Timestamp of the feed match, measured in number of seconds since the epoch |
+| `docs`           | list     | List of one or more matching process documents; see next table |
+
+Each matching process document is a JSON structure with the following entries:
+
+| name              | type   | description |
+| ----------------- | ------ | ----------- |
+| `childproc_count` | int32  | Total count of child processes created by this process |
+| `cmdline`         | string | Process command line |
+| `filemod_count`   | int32  | Total count of file modifications made by this process|
+| `group`           | string | Sensor group this sensor was assigned to at time of process execution|
+| `host_type`       | string | Type of the computer: server, workstation, domain controller|
+| `hostname`        | string | Hostname of the endpoint on which the event matching the feed occurred |
+| `last_update`     | string | Last activity in this process is endpoint local time.  Example: 2014-02-04T16:23:22.547Z |
+| `modload_count`   | int32  | Total count of module loads in this process.| 
+| `netconn_count`   | int32  | Total count of network connections made and received by this process.|
+| `os_type`         | string | Operating system type, e.g. Windows, Linux, Osx. |
+| `parent_name`     | string | Name of the parent process. |
+| `parent_md5`      | string | MD5 of the parent process. |
+| `parent_pid`      | int32  | PID of parent process. |
+| `parent_unique_id`| string | Parent process unique identifer. |
+| `path`            | string | Full path to the executable file backing this process.|
+| `process_md5`     | string | MD5 of the executable file backing this process.|
+| `process_name`    | string | Filename of the executable backing this process.|
+| `process_pid`     | int32  | PID of this process. |
+| `regmod_count`    | int32  | total count of registry modifications made by this process.|
+| `segment_id`      | int32  | For internal use|
+| `sensor_id`       | int32  | Endpoint identifier.|
+| `start`           | string | Start time of this process in endpoint local time. Example: 2014-02-04T16:23:22.516Z|
+| `unique_id`       | string | Process unique Id|
+| `username`        | string | User context in which the process executed.|
+
+
+Example Event:
+
+```
+{
+  "process_id": "00000001-0000-1098-01cf-cc5fea563f8f",
+  "sensor_id": 1,
+  "segment_id": 1,
+  "docs": [
+    {
+      "username": "WIN7X64-BUILDER\\User",
+      "process_md5": "f2c7bb8acc97f92e987a2d4087d021b1",
+      "modload_count": 20,
+      "parent_unique_id": "00000001-0000-0a84-01cf-c240c9d1f378-00000001",
+      "process_name": "notepad.exe",
+      "cmdline": "\"c:\\windows\\system32\\notepad.exe\" ",
+      "os_type": "windows",
+      "path": "c:\\windows\\system32\\notepad.exe",
+      "last_update": "2014-09-09T18:57:34.267Z",
+      "parent_pid": 2692,
+      "crossproc_count": 0,
+      "parent_name": "explorer.exe",
+      "parent_md5": "000000000000000000000000000000",
+      "group": "Default Group",
+      "netconn_count": 0,
+      "hostname": "WIN7X64-BUILDER",
+      "host_type": "workstation",
+      "filemod_count": 0,
+      "start": "2014-09-09T18:57:34.251Z",
+      "unique_id": "00000001-0000-1098-01cf-cc5fea563f8f-00000001",
+      "regmod_count": 0,
+      "childproc_count": 0,
+      "process_pid": 4248
+    }
+  ],
+  "hostname": "DXM021-VM1",
+  "event_timestamp": 1410289221.38,
+  "feed_name": "dxmtest2",
+  "feed_id": 12,
+  "ioc_value": "cb.urlver=1&cb.q.process_name=notepad.exe&sort=start%20desc&rows=10&start=0",
+  "ioc_type": "query",
+  "ioc_attrs": {
+    "highlights": [
+      "PREPREPREnotepad.exePOSTPOSTPOST",
+      "c:\\windows\\system32\\PREPREPREnotepad.exePOSTPOSTPOST"
+    ]
+  },
+  "report_id": "notepad_proc"
+}
+```
+
+Notes:
+
+* The process_id and segment_id fields can be used to construct a request for complete process segment information, including events such as netconns, modloads, and similar, using the Carbon Black Client API.
+
+##### Binary Storage Feed Hit 
+
+Name: `feed.storage.hit.binary`
+
+`feed.storage.hit.binary` is a JSON structure with the following entries:
+
+| name             | type     | description | 
+| -----------------|----------|-------------| 
+| `md5`            | string   | MD5 of the binary. | 
+| `report_id`      | string   | Identifier of the report which included the matching IOC. |
+| `ioc_type`       | string   | Always the value "query" | 
+| `ioc_value`      | string   | The query string used to look for matches | 
+| `ioc_attr`       | JSON     | Key value pairs of additional attributes related to the hit (if present). |
+| `sensor_id`      | int32    | Sensor Id of the endpoint on which the event matching the feed occurred |
+| `hostname`       | string   | Hostname of the endpoint on which the event matching the feed occurred |
+| `cb_version`     | string   | Carbon Black server version. |
+| `server_name`    | string   | Name of Carbon Black server. |
+| `feed_id`        | int32    | Identifier of the feed that included the matching report. | 
+| `feed_name`      | string   | The  name of the feed that included the matching report. | 
+| `event_timestamp`| float    | Timestamp of the feed match, measured in number of seconds since the epoch | 
+| `docs`           | list     | List of one or more matching process documents; see next table |
+
+Each matching process document is a JSON structure with the following entries:
+
+  
+| name                    | type   | description | 
+| ----------------------- | -------| -------------| 
+| `comments`              | string | Comment String (Windows only)|
+| `company_name`          | string | Company Name (Windows Only)|
+| `copied_mod_len`        | int32  | Number of bytes copied to server|
+| `endpoint`              | string | Hostname and sensor ID of the endpoint on which this binary was observed. |
+| `file_desc`             | string | File Description (Windows only)|
+| `file_version`          | string | File Version (Windows Only)|
+| `group`                 | string | First sensor group on which this binary was observed|
+| `host_count`            | int32  | Number of hosts containing this file|
+| `digsig_issuer`         | string | If digitally signed, the issuer.|
+| `digsig_publisher`      | string | If digitally signed, the publisher.|
+| `digsig_result`         | string | If digitally signed, the human-readable status. See notes.|
+| `digsig_result_code`    | in32   | For internal use.|
+| `digsig_sign_time`      | string | If digitally signed, the sign time.|
+| `digsig_subject`        | string | If digitally signed, the subject.|
+| `internal_name`         | string | Internal Name (Windows Only)|
+| `is_executable_image`   | bool   | True if the binary is a standalone executable (as compared to a library).|
+| `is_64bit`              | bool   | True if architecture is x64 (versus x86)
+| `last_seen`             | string | Time last seen|
+| `legal_copyright`       | string | Legal copyright string (Windows only)|
+| `legal_trademark`       | string | Legal trademark string (Windows only)|
+| `md5`                   | string | MD5 of the binary|
+| `observed_filename`     | string | Full path to the executable backing the process|
+| `orig_mod_len`          | int32  | Size in bytes of the binary at the time of observation on the endpoint.|
+| `original_filename`     | string | Internal Original Filename (Windows Only)|
+| `os_type`               | string | Operating system type of the endpoint, e.g. Windows, Linux, Osx. |
+| `private_build`         | string | Private build string (Windows only)|
+| `product_desc`          | string | Product Description (Windows only)|
+| `product_name`          | string | Product Name (Windows Only)|
+| `product_version`       | string | Product Description (Windows only)|
+| `server_added_timestamp`| string | The time this binary was first seen by the server.
+| `signed`                | string | If digitally signed|
+| `timestamp`             | string | The time this binary was first seen by the server.|
+
+Example Event:
+
+```
+{
+  "sensor_id": 1,
+  "docs": [
+    {
+      "host_count": 1,
+      "digsig_result": "Unsigned",
+      "observed_filename": [
+        "c:\\program files (x86)\\programmer's notepad\\pn.exe"
+      ],
+      "product_version": "2.3.4.0-charles",
+      "signed": "Unsigned",
+      "is_executable_image": false,
+      "orig_mod_len": 3092992,
+      "is_64bit": false,
+      "group": [
+        "Default Group"
+      ],
+      "file_version": "2.3.4.0",
+      "company_name": "Simon Steele (Echo Software)",
+      "internal_name": "PNWTL",
+      "product_name": "Programmer's Notepad",
+      "digsig_result_code": "2148204800",
+      "timestamp": "2014-09-09T21:00:29.875Z",
+      "copied_mod_len": 3092992,
+      "server_added_timestamp": "2014-09-09T21:00:29.875Z",
+      "md5": "EFA7ECAF4468E0106E8B1041C5CE450E",
+      "endpoint": [
+        "WIN7X64-BUILDER|1"
+      ],
+      "legal_copyright": "Copyright \u00a9 2002-2010 Simon Steele (Echo Software)",
+      "original_filename": "pn.exe",
+      "os_type": "Windows",
+      "file_desc": "Programmer's Notepad 2",
+      "last_seen": "2014-09-09T21:00:29.875Z"
+    }
+  ],
+  "hostname": "DXM021-VM1",
+  "event_timestamp": 1410296635.26,
+  "feed_name": "dxmtest2",
+  "feed_id": 12,
+  "ioc_value": "cb.urlver=1&cb.q.process_name=notepad.exe&sort=start%20desc&rows=10&start=0",
+  "ioc_type": "query",
+  "md5": "EFA7ECAF4468E0106E8B1041C5CE450E",
+  "report_id": "Newly Loaded Modules"
+}
+```
+
+Notes: It can be up to 15 seconds from the time of the event generation until the document is visible via CBAPI or raw SOLR query.
+
 
 ### New Binary Instance
 

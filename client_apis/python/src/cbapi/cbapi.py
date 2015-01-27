@@ -31,6 +31,9 @@ class CbApi(object):
         if not server.startswith("http"): 
             raise TypeError("Server must be URL: e.g, http://cb.example.com")
 
+        if token is None: 
+            raise TypeError("Missing required authentication token.")
+
         self.server = server.rstrip("/")
         self.ssl_verify = ssl_verify
         self.token = token
@@ -316,7 +319,7 @@ class CbApi(object):
         r.raise_for_status()
         return r.json()
 
-    def watchlist_add(self, type, name, search_query, id=id, readonly=False):
+    def watchlist_add(self, type, name, search_query, id=None, readonly=False):
         '''
         adds a new watchlist
         '''
@@ -463,9 +466,7 @@ class CbApi(object):
                     raise Exception("Unexpected response from /api/v1/feed/%s/synchronize: %s"
                                     % (feed['id'], sync_request.status_code))
 
-                return r.json()
-
-        raise Exception("No such feed %s" % (name,))
+        return {"result": False, "reason": "feed not found"}
 
     def feed_report_enum(self, id):
         '''
@@ -495,4 +496,44 @@ class CbApi(object):
         r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
         r.raise_for_status()
 
+        return r.json()
+
+    def alert_search(self, query_string, sort="created_time desc", rows=10, start=0):
+        """ Search for processes.  Arguments: 
+
+            query_string -      The Alert query string; this is the same string used in the 
+                                "main search box" on the alert search page.  "Contains text..."
+                                See Cb Query Syntax for a description of options.
+
+            start -             Defaulted to 0.  Will retrieve records starting at this offset.
+            rows -              Defaulted to 10. Will retrieve this many rows. 
+            sort -              Default to created_time desc.  Must include a field and a sort
+                                order; results will be sorted by this param.
+
+            Returns a list of python dictionaries with the following primary fields:
+                - results - a list of dictionaries describing each matching process
+                - total_results - the total number of matches
+                - elapsed - how long this search took
+                - terms - a list of strings describing how the query was parsed
+                - facets - a dictionary of the facet results for this saerch
+        """
+        params = {
+            'sort': sort,
+            'facet': ['true', 'true'],
+            'rows': rows,
+            'cb.urlver': ['1'],
+            'start': start}
+
+        if len(query_string) > 0:
+            params['q'] = [query_string]
+
+        r = requests.get("%s/api/v1/alert" % self.server, headers=self.token_header,
+                          params=params, verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def alert_update(self, alert): 
+        r = requests.post("%s/api/v1/alert/%s" % (self.server, alert['unique_id']), headers=self.token_header,
+                          data=json.dumps(alert), verify=self.ssl_verify)
+        r.raise_for_status()
         return r.json()

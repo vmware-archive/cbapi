@@ -50,6 +50,10 @@ The following APIs are versioned.
 #### Feeds
 - [`/api/v1/feed`](#apiv1feed) - Feed enumeration, addition, modification, and deletion
 
+#### Alerts
+- [`/api/v1/alert`](#apiv1alert) - Alert search
+- [`/api/v1/alert/<alertid>`] - Alert update and resolution
+
 #### Licensing
 - [`/api/v1/license`](#apiv1license) - Server license status, requests, and application of new license
 
@@ -140,6 +144,7 @@ A process contains the following fields:
 - `filemod_count`: the count of file modifications in this process
 - `netconn_count`: count of network connections in this process
 - `childproc_count`: the count of child processes launched by this process
+- `crossproc_count`: the count of cross process events launched by this process
 - `group`: the CB Host group this sensor is assigned to 
 - `sensor_id`: the internal CB id for the sensor on which the process executed
 - `id`: the internal CB process GUID for this process (processes are identified by this GUID and their segment id)
@@ -344,6 +349,7 @@ The process object may contain the following entries.
 - `modload_complete`: a pipe-delimited list of modload strings
 - `netconn_complete`: a pipe-delimited list of netconn strings
 - `childproc_complete`: a pipe-delimited list of childproc strings
+- `crossproc_complete`: a pipe-delimited list of crossproc string
 - `os_type`: operating system type of the computer for this process; one of windows, linux, osx
 
 Each xxx_complete record is a string similar to:
@@ -356,7 +362,7 @@ The pipe character (`|`) delimits the fields.
 
 ##### filemod_complete
 ```
-"1|2013-09-16 07:11:58.000000|c:\\documents and settings\\administrator\\local settings\\temp\\hsperfdata_administrator\\3704|"
+"1|2013-09-16 07:11:58.000000|c:\\documents and settings\\administrator\\local settings\\temp\\hsperfdata_administrator\\3704|||false"
 ```
 - field 0: operation type, an integer 1, 2, 4 or 8
   - 1: Created the file
@@ -366,6 +372,21 @@ The pipe character (`|`) delimits the fields.
 - field 1: event time
 - field 2: file path
 - field 3: if operation type (field 0) is 8, last write, this value is the md5 of the file after the last write
+- field 4: file type, if known, an integer
+  - 1: PE
+  - 2: Elf
+  - 3: UniversalBin
+  - 8: EICAR
+  - 16: OfficeLegacy
+  - 17: OfficeOpenXml
+  - 48: Pdf
+  - 64: ArchivePkzip
+  - 65: ArchiveLzh
+  - 66: ArchiveLzw
+  - 67: ArchiveRar
+  - 68: ArchiveTar
+  - 69: Archive7zip
+- field 5: boolean "true" if event is flagged as potential tamper attempt; "false" otherwise
 
 ##### modload_complete
 ```
@@ -397,6 +418,32 @@ The pipe character (`|`) delimits the fields.
 - field 3: protocol: 6 is TCP, 17 is UDP
 - field 4: domain name associated with the IP address, from the client's perspective at the time of the network connection
 - field 5: boolean "true" if the connection was outbound; "false" if the connection was inbound
+
+##### childproc_complete
+```
+"2014-01-23 09:19:08.331|8832db0c-6b84-fc4b-0000-000000000001|51138beea3e2c21ec44d0932c71762a8|c:\windows\system32\rundll32.exe|6980|true|false"
+```
+- field 0: event time
+- field 1: unique_id of the child process
+- field 2: md5 of the child process
+- field 3: path of the child process
+- field 4: PID of child process
+- field 5: boolean "true" if child process started; "false" if terminated
+- field 6: boolean "true" if event is flagged as potential tamper attempt; "false" otherwise
+ 
+##### crossproc_complete
+```
+"ProcessOpen|2014-01-23 09:19:08.331|00000177-0000-0258-01cf-c209d9f1c431|204f3f58212b3e422c90bd9691a2df28|c:\windows\system32\lsass.exe|1|2097151|false"
+```
+- field 0: type of cross-process access: RemoteThread if remote thread creation; ProcessOpen if process handle open with access privileges
+- field 1: event time
+- field 2: unique_id of the targeted process
+- field 3: md5 of the targeted process
+- field 4: path of the targeted process
+- field 5: sub-type for ProcessOpen, "1" for handle open to process; "2" for handle open to thread in process
+- field 6: requested access priviledges
+- field 7: boolean "true" if event is flagged as potential tamper attempt; "false" otherwise
+
 
 A complete example:
 
@@ -479,11 +526,13 @@ A process preview structure with the following fields:
 - `modload_complete`: a pipe-delimited **summary** list of modload strings (see spec above)
 - `netconn_complete`: a pipe-delimited **summary** list of netconn strings (see spec above)
 - `childproc_complete`: a pipe-delimited list of **summary** childproc strings (see spec above)
+- `crossproc_complete`: a pipe-delimited list of **summary** crossproc string (see spec above)
 - `modload_count`: the **total** count of modules loaded in this process
 - `regmod_count`: the **total** count of registry modifications in this process
 - `filemod_count`: the **total** count of file modifications in this process
 - `netconn_count`: **total** count of network connections in this process
 - `childproc_count`: the **total** count of child processes launched by this process
+- `crossproc_count`: the **total** count of cross process events launched by this process
 - `os_type`: operating system type of the computer for this process; one of windows, linux, osx
 
 If a query string is provided, the endpoint will highlight all matching strings.  Highlighted results will 
@@ -786,6 +835,38 @@ GET http://192.168.206.154/api/binary/1C8B787BAA52DEAD1A6FEC1502D652f0/summary
   ]
 }
 ```
+-----
+
+#### `/api/v1/alert`
+
+Alert search
+
+*Supports*: 'GET', 'POST'
+
+##### Parameters:
+- `q`: REQUIRED Query string. Accepts the same data as the alert search box on the Triage Alerts page. 
+- `rows`: OPTIONAL Return this many rows, 10 by default.
+- `start`: OPTIONAL Start at this row, 0 by default.
+- `sort`: OPTIONAL Sort rows by this field and order.  `last_update desc` by default.
+- `facets`: OPTIONAL Return facet results.  'false' by default, set to 'true' for facets.
+
+##### Returns:
+
+ - JSON dictionary describing the alert search results
+
+#### `/api/v1/alert/(alertid)`
+
+Alert update and resolution
+
+*Supports*: 'POST'
+
+##### Parameters:
+- `unique_id`: REQUIRED Unique ID of alert to update
+- `status`: REQUIRED Status of the alert, as a string
+
+##### Returns:
+
+ - JSON dictionary describing alert
 
 -----
 
@@ -959,10 +1040,23 @@ A sensor structure has the following fields:
 - `display`: Deprecated
 - `uninstall`: when set, indicates sensor will be directed to uninstall on next checkin
 - `parity_host_id`: Bit9 Platform Agent Host Id; zero indicates Agent is not installed
+- `network_isolation_enabled`: Boolean representing network isolation request status.  See below for details.
+- `is_isolating`: Boolean representing sensor-reported isolation status.  See below for details.
  
 If `event_log_flush_time` is set, the server will instruct the sensor to immediately send all data before this date, 
 ignoring all other throttling mechansims.  To force a host current, set this value to a value far in the future.
 When the sensor has finished sending it's queued data, this value will be null. 
+
+Network isolation is requested by setting `network_isolation_enabled` to `true`.   When the sensor receives the request and enables isolation, `is_isolating` will be set to `true`.   The combination of the two parameters creates the following potential states:
+
+| Phase | `network_isolation_enabled` | `is_isolating` | State | 
+| ----- | --------------------------- | -------------- | ----- | 
+| 0     |  False | False | normal state, isolation neither requested nor active | 
+| 1     |  True  | False | Isolation requested but not yet active | 
+| 2     | True   | True  | Isolation requested and active | 
+| 3     | False  | True  | Isolation disabled, but still active | 
+
+Transitions between states 0 to 1 and states 2 to 3 will be delayed by a few minutes, based on sensor checkin interval and online status.
 
 A complete example:
 ```
@@ -995,7 +1089,9 @@ GET http://192.168.206.154/api/v1/sensor/1
   "cookie": 1291426991, 
   "group_id": 1, 
   "display": true, 
-  "uninstall": false
+  "uninstall": false,
+  "network_isolation_enabled": false,
+  "is_isolating": false
 }
 
 http://192.168.206.132/api/v1/sensor?hostname=A0C4
@@ -1035,7 +1131,9 @@ http://192.168.206.132/api/v1/sensor?hostname=A0C4
     "last_checkin_time": "2013-10-07 07:54:06.919446-07:00", 
     "group_id": 1, 
     "display": true, 
-    "uninstall": false
+    "uninstall": false,
+    "network_isolation_enabled": false,
+    "is_isolating": false
   }
 ]
 ```
