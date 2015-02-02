@@ -18,16 +18,21 @@ class CBQuery(object):
 
         def addressInNetwork(ip, cidr):
 
-            net = cidr.split('/')[0]
-            bits = cidr.split('/')[1]
+            try:
+                net = cidr.split('/')[0]
+                bits = cidr.split('/')[1]
 
-            if int(ip) > 0: 
-                ipaddr = struct.unpack('<L', socket.inet_aton(ip))[0]
-            else:
-                ipaddr = struct.unpack('<L', socket.inet_aton(".".join(map(lambda n: str(int(ip)>>n & 0xFF), [24,16,8,0]))))[0]
-            netaddr = struct.unpack('<L', socket.inet_aton(net))[0]
-            netmask = ((1L << int(bits)) - 1)
-            return ipaddr & netmask == netaddr & netmask
+                if int(ip) > 0: 
+                    ipaddr = struct.unpack('<L', socket.inet_aton(ip))[0]
+                else:
+                    ipaddr = struct.unpack('<L', socket.inet_aton(".".join(map(lambda n: str(int(ip)>>n & 0xFF), [24,16,8,0]))))[0]
+                netaddr = struct.unpack('<L', socket.inet_aton(net))[0]
+                netmask = ((1L << int(bits)) - 1)
+                
+                return ipaddr & netmask == netaddr & netmask
+
+            except:
+                return False
     
         # return the events associated with this process segment
         # this will include netconns, as well as modloads, filemods, etc.
