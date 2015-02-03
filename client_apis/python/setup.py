@@ -8,7 +8,7 @@ import sys
 
 setup(
     name='python-cbapi',
-    version='0.5.0
+    version='0.5.0',
     url='http://www.carbonblack.com/',
     license='',
     author='Carbon Black',
