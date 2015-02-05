@@ -122,7 +122,7 @@ class CBQuery(object):
                         self.outputNetConn(proc, netconn)
                     except:
                         self.stats['output_errors'] = self.stats['output_errors'] + 1
-                        raise 
+                        pass 
 
     def strip_to_int(ip):
         """
