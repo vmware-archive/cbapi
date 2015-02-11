@@ -35,7 +35,7 @@ def main(argv):
     #
     cb = cbapi.CbApi(opts.url, token=opts.token, ssl_verify=opts.ssl_verify)
 
-    # perform a single binary search
+    # perform a single process search
     #
     processes = cb.process_search(opts.query)
     
