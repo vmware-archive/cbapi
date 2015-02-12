@@ -65,6 +65,7 @@ def main(argv):
         sys.exit(-1)
     if not opts.query.startswith("q="):
         print "Query must begin with q="
+        print opts.query
         sys.exit(-1)
 
     # build a cbapi object

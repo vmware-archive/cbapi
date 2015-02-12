@@ -319,10 +319,32 @@ class CbApi(object):
         r.raise_for_status()
         return r.json()
 
-    def watchlist_add(self, type, name, search_query, id=None, readonly=False):
+    def watchlist_add(self, type, name, search_query, id=None, readonly=False, basic_query_validation=True):
         '''
         adds a new watchlist
         '''
+
+        # as directed by the caller, provide basic feed validation
+        if basic_query_validation:
+            if not "q=" in search_query:
+                raise ValueError("watchlist queries must be of the form: cb.urlver=1&q=<query>")
+            if "cb.urlver" not in search_query:
+                search_query = "cb.urlver=1&" + search_query 
+
+            for kvpair in search_query.split('&'):
+                print kvpair
+                if len(kvpair.split('=')) != 2:
+                    continue
+                if kvpair.split('=')[0] != 'q':
+                    continue
+                
+                # the query itself must be percent-encoded
+                # verify there are only non-reserved characters present
+                # no logic to detect unescaped '%' characters
+                for c in kvpair.split('=')[1]:
+                    if c not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.~%":
+                        raise ValueError("Unescaped non-reserved character '%s' found in query; use percent-encoding" % c)
+
         request = {\
                       'index_type': type,\
                       'name': name,\
@@ -332,7 +354,7 @@ class CbApi(object):
 
         if id is not None:
           request['id'] = id
-
+        
         url = "%s/api/v1/watchlist" % (self.server,)
 
         r = requests.post(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
