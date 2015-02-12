@@ -66,8 +66,8 @@ def main(argv):
 
     # print a legend
     #
-    print "%-20s | %-4s | %-7s | %s" % ("report id", "hits", "QTime", "Query") 
-    print "%-20s | %-4s | %-7s | %s" % ("-" * 20, "-" * 4, "-" * 7, "-" * 50)
+    print "%-20s | %-4s | %-4s | %-7s | %s" % ("report id", "ver", "hits", "QTime", "Query") 
+    print "%-20s | %-4s | %-4s | %-7s | %s" % ("-" * 20, "-" * 4, "-" * 4, "-" * 7, "-" * 100)
 
     # iterate over each report
     #
@@ -82,9 +82,32 @@ def main(argv):
        if not q.has_key('index_type') or not q.has_key('search_query'):
            continue
 
-       result = search_wrapper(cb, urllib.unquote(q['search_query']), q['index_type'])
+       # ensure that the search_query has a query ("q=") value
+       query = None
+       urlver = None
+       for kvpair in q['search_query'].split('&'):
+           if 2 != len(kvpair.split('=')):
+               continue
 
-       print "%-20s | %-4s | %-7s | %s" % (report.get('id', "<none>"), result['TotalResults'], str(result['QTime']) + "ms", result['Query'])
+           key = kvpair.split('=')[0]
+           val = kvpair.split('=')[1]
+           
+           if key == 'q':
+               query = val
+      
+           if key == 'cb.urlver':
+               urlver = val
+
+       # without a query, nothing to validate
+       if query is None:
+           continue
+
+       result = search_wrapper(cb, urllib.unquote(query), q['index_type'])
+       
+       if not result.has_key('e'):
+           print "%-20s | %-4s | %-4s | %-7s | %s" % (report.get('id', "<none>"), str(urlver), result.get('TotalResults', 0), str(result.get('QTime', 0)) + "ms", result['Query'])
+       else:
+           print "ERROR: %s" % result['e']
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
