@@ -16,6 +16,8 @@ message CbHeaderMsg
     optional int64  process_filepath_string_guid    = 8;    // lookup key for CbStringMsg
     optional int64  process_create_time             = 9;    // FILETIME format
     optional int32  process_pid                     = 10;   // Windows Process Identifier (PID)
+    optional bytes  process_md5                     = 11;
+    optional string process_path                    = 12;
 }
 
 message CbStringMsg
@@ -89,6 +91,7 @@ message CbFileModMsg
         actionFileModWrite     = 2;  // file was modified (any write, at any offset)
         actionFileModDelete    = 4;  // file was deleted
         actionFileModLastWrite = 8;  // newly-written file 'completed' CbFileModMsg will include filetype and md5
+        actionFileModOpen      = 16; // Tamper opens of the carbonblackk device
     }
     
     enum CbFileType
@@ -114,6 +117,7 @@ message CbFileModMsg
     optional    bool                have_seen_before    = 3;  // deprecated 
     optional    bytes               md5hash             = 4;  // present for actionFileModLastWrite only
     optional    CbFileType          type                = 5;  // CbFileType enum; present for actionFileModLastWrite only
+    optional    bool                tamper              = 6; 
 }
 
 message CbRegModMsg
@@ -130,6 +134,7 @@ message CbRegModMsg
     optional    CbRegModAction      action              = 2;  // CbRegModAction enum
     optional    bool                have_seen_before    = 3;  // deprecated 
     optional    bytes               utf8_regpath        = 4;  // value name appended to key for DeleteValue and WriteValue action types
+    optional    bool                tamper              = 5; 
 }
 
 
@@ -173,6 +178,66 @@ message CbLinStatsMsg
     optional int32  lin_current_handlepath_pended_size = 6;   // deprecated
     optional int32  lin_current_filepath_pended_size   = 7;   // deprecated
 }
+
+message CbCrossProcessOpenMsg
+{
+    enum OpenType
+    {
+        OpenProcessHandle       = 1;
+        OpenThreadHandle        = 2;
+    }
+    optional OpenType           type                 = 1;
+    optional uint32             targetPid            = 2; // pid of the process being acted upon
+    optional uint64             targetProcCreateTime = 3;
+    optional uint32             requestedAccess      = 4; // Desired Access for OpenThread/Process
+    optional string             targetProcPath       = 5; // the path of the target process
+    optional bytes              targetProcMd5        = 6; // the md5 sum of the target process
+
+}
+
+message CbCreateRemoteThreadMsg
+{
+    optional uint32             remoteProcPid           = 1; // pid of process the thread was created in
+    optional uint64             remoteProcCreateTime    = 2; // create time of the target process
+    optional string             remoteProcPath          = 3; // the path of the target process
+    optional bytes              remoteProcMd5           = 4; // the md5 sum of the target process
+}
+
+//
+// CbCrossProcessEvent
+//
+// Activities from a process that cross into other process
+// 
+// These are reported in terms of the offending (from) process in the header
+//
+message CbCrossProcessMsg
+{
+    optional CbCrossProcessOpenMsg      open            = 1;    // openprocess or openthread
+    optional CbCreateRemoteThreadMsg    remotethread    = 2;    // createRemoteThread
+    optional bool                       tamper          = 3;    // potential tamper event
+}
+
+message CbProtectionBlockedMsg
+{
+    enum BlockType
+    {
+        MD5Hash             = 1;
+        NetworkIsolation    = 2;
+    }
+
+    enum BlockEvent
+    {
+        ProcessCreate       = 1;
+        NetConn             = 2;
+    }
+
+    optional BlockType              blockedType         = 1;
+    optional BlockEvent             blockedEvent        = 2;
+    optional bytes                  blockedmd5Hash      = 3;
+}
+
+
+
 
 //
 // deprecated
@@ -273,6 +338,23 @@ message CbEnvironmentMsg
     optional CbServerEnvironmentMsg     server   = 2;  
 }
 
+//
+// the follow are for tamper "alerts" that don't
+// fit within events that are associated with a specific process
+//
+message CbTamperAlertMsg
+{
+    enum CbTamperAlertType {
+        AlertCoreDriverUnloaded         = 1; // carbonblackk unloaded (actually happens before the unload)
+        AlertNetworkDriverUnloaded      = 2; // cbstream or cbtdiflt stopped
+        AlertCbServiceStopped           = 3; // carbonblack service stopped
+        AlertCbProcessTerminated        = 4; // cb.exe has ended/was terminated
+        AlertCbCodeInjection            = 5; // non-image based code injected into cb.exe 
+    }
+    optional CbTamperAlertType  type = 1;
+}
+
+
 message CbEventMsg
 {
     required CbHeaderMsg            header    = 1;
@@ -288,5 +370,8 @@ message CbEventMsg
     optional CbVtLoadMsg            vtload    = 11; // deprecated
     optional CbChildProcessMsg      childproc = 12;
     optional CbEnvironmentMsg       env       = 13; // populated by server at event-export time
+    optional CbCrossProcessMsg      crossproc   = 14;
+    optional CbTamperAlertMsg       tamperAlert = 15;
+    optional CbProtectionBlockedMsg blocked     = 16;
 }
 
