@@ -116,7 +116,7 @@ Process search.  Parameters passed as a query string.
 - `rows`: OPTIONAL Return this many rows, 10 by default.
 - `start`: OPTIONAL Start at this row, 0 by default.
 - `sort`: OPTIONAL Sort rows by this field and order.  `last_update desc` by default.
-- `facets`: OPTIONAL Return facet results.  'false' by default, set to 'true' for facets.
+- `facet`: OPTIONAL Return facet results.  'false' by default, set to 'true' for facets.
 
 ##### Returns:
 JSON object with the following elements:
@@ -182,7 +182,7 @@ Each facet result object has three values:
 A complete example:
 
 ```
-GET http://192.168.206.151/api/v1/process/?q=notepad.exe
+GET http://192.168.206.151/api/v1/process?q=notepad.exe
 
 {
   "results": [
@@ -589,7 +589,7 @@ Binary search.  Parameters passed as query string.
 - `rows`: OPTIONAL Return this many rows, 10 by default.
 - `start`: OPTIONAL Start at this row, 0 by default.
 - `sort`: OPTIONAL Sort rows by this field and order.  `server_added_timestamp desc` by default.  
-- `facets`: OPTIONAL Return facet results.  'false' by default, set to 'true' for facets.
+- `facet`: OPTIONAL Return facet results.  'false' by default, set to 'true' for facets.
 
 ##### Returns:
 JSON object with the following elements:
