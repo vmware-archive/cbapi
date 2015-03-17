@@ -231,12 +231,12 @@ def getEventLogDirFromCfg():
 
 def getBusUsernameFromConfig():
     for line in open('/etc/cb/cb.conf').readlines():
-        if line.strip().starswith('RabbitMQUser'):
+        if line.strip().startswith('RabbitMQUser'):
             return line.split('=')[1].strip()
 
 def getBusPasswordFromConfig():
     for line in open('/etc/cb/cb.conf').readlines():
-        if line.strip().starswith('RabbitMQPassword'):
+        if line.strip().startswith('RabbitMQPassword'):
             return line.split('=')[1].strip()
 
 def processEventLogFile(filename, outputformat, remove, hostinfo):
