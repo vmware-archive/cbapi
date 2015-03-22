@@ -1,4 +1,4 @@
-Carbon Black Enterprise Server Client API 
+Carbon Black Client API 
 =========================
 
 https://www.bit9.com/solutions/carbon-black/
@@ -995,15 +995,16 @@ A feed record has the following structure:
 
 -----
 
-####  `/api/v1/sensor/(id)?hostname=(hostname)&ip=(ipaddr)`
+####  `/api/v1/sensor/(id)?hostname=(hostname)&ip=(ipaddr)&groupid=(groupid)`
 Sensor / remote client details
 
 *Supports*: `GET` for all variations, `PUT` for `/api/v1/sensor/(id)` to update `event_log_flush_time`
 
 ##### Parameters:
 - `id`: OPTIONAL the sensor id
-- `hostname`: OPTIONAL returns the sensor record(s) with matching hostname
-- `ipaddr`: OPTIONAL returns the sensor record(s) with specified IP address
+- `hostname`: OPTIONAL returns the sensor registration(s) with matching hostname
+- `ipaddr`: OPTIONAL returns the sensor registration(s) with specified IP address
+- `groupid`: OPTIONAL retruns the sensor registration(s) in the specified sensor group id
 
 ##### Returns:
 
