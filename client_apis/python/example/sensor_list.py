@@ -22,6 +22,8 @@ def build_cli_parser():
                       help="Do not verify server SSL certificate.")
     parser.add_option("-f", "--format", action="store", default='plain', dest="format",
                       help="Output in pipe-delimited ('pipe'), plaintext ('plain') format or csv ('csv'); plain by default")
+    parser.add_option("-g", "--group", action="store", default=None, dest="groupid",
+                      help="Limit sensor listing to just those specified by the sensor group id provided")
     return parser
 
 def main(argv):
@@ -39,32 +41,38 @@ def main(argv):
     #
     cb = cbapi.CbApi(opts.url, token=opts.token, ssl_verify=opts.ssl_verify)
 
+    # set up filters
+    #
+    filters = {}
+    if opts.groupid is not None:
+        filters['groupid'] = opts.groupid
+
     # enumerate sensors 
     #
-    sensors = cb.sensors()
+    sensors = cb.sensors(filters)
 
     # output column headings as appropriate
     #
     if opts.format == 'pipe':
-        print "%s|%s|%s|%s" % ("sensor id", "computer name", "OS", "last checkin time")
+        print "%s|%s|%s|%s|%s" % ("sensor id", "group id", "computer name", "OS", "last checkin time")
     if opts.format == 'csv':
-        print "%s,%s,%s,%s" % ("sensor id", "computer name", "OS", "last checkin time")
+        print "%s,%s,%s,%s,%s" % ("sensor id", "group id", "computer name", "OS", "last checkin time")
 
     # output each sensor in turn
     #
     for sensor in sensors:
-   
        if opts.format == 'plain': 
            print "%-20s : %s" % ("computer name", sensor['computer_name'])
            print "----------------------------------------------"
+           print "%-20s : %s" % ("sensor_group_id", sensor['group_id'])
            print "%-20s : %s" % ("sensor id", sensor['id'])
            print "%-20s : %s" % ("os", sensor['os_environment_display_string'])
            print "%-20s : %s" % ("last checkin time", sensor['last_checkin_time'])
            print
        elif opts.format == 'pipe':
-           print "%s|%s|%s|%s" % (sensor['id'], sensor['computer_name'], sensor['os_environment_display_string'], sensor['last_checkin_time'])
+           print "%s|%s|%s|%s|%s" % (sensor['id'], sensor['group_id'], sensor['computer_name'], sensor['os_environment_display_string'], sensor['last_checkin_time'])
        elif opts.format == 'csv':
-           print '"%s","%s","%s","%s"' % (sensor['id'], sensor['computer_name'], sensor['os_environment_display_string'], sensor['last_checkin_time'])
+           print '"%s","%s","%s","%s","%s"' % (sensor['id'], sensor['group_id'], sensor['computer_name'], sensor['os_environment_display_string'], sensor['last_checkin_time'])
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

@@ -251,6 +251,7 @@ class CbApi(object):
         as of this writing, supported search criteria are:
           ip - any portion of an ip address
           hostname - any portion of a hostname, case sensitive
+          groupid - the sensor group id; must be numeric
 
         returns a list of 0 or more matching sensors
         '''
