@@ -18,10 +18,7 @@ defmodule Cbserverapi do
       def handle_info({:"basic.consume_ok", consumer_tag}, state = [consumer_tag,_,_]) do
         {:noreply, state}
       end
-      def handle_info(stuff, state) do
-        Logger.info("Unhandled bus message discarded: " <> inspect(stuff))
-        { :noreply, state}
-      end
+      @before_compile unquote(__MODULE__)
     end
   end
 
@@ -43,4 +40,12 @@ defmodule Cbserverapi do
     Cbserverapi.Creds.getcreds
   end
 
+  defmacro __before_compile__(_env) do
+    quote do
+      def handle_info(stuff, state) do
+        Logger.info("Unhandled bus message discarded: " <> inspect(stuff))
+        { :noreply, state}
+      end
+    end
+  end
 end
