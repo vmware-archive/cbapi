@@ -4,7 +4,6 @@ defmodule Cbserverapi.Creds do
   def getcreds do
     File.stream!(@cfconf, [:read], :line)
     |> Enum.reduce([], &fromcbconf/2)
-    |> IO.inspect
   end
 
   defp fromcbconf("RabbitMQUser=" <> username, acc) do
