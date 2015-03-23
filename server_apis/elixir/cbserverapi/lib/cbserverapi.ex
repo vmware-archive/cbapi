@@ -26,11 +26,18 @@ defmodule Cbserverapi do
       end
 
       defp connect(key) do
-        channel = Cbserverapi.Creds.getcreds |> Exrabbit.Utils.connect |> Exrabbit.Utils.channel
+        channel = getcreds |> Exrabbit.Utils.connect |> Exrabbit.Utils.channel
         queue = Exrabbit.Utils.declare_queue(channel)
         {:"queue.bind_ok"} = Exrabbit.Utils.bind_queue(channel, queue, "api.events", key)
         {:ok, [channel, queue]}
       end
+
+      defp getcreds do
+        Cbserverapi.Creds.getcreds
+      end
+
+      defoverridable [getcreds: 0]
+
     end
   end
 end
