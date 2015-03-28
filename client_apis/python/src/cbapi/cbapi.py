@@ -501,7 +501,7 @@ class CbApi(object):
 
         use feed_synchronize to force a feed synchronization
         '''
-
+        # 
         url = "%s/api/v1/feed/%s/report" % (self.server, id)
 
         r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
@@ -512,6 +512,8 @@ class CbApi(object):
     def feed_report_info(self, feedid, reportid):
         '''
         retrieve a single report from a feed
+
+        http://<server>/api/v1/feed/<feedid>/report/<reportid>
         '''
 
         url = "%s/api/v1/feed/%s/report/%s" % (self.server, feedid, reportid,)
