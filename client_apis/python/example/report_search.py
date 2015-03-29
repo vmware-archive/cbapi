@@ -21,7 +21,7 @@ def build_cli_parser():
     parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
                       help="Do not verify server SSL certificate.")
     parser.add_option("-q", "--query", action="store", default=None, dest="query",
-                      help="threat report query e.g. feed_id:1")
+                      help="threat report query e.g. severity_score:[0 to 100]")
     return parser
 
 def main(argv):
