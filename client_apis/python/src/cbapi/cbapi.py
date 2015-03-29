@@ -512,8 +512,6 @@ class CbApi(object):
     def feed_report_info(self, feedid, reportid):
         '''
         retrieve a single report from a feed
-
-        http://<server>/api/v1/feed/<feedid>/report/<reportid>
         '''
 
         url = "%s/api/v1/feed/%s/report/%s" % (self.server, feedid, reportid,)
