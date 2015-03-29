@@ -490,23 +490,48 @@ class CbApi(object):
                                     % (feed['id'], sync_request.status_code))
 
         return {"result": False, "reason": "feed not found"}
+    
+    def threat_report_search(self, query_string, start=0, rows=10, sort="severity_score desc"):
+        """ Search for threat reports.  Arguments: 
 
-    def feed_report_enum(self, id):
-        '''
-        enumerate all reports for an existing feed
+            query_string -      The Cb query string; this is the same string used in the 
+                                "main search box" on the process search page.  "Contains text..."
+                                See Cb Query Syntax for a description of options.
 
-        note that this will enumerate only the reports that are available on
-        the Carbon Black server.  If the feed source has changed since the
-        last time the feed was synchronized, these reports may be out-of-date.
+            start -             Defaulted to 0.  Will retrieve records starting at this offset.
+            rows -              Defaulted to 10. Will retrieve this many rows. 
+            sort -              Default to last_update desc.  Must include a field and a sort
+                                order; results will be sorted by this param.
 
-        use feed_synchronize to force a feed synchronization
-        '''
-        # 
-        url = "%s/api/v1/feed/%s/report" % (self.server, id)
+            Returns a python dictionary with the following primary fields:
+                - results - a list of dictionaries describing each matching process
+                - total_results - the total number of matches
+                - elapsed - how long this search took
+                - terms - a list of strings describing how the query was parsed
+                - facets - a dictionary of the facet results for this saerch
+        """
 
-        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        # setup the object to be used as the JSON object sent as a payload
+        # to the endpoint
+        params = {
+            'sort': sort,
+            'facet': ['true', 'true'],
+            'rows': rows,
+            'cb.urlver': ['1'],
+            'start': start}
+
+        # a q (query) param only needs to be specified if a query is present
+        # to search for all processes, provide an empty string for q
+        #
+        if len(query_string) > 0:
+            params['q'] = [query_string]
+
+        # HTTP POST and HTTP GET are both supported for process search
+        # HTTP POST allows for longer query strings
+        #
+        r = requests.get("%s/api/v1/threat_report" % self.server, headers=self.token_header,
+                          params=params, verify=self.ssl_verify)
         r.raise_for_status()
-
         return r.json()
 
     def feed_report_info(self, feedid, reportid):
@@ -515,7 +540,7 @@ class CbApi(object):
         '''
 
         url = "%s/api/v1/feed/%s/report/%s" % (self.server, feedid, reportid,)
-
+ 
         r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
         r.raise_for_status()
 
