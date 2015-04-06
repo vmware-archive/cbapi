@@ -38,8 +38,8 @@ The following APIs are versioned.
  
 #### Sensors & Sensor Groups 
 - [`/api/v1/sensor`](#apiv1sensoridhostnamehostnameipipaddr) - Sensor details
-- [`/api/v1/group/<groupid>/installer/windows/exe`](#windowsexeinstaller) - Signed EXE Sensor Installer for Windows
-- [`/api/v1/group/<groupid>/installer/windows/msi`](#windowsmsiinstaller) - Signed MSI Sensor Installer for Windows
+- [`/api/v1/group/<groupid>/installer/windows/exe`](#windowsexeinstaller) - Signed EXE Sensor Installer for Windows (zip archive)
+- [`/api/v1/group/<groupid>/installer/windows/msi`](#windowsmsiinstaller) - Signed MSI Sensor Installer for Windows (zip archive)
 - [`/api/v1/group/<groupid>/installer/osx`](#osxinstaller) - PKG Sensor Installer for OSX
 - [`/api/v1/group/<groupid>/installer/linux`](#linuxinstaller) - Sensor Installer for Linux
 - [`/api/v1/sensor/statistics`](#sensorstatistics) - Global sensor status, including aggregate sensor data backlog
@@ -1017,23 +1017,23 @@ Sensor query strings are case-sensitive substring searches, for both `hostname` 
 
 A sensor structure has the following fields:
 
-- `id`: this sensor's id
+- `id`: the sensor id of this sensor 
 - `build_id`: the sensor version installed on this endpoint.  From the `/api/builds/` endpoint
-- `build_version_string`: Human-readable string of the host's installed sensor version
-- `uptime`: Host's uptime in seconds
-- `systemvolume_total_size`: size in bytes of the computer's system volumn
+- `build_version_string`: Human-readable string of the sensor version
+- `uptime`: Endpoint uptime in seconds
+- `systemvolume_total_size`: size, in bytes, of system volume of endpoint on which sensor in installed 
 - `systemvolume_free_size`: bytes free on the system volume
 - `os_environment_display_string`: Human-readable string of the installed OS
 - `os_environment_id`: the operating system installed on this computer.  From the internal table.
 - `physical_memory_size`: size in bytes of physical memory
-- `computer_dns_name`: this computer's DNS name
+- `computer_dns_name`: the DNS name of the endpoint on which the sensor is installed
 - `computer_name`: NetBIOS name of this computer
 - `sensor_health_message`: Human-readable string indicating sensor's self-reported status
 - `computer_sid`: Machine SID of this host
 - `event_log_flush_time`: See below.
 - `last_checkin_time`: Last communication with this computer in server-local time and zone
 - `network_adapters`: A pipe-delimited list list of IP,MAC pairs for each network interface
-- `sensor_health_status`: sensor's self-reported health score, from 0 to 100.  Higher numbers better
+- `sensor_health_status`: self-reported health score, from 0 to 100.  Higher numbers better
 - `registration_time`: Time this sensor originally registered in server-local time and zone
 - `next_checkin_time`: Next expected communication from this computer in server-local time and zone
 - `boot_id`: A sequential counter of boots since the sensor was installed
