@@ -634,7 +634,8 @@ A binary object contains the following fields:
 - `digsig_issuer`: If signed and present, the issuer name
 - `digsig_subject`: If signed and present, the subject
 - `alliance_score_virustotal`: If enabled and the hit count > 1, the number of [VirusTotal](http://virustotal.com) hits for this md5
-- `os_type`: operating system type of the computer for this process; one of windows, linux, osx
+- `os_type`: operating system type of this binary; one of windows, linux, osx
+- `host_count`: count of unique endpoints which have ever reported this binary
 
  
 *Facet object* 
