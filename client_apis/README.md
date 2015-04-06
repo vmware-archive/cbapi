@@ -413,7 +413,7 @@ The pipe character (`|`) delimits the fields.
 "2013-09-16 07:11:59.000000|-1979811809|80|6|dl.javafx.com|true"
 ```
 - field 0: event time
-- field 1: remote IP address as a 32-bit signed long
+- field 1: remote IP address as a 32-bit signed long (host byte order)
 - field 2: remote port
 - field 3: protocol: 6 is TCP, 17 is UDP
 - field 4: domain name associated with the IP address, from the client's perspective at the time of the network connection
