@@ -26,9 +26,9 @@ The following APIs are versioned.
 
 #### Process Data 
 - [`/api/v1/process`](#apiv1process) - Process search
-- [`/api/v1/process/(id)/(segment)`](#apiv1processidsegment) - Process summary data
-- [`/api/v1/process/(id)/(segment)/event`](#apiv1processidsegmentevent) - Events for the selected process
-- [`/api/v1/process/(id)/(segment)/preview`](#apiv1processidsegmentpreviewqquery) - Preview for the selected process
+- [`/api/v1/process/(process_id)/(segment_id)`](#apiv1processidsegment) - Process summary data
+- [`/api/v1/process/(process_id)/(segment_id)/event`](#apiv1processidsegmentevent) - Events for the selected process
+- [`/api/v1/process/(process_id)/(segment_id)/preview`](#apiv1processidsegmentpreviewqquery) - Preview for the selected process
 
 #### Binary Data
 - [`/api/v1/binary`](#apiv1binary) - Binary search
@@ -147,9 +147,9 @@ A process contains the following fields:
 - `crossproc_count`: the count of cross process events launched by this process
 - `group`: the CB Host group this sensor is assigned to 
 - `sensor_id`: the internal CB id for the sensor on which the process executed
-- `id`: the internal CB process GUID for this process (processes are identified by this GUID and their segment id)
+- `id`: the internal CB process id for this process (processes are identified by this id and their segment id)
 - `segment_id`: the process segment id (processes are identified by this segment id and their process ID id)
-- `unique_id`: internal CB process id combining of the process GUID and segment GUID
+- `unique_id`: internal CB process id combining of the process id and segment id 
 - `os_type`: operating system type of the computer for this process; one of windows, linux, osx
 
 *Event Object*
@@ -227,14 +227,14 @@ GET http://192.168.206.151/api/v1/process?q=notepad.exe
 ```
 
 -----
-####  `/api/v1/process/(id)/(segment)`
-Gets basic process information for segment (segment) of process (guid)
+####  `/api/v1/process/(process_id)/(segment_id)`
+Gets basic process information for segment (segment_id) of process (process_id)
 
 *Supports*: `GET`
 
 ##### Parameters:
-- `id`: REQUIRED the internal CB process guid, the `id` field in search results
-- `segment`: REQUIRED the process segment, the `segment_id` field in search results.
+- `process_id`: REQUIRED the internal CB process id; this is the `id` field in search results
+- `segment_id`: REQUIRED the process segment id, the `segment_id` field in search results.
 
 ##### Returns:
 A JSON object with the following structure:
@@ -249,13 +249,13 @@ Each process summary object contains the following structure:
 - `process_md5`: the MD5 of the executable backing this process 
 - `sensor_id`: the sensor id of the host this process executed on
 - `group`: the sensor group the sensor was assigned to
-- `parent_id`: the process guid of the parent process
+- `parent_id`: the Carbon Black process id of the parent process
 - `process_name`: the name of this process, e.g., svchost.exe
 - `path`: the full path of the executable backing this process, e.g., c:\windows\system32\svchost.exe
 - `last_update`: the time of the last event received from this process, as recorded by the remote host
 - `start`: the start time of this process, as recorded by the remote host
 - `hostname`: the hostname of the computer this process executed on
-- `id`: the internal CB process guid of this process
+- `id`: the internal CB process id of this process
 - `segment_id`: the segment id of this process
 - `os_type`: operating system type of the computer for this process; one of windows, linux, osx
 
@@ -314,14 +314,14 @@ GET http://192.168.206.154/api/v1/process/2032659773721368929/1
 }
 ```
 -----
-#### `/api/v1/process/(id)/(segment)/event`
-Gets the events for the process with id (id) and segment (segment)
+#### `/api/v1/process/(process_id)/(segment_id)/event`
+Gets the events for the process with CB process id (process_id) and segment id (segment_id)
 
 *Supports*:: `GET`
 
 ##### Parameters
-- `id`: REQUIRED the internal CB process guid, the `id` field in search results
-- `segment`: REQUIRED the process segment, the `segment_id` field in search results.
+- `process_id`: REQUIRED the internal CB process id; this is the `id` field in search results
+- `segment_id`: REQUIRED the process segment id; this is the `segment_id` field in search results.
 
 
 ##### Returns:
@@ -335,14 +335,14 @@ The process object may contain the following entries.
 - `process_md5`: the MD5 of the executable backing this process 
 - `sensor_id`: the sensor id of the host this process executed on
 - `group`: the sensor group the sensor was assigned to
-- `parent_id`: the process guid of the parent process
+- `parent_id`: the Carbon Black process id of the parent process
 - `process_name`: the name of this process, e.g., svchost.exe
 - `path`: the full path of the executable backing this process, e.g., c:\windows\system32\svchost.exe
 - `cmdline`: the command line of the process
 - `last_update`: the time of the last event received from this process, as recorded by the remote host
 - `start`: the start time of this process, as recorded by the remote host
 - `hostname`: the hostname of the computer this process executed on
-- `id`: the internal CB process guid of this process
+- `id`: the internal CB process id of this process
 - `segment_id`: the segment id of this process
 - `regmod_complete`: a pipe-delimited list of regmod strings
 - `filemod_complete`: a pipe-delimited list of filemod strings
@@ -497,14 +497,14 @@ GET http://192.168.206.154/api/v1/process/2032659773721368929/1/event
 }
 ```
 -----
-#### `/api/v1/process/(id)/(segment)/preview?q=(query)`
-Process preview.  Requires id and segment id.
+#### `/api/v1/process/(process_id)/(segment_id)/preview?q=(query)`
+Process preview.  Requires process_id and segment id.
 
 *Supports*: `GET`
 
 ##### Parameters: 
-- `id`: REQUIRED the internal CB process guid, the `id` field in search results
-- `segment`: REQUIRED the process segment, the `segment_id` field in search results.
+- `process_id`: REQUIRED the internal CB process id, the `id` field in search results
+- `segment_id`: REQUIRED the process segment id; this is the `segment_id` field in search results.
 - `query`: OPTIONAL a process query string.  If present, preview results will highlight matching terms
  
 ##### Returns: 
@@ -519,7 +519,7 @@ A process preview structure with the following fields:
 - `last_update`: the time of the last event received from this process, as recorded by the remote host
 - `start`: the start time of this process, as recorded by the remote host
 - `hostname`: the hostname of the computer this process executed on
-- `id`: the internal CB process guid of this process
+- `id`: the internal CB process id of this process
 - `segment_id`: the segment id of this process
 - `regmod_complete`: a pipe-delimited **summary** list of regmod strings (see spec above)
 - `filemod_complete`: a pipe-delimited **summary** list of filemod strings (see spec above)
