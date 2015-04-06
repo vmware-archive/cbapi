@@ -1,5 +1,9 @@
 # Carbon Black API 
 
+## License
+
+Use of the Carbon Black API is governed by the license found in LICENSE.md.
+
 ## Overview
 
 Carbon Black includes extensive support for programmatic access to the underlying data and configuration via APIs.
