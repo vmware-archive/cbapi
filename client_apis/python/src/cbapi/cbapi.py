@@ -325,13 +325,22 @@ class CbApi(object):
         adds a new watchlist
         '''
 
-        # as directed by the caller, provide basic feed validation
+        # as directed by the caller, provide basic parameter validation
         if basic_query_validation:
+
+            # ensure that the index type is either events or modules
+            if "events" != type and "modules" != type:
+                raise ValueError("type must be one of events or modules") 
+
+            # ensure that the query begins with q=
             if not "q=" in search_query:
                 raise ValueError("watchlist queries must be of the form: cb.urlver=1&q=<query>")
+            
+            # ensure that a cb url version is included
             if "cb.urlver" not in search_query:
                 search_query = "cb.urlver=1&" + search_query 
 
+            # ensure that the query itself is properly encoded
             for kvpair in search_query.split('&'):
                 print kvpair
                 if len(kvpair.split('=')) != 2:
