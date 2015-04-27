@@ -249,6 +249,11 @@ The remaining fields are specific to each requested built-in command:
 - `working_directory`: An optional parameter to specify the working directory of the executable
 - `output_file`: An option file that STDERR and STDOUT will be redirected to.
 
+#### memdump
+- `name`: “memdump”
+- `object`: the path to save the resulting memory dump
+- `commpress`: "true" or "false" - an optional parameter to specify whether to compress resulting memory dump
+
 ### Command results
 
 The command result object contents vary per built-in command.
@@ -287,7 +292,14 @@ The command result object contents vary per built-in command.
   - `value_type`: the string representation of the registry value type (ie REG_DWORD, REG_QWORD, ….)
   - `value_name`: the name of the registry value
   - `value_data`: the data associated with the registry value
-  - sub_keys : an array of subkey names  (ie { “sub_keys” : [“some_sub_key” ,  “some_other_sub_key”]}
+  - `sub_keys` : an array of subkey names  (ie { “sub_keys” : [“some_sub_key” ,  “some_other_sub_key”]}
 
 #### reg query value:
  - `value`: See the values object returned in the “values” field of reg enum key
+
+#### memdump:
+- `return_code`: return code of the memory dump process
+- `compressing`: boolean flag indicating if compression is enabled
+- `complete`: boolean flag indicating if memory dump is completed
+- `percentdone`: percent of the process completed
+- `dumping`: boolean flag indicating if memory dump is in progress
