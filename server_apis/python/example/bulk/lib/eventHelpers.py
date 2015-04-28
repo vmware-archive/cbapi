@@ -1,4 +1,5 @@
 
+import uuid
 import socket
 import struct
 import time
@@ -38,30 +39,30 @@ def regmod_action_to_str(action):
         return "delval" # action must always be lower case
     return "unknown"   # action must always be lower case
 
-def convert_protobuf_to_cb_type(msg):
+def convert_protobuf_to_cb_type(msg, sensorid):
     if msg.HasField('process'):
-        return CbProcessEvent(msg.process, msg.header, msg.strings)
+        return CbProcessEvent(msg.process, msg.header, msg.strings, sensorid)
 
     if msg.HasField('modload'):
-        return CbModuleLoadEvent(msg.modload, msg.header, msg.strings)
+        return CbModuleLoadEvent(msg.modload, msg.header, msg.strings, sensorid)
 
     if msg.HasField('filemod'):
-        return CbFileModEvent(msg.filemod, msg.header, msg.strings)
+        return CbFileModEvent(msg.filemod, msg.header, msg.strings, sensorid)
 
     if msg.HasField('regmod'):
-        return CbRegModEvent(msg.regmod, msg.header, msg.strings)
+        return CbRegModEvent(msg.regmod, msg.header, msg.strings, sensorid)
 
     if msg.HasField('network'):
-        return CbNetConnEvent(msg.network, msg.header, msg.strings)
+        return CbNetConnEvent(msg.network, msg.header, msg.strings, sensorid)
 
     if msg.HasField('vtwrite'):
-        return CbVtWriteEvent(msg.vtwrite, msg.header, msg.strings)
+        return CbVtWriteEvent(msg.vtwrite, msg.header, msg.strings, sensorid)
 
     if msg.HasField('module'):
-        return CbModInfoEvent(msg.module, msg.header, msg.strings)
+        return CbModInfoEvent(msg.module, msg.header, msg.strings, sensorid)
 
     if msg.HasField('childproc'):
-        return CbChildProcEvent(msg.childproc, msg.header, msg.strings)
+        return CbChildProcEvent(msg.childproc, msg.header, msg.strings, sensorid)
 
     raise Exception("unknown type of message: '%s'" % str(msg))
 
@@ -84,22 +85,22 @@ def protobuf_to_obj_and_host(serialized_pb_event):
     if (msg.HasField('env')):
         sensor_id = msg.env.endpoint.SensorId
 
-    cb_type = convert_protobuf_to_cb_type(msg)
+    cb_type = convert_protobuf_to_cb_type(msg, sensor_id)
 
     return (sensor_id, cb_type.to_obj())
 
-def protobuf_to_obj(serialized_protobuf_event):
+def protobuf_to_obj(serialized_protobuf_event, sensor_id):
     """
     converts a serialized protobuf CB event to a
     native python dictionary
     """
     msg = cbevents.CbEventMsg()
     msg.ParseFromString(serialized_protobuf_event)
-    cb_type = convert_protobuf_to_cb_type(msg)
+    cb_type = convert_protobuf_to_cb_type(msg, sensor_id)
     return cb_type.to_obj()
 
 class CbBaseEvent(object):
-    def __init__(self, msg, msg_type, msg_header, filepaths):
+    def __init__(self, msg, msg_type, msg_header, filepaths, sensorid, sensorevent=True):
         self.msg = msg
         self.msg_type = msg_type
         self.filepaths = filepaths
@@ -108,6 +109,25 @@ class CbBaseEvent(object):
         self.event_timestamp = msg_header.timestamp
         self.process_guid = msg_header.process_guid
         self.filepath_string_guid = msg_header.filepath_string_guid
+
+        self.sensorid = sensorid
+        if sensorevent:
+            self._fixup_guid(msg_header)
+
+    def _make_guid(self, sensorid, pid, createtime):
+        pid = int(pid)
+        # new style guid
+        high = (sensorid & 0xffffffff) << 32
+        high = high | (pid & 0xffffffff)
+        low = int(createtime)
+        b = struct.pack(">QQ", high, low)
+        return str(uuid.UUID(bytes=b))
+
+    def _fixup_guid(self, header):
+
+        if header.HasField('process_pid') and header.HasField('process_create_time'):
+            pid = int(header.process_pid)
+            self.process_guid = self._make_guid(self.sensorid, pid, header.process_create_time)
 
     def _lookup_filepath(self, target):
         for filepath in self.filepaths:
@@ -119,8 +139,8 @@ class CbBaseEvent(object):
         raise NotImplementedError("'to_obj' must be implemented by subclass!")
 
 class CbProcessEvent(CbBaseEvent):
-    def __init__(self, msg, msg_header, filepaths):
-        CbBaseEvent.__init__(self, msg, "PROCESS", msg_header, filepaths)
+    def __init__(self, msg, msg_header, filepaths, sensorid):
+        CbBaseEvent.__init__(self, msg, "PROCESS", msg_header, filepaths, sensorid)
         self.timestamp = self.event_timestamp
         self.guid = self.process_guid
         self.filepath = self._lookup_filepath(self.filepath_string_guid)
@@ -129,7 +149,7 @@ class CbProcessEvent(CbBaseEvent):
         # TODO: ADD process_create_time
         self.parent_pid = self.msg.parent_pid
         self.parent_create_time = self.msg.parent_create_time
-        self.parent_guid = self.msg.parent_guid
+        self.parent_guid = self._make_guid(self.sensorid, self.parent_pid, self.parent_create_time)
         self.md5hash = self.msg.md5hash
         self.have_seen_before = self.msg.have_seen_before
         self.commandline = self.msg.commandline
@@ -144,17 +164,19 @@ class CbProcessEvent(CbBaseEvent):
         dict['type'] = 'proc'
         dict['timestamp'] = windows_time_to_unix_time(self.timestamp)
         dict['process_guid'] = self.process_guid
+        dict['parent_process_guid'] = self.parent_guid
         
         dict['path'] = self.filepath
         dict['pid'] = self.pid
         dict['md5'] = self.md5hash.encode("hex").upper() 
         dict['command_line'] = self.commandline
+        dict['sensor_id'] = self.sensorid
 
         return dict
 
 class CbChildProcEvent(CbBaseEvent):
-    def __init__(self, msg, msg_header, filepaths):
-        CbBaseEvent.__init__(self, msg, "CHILDPROC", msg_header, filepaths)
+    def __init__(self, msg, msg_header, filepaths, sensorid):
+        CbBaseEvent.__init__(self, msg, "CHILDPROC", msg_header, filepaths, sensorid)
         self.timestamp = self.event_timestamp
         self.created = self.msg.created
         self.parent_guid = self.msg.parent_guid
@@ -163,6 +185,9 @@ class CbChildProcEvent(CbBaseEvent):
         self.child_guid = self.msg.child_guid
         self.path = self.msg.path
         self.pid = self.msg.pid
+
+        if msg.HasField('create_time'):
+            self.child_guid = self._make_guid(self.sensorid, self.pid, msg.create_time)
 
     def to_obj(self):
         dict = {}
@@ -174,12 +199,13 @@ class CbChildProcEvent(CbBaseEvent):
         dict['created'] = self.created
         dict['md5'] = self.md5hash.encode("hex").upper()
         dict['child_process_guid'] = self.child_guid
+        dict['sensor_id'] = self.sensorid
 
         return dict
 
 class CbModuleLoadEvent(CbBaseEvent):
-    def __init__(self, msg, msg_header, filepaths):
-        CbBaseEvent.__init__(self, msg, "MODULELOAD", msg_header, filepaths)
+    def __init__(self, msg, msg_header, filepaths, sensorid):
+        CbBaseEvent.__init__(self, msg, "MODULELOAD", msg_header, filepaths, sensorid)
 
         self.timestamp = self.event_timestamp
         self.guid = self.msg.guid
@@ -198,12 +224,13 @@ class CbModuleLoadEvent(CbBaseEvent):
 
         dict['path'] = self.filepath
         dict['md5'] = self.md5hash.encode('hex').upper()
+        dict['sensor_id'] = self.sensorid
 
         return dict
 
 class CbFileModEvent(CbBaseEvent):
-    def __init__(self, msg, msg_header, filepaths):
-        CbBaseEvent.__init__(self, msg, "FILEMOD", msg_header, filepaths)
+    def __init__(self, msg, msg_header, filepaths, sensorid):
+        CbBaseEvent.__init__(self, msg, "FILEMOD", msg_header, filepaths, sensorid)
         self.timestamp = self.event_timestamp
         self.guid = self.msg.guid
         self.filepath = self._lookup_filepath(self.filepath_string_guid)
@@ -222,14 +249,15 @@ class CbFileModEvent(CbBaseEvent):
         dict['path'] = self.filepath
         dict['action'] = self.action
         dict['actiontype'] = self.actiontype
+        dict['sensor_id'] = self.sensorid
 
         # todo add md5 for filewrite_complete
 
         return dict
 
 class CbRegModEvent(CbBaseEvent):
-    def __init__(self, msg, msg_header, filepaths):
-        CbBaseEvent.__init__(self, msg, "REGMOD", msg_header, filepaths)
+    def __init__(self, msg, msg_header, filepaths, sensorid):
+        CbBaseEvent.__init__(self, msg, "REGMOD", msg_header, filepaths, sensorid)
         self.timestamp = self.event_timestamp
         self.guid = self.msg.guid
         self.registry_path = msg.utf8_regpath
@@ -248,12 +276,13 @@ class CbRegModEvent(CbBaseEvent):
         dict['path'] = self.registry_path
         dict['action'] = self.action
         dict['actiontype'] = self.actiontype
+        dict['sensor_id'] = self.sensorid
 
         return dict
 
 class CbNetConnEvent(CbBaseEvent):
-    def __init__(self, msg, msg_header, filepaths):
-        CbBaseEvent.__init__(self, msg, "NETCONN", msg_header, filepaths)
+    def __init__(self, msg, msg_header, filepaths, sensorid):
+        CbBaseEvent.__init__(self, msg, "NETCONN", msg_header, filepaths, sensorid)
         self.timestamp = self.event_timestamp
         self.process_guid = self.process_guid
         self.ipv4address = self.msg.ipv4Address
@@ -280,12 +309,13 @@ class CbNetConnEvent(CbBaseEvent):
         dict['port'] = socket.ntohs(self.port)
         dict['protocol'] = self.protocol
         dict['direction'] = self.direction
+        dict['sensor_id'] = self.sensorid
 
         return dict
 
 class CbVtWriteEvent(CbBaseEvent):
-    def __init__(self, msg, msg_header, filepaths):
-        CbBaseEvent.__init__(self, msg, "VT_WRITE", msg_header, filepaths)
+    def __init__(self, msg, msg_header, filepaths, sensorid):
+        CbBaseEvent.__init__(self, msg, "VT_WRITE", msg_header, filepaths, sensorid)
         self.timestamp = self.event_timestamp
         self.WritingProcessExeMd5 = msg.WritingProcessExeMd5
         self.FileWrittenMd5 = msg.FileWrittenMd5
@@ -300,8 +330,8 @@ class CbVtWriteEvent(CbBaseEvent):
         return {}
 
 class CbModInfoEvent(CbBaseEvent):
-    def __init__(self, msg, msg_header, filepaths):
-        CbBaseEvent.__init__(self, msg, "MODINFO", msg_header, filepaths)
+    def __init__(self, msg, msg_header, filepaths, sensorid):
+        CbBaseEvent.__init__(self, msg, "MODINFO", msg_header, filepaths, sensorid, sensorevent=False)
         self.timestamp = self.event_timestamp
         self.md5                     = msg.md5
         self.CopiedModuleLength      = msg.CopiedModuleLength
