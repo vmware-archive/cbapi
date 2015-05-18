@@ -728,11 +728,11 @@ Notes:
 
 * The process_id and segment_id fields can be used to construct a request for complete process segment information, including events such as netconns, modloads, and similar, using the Carbon Black Client API.
 
-##### Binary Storage Feed Hit 
+##### Binary Query Feed Hit 
 
-Name: `feed.storage.hit.binary`
+Name: `feed.query.hit.binary`
 
-`feed.storage.hit.binary` is a JSON structure with the following entries:
+`feed.query.hit.binary` is a JSON structure with the following entries:
 
 | name             | type     | description | 
 | -----------------|----------|-------------| 
