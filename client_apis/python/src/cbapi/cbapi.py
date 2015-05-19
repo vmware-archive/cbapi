@@ -8,6 +8,7 @@ import json
 import urllib
 import requests
 
+
 class CbApi(object):
     """ Python bindings for Carbon Black API 
     Example:
@@ -403,6 +404,30 @@ class CbApi(object):
         r.raise_for_status()
 
         return r.json()
+    
+    def user_add_from_data(self, username, first_name, last_name, password, confirm_password, global_admin, teams, email):
+        '''
+        add a new user to the server
+        '''
+        request = {\
+                    'username' : username,\
+                    'first_name' : first_name,\
+                    'last_name' : last_name,\
+                    'password' : password,\
+                    'confirm_password' : confirm_password,\
+                    'global_admin' : global_admin,\
+                    'teams' : teams,\
+                    'email' : email,\
+                  }
+        url = "%s/api/user" % (self.server,)
+       
+        r = requests.post(url, headers=self.token_header, data = json.dumps(request), verify=self.ssl_verify)
+        a = requests.get(url)
+        print a.data['teams']
+        
+        r.raise_for_status()
+        
+        return r.json()        
 
     def feed_get_id_by_name(self, name):
         '''
@@ -417,6 +442,19 @@ class CbApi(object):
         #
         return None
 
+    def user_get_username_by_name(self, first_name, last_name):
+        '''
+        helper function to find the username given a user's first and last name
+        '''
+
+        for user in self.user_enum():
+            if user['first_name'].lower() == first_name.lower() and user['last_name'].lower() == last_name.lower():
+                return user['username']
+
+        # did not find it
+        #
+        return None
+	
     def feed_enum(self):
         '''
         enumerate all configured feeds
@@ -429,6 +467,33 @@ class CbApi(object):
 
         return r.json()
 
+    def user_enum(self):
+        '''
+        enumerate all users
+        '''
+
+        url = "%s/api/users" % (self.server,)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+    
+    def team_enum(self):
+        '''
+        enumerate all teams
+        '''
+        
+        url = "%s/api/teams" % (self.server,)
+        
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        
+        return r.json() 
+    
+    def group_enum(self):
+        return 
+        
     def feed_info(self, id):
         '''
         retrieve information about an existing feed, as specified by id 
@@ -440,6 +505,97 @@ class CbApi(object):
           if str(feed['id']) == str(id):
               return feed 
 
+    def user_info(self, username):
+        '''
+        retrieve information about an existing user, as specified by username 
+        
+        note: the endpoint /api/users/<id> is not supported as of CB server 5.0
+        '''
+        users = self.user_enum()
+        for user in users:
+          if user['username'] == username:
+              return user 
+          
+    def team_get_id_by_name(self, name):
+        '''
+        retrieve information about an existing team, specified by name
+        '''
+        
+        teams = self.team_enum()
+        for team in teams:
+            if team['name'] == name:
+                return team['id']
+    
+    def team_info(self, id):
+        '''
+        retrieve information about an existing team, specified by id
+        '''
+        
+        teams = self.team_enum()
+        for team in teams:
+            print type(id)
+            print type(team['id'])
+            if team['id'] == id:
+                return team
+        
+    def output_user_activity(self):
+        '''
+        retrieve all user activity from server
+        '''
+        
+        url = "%s/api/useractivity" % (self.server,)
+    
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+    
+        useractivity = r.json()
+        
+        print "%-12s| %-14s | %-12s | %-5s | %-20s" %("Username", "Timestamp", "Remote Ip", "Result", "Description")
+        for attempt in useractivity:
+            print "%-12s| %-14s | %-12s | %-5s | %-20s" % (attempt['username'], attempt['timestamp'], attempt['ip_address'], attempt['http_status'], attempt['http_description'])
+    
+    def output_user_activity_success(self):
+        '''
+        retrieve all user activity from server and filter out successful attempts
+        '''
+        
+        url = "%s/api/useractivity" % (self.server,)
+        
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        
+        useractivity = r.json()
+        
+        successes = []
+        for attempt in useractivity:
+            if attempt['http_status'] == 200:
+                successes.append(attempt)
+            
+        print "%-12s| %-14s | %-12s | %-5s | %-20s" %("Username", "Timestamp", "Remote Ip", "Result", "Description")
+        for attempt in successes:
+            print "%-12s| %-14s | %-12s | %-5s | %-20s" % (attempt['username'], attempt['timestamp'], attempt['ip_address'], attempt['http_status'], attempt['http_description'])  
+    
+    def output_user_activity_failure(self):
+        '''
+        retrieve all user activity from server and filter out successful attempts
+        '''
+        
+        url = "%s/api/useractivity" % (self.server,)
+        
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        
+        useractivity = r.json()
+        
+        failures = []
+        for attempt in useractivity:
+            if attempt['http_status'] == 403:
+                failures.append(attempt)
+        
+        print "%-12s| %-14s | %-12s | %-5s | %-20s" %("Username", "Timestamp", "Remote Ip", "Result", "Description")
+        for attempt in failures:
+            print "%-12s| %-14s | %-12s | %-5s | %-20s" % (attempt['username'], attempt['timestamp'], attempt['ip_address'], attempt['http_status'], attempt['http_description'])      
+    
     def feed_del(self, id):
         '''
         delete a feed, as specified by id
@@ -450,6 +606,16 @@ class CbApi(object):
         r.raise_for_status()
 
         return r.json()
+    
+    def user_del(self,username):
+        
+        
+        url = "%s/api/user/%s" % (self.server, username)
+        
+        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        
+        return r.json()        
         
     def feed_modify(self, id, feed):
         '''
