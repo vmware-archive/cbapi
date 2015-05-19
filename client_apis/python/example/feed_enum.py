@@ -64,13 +64,13 @@ def main(argv):
 
     # output a banner
     #
-    print "%-3s  %-15s   %-8s   %s" % ("Id", "Name", "Enabled", "Url")
-    print "%s+%s+%s+%s" % ("-"*3, "-"*17, "-"*10, "-"*31)
+    print "%-3s  %-25s   %-8s   %s" % ("Id", "Name", "Enabled", "Url")
+    print "%s+%s+%s+%s" % ("-"*3, "-"*27, "-"*10, "-"*31)
 
     # output a row about each feed
     #
     for feed in feeds:
-        print "%-3s| %-15s | %-8s | %s" % (feed['id'], feed['name'], feed['enabled'], feed['feed_url'])
+        print "%-3s| %-25s | %-8s | %s" % (feed['id'], feed['name'], feed['enabled'], feed['feed_url'])
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
