@@ -30,21 +30,21 @@ def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
     if not opts.server_url or not opts.token :
-      print "Missing required param; run with --help for usage"
-      print "One of -f or -i must be specified"
-      sys.exit(-1)
+        print "Missing required param; run with --help for usage"
+        print "One of -f or -i must be specified"
+        sys.exit(-1)
 
     # build a cbapi object
     #
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
 
     if not opts.feedid:
-      username = cb.feed_get_id_by_name(opts.username)
-      if id is None:
-        print "-> No configured feed with name '%s' found!" % (opts.feedname) 
-        return
+        username = cb.feed_get_id_by_name(opts.username)
+        if id is None:
+            print "-> No configured feed with name '%s' found!" % (opts.feedname) 
+            return
     else:
-      username = opts.username
+        username = opts.username
 
     # delete the feed
     #

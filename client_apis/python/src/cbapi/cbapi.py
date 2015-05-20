@@ -423,12 +423,36 @@ class CbApi(object):
         url = "%s/api/user" % (self.server,)
        
         r = requests.post(url, headers=self.token_header, data = json.dumps(request), verify=self.ssl_verify)
-        a = requests.get(url)
-        print a.data['teams']
+        #a = requests.get(url)
+        #print a.data['teams']
         
         r.raise_for_status()
         
-        return r.json()        
+        return r.json()
+    
+    def team_add_from_data(self, team_name,groups):
+        
+        '''
+        adds new team to the server
+        '''
+        
+        #TODO: How to compute id_count
+        
+        request = {\
+            'groups' : group_name, \
+#            'id' : id_count,\ 
+            'name' : team_name, \
+        }
+        
+        url = "%s/api/team" % (self.server,)
+        
+        
+        r = requests.post(url, headers=self.token_header, data = json.dumps(request), verify=self.ssl_verify)
+        
+        r.raise_for_status()
+        
+        
+        return r.json()
 
     def feed_get_id_by_name(self, name):
         '''
@@ -442,6 +466,7 @@ class CbApi(object):
         # did not find it
         #
         return None
+    
 
     def user_get_username_by_name(self, first_name, last_name):
         '''
@@ -524,6 +549,7 @@ class CbApi(object):
         
         return r.json()         
         
+
         
     def feed_info(self, id):
         '''
@@ -652,7 +678,16 @@ class CbApi(object):
         r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
         r.raise_for_status()
         
-        return r.json()        
+        return r.json()
+    
+    def team_del(self,teamname):
+        
+        url = "%s/api/team/%s" % (self.server, teamname)         #TODO: Verify that this url works!!!
+        
+        r = requests.delete(url, header = self.token_header, verify = self.ssl_verify)
+        r.raise_for_status()
+        
+        return r.json()
         
     def feed_modify(self, id, feed):
         '''

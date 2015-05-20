@@ -20,14 +20,16 @@ def build_cli_parser():
                       help="API Token for Carbon Black server")
     parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
                       help="Do not verify server SSL certificate.")
+
     return parser
 
 def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
     if not opts.server_url or not opts.token:
-      print "Missing required param; run with --help for usage"
-      sys.exit(-1)
+        print "Missing required param; run with --help for usage"
+        sys.exit(-1)
+
 
     # build a cbapi object
     #
