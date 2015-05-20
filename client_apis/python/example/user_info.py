@@ -43,7 +43,7 @@ def output_user_info(user):
     if len(teams) > 0:
         print "%-20s : %s" % ("Teams", teams[0]['name'])
         for i in range(len(teams)-1): 
-             print "%-20s : %s" % ("", teams[i+1]['name'])
+            print "%-20s : %s" % ("", teams[i+1]['name'])
     print "%-20s : %s" % ("User Email Address", user['email'])
 	
 
@@ -52,9 +52,9 @@ def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
     if not opts.server_url or not opts.token or (not opts.username and (not opts.first_name or not opts.last_name)) :
-      print "Missing required param; run with --help for usage"
-      print "Either username must be satisfied -u or first and last name must be satisfied -f and -l"
-      sys.exit(-1)
+        print "Missing required param; run with --help for usage"
+        print "Either username must be satisfied -u or first and last name must be satisfied -f and -l"
+        sys.exit(-1)
 
     # build a cbapi object
     #
@@ -63,16 +63,16 @@ def main(argv):
   #  import pdb; pdb.set_trace()
 	
     if not opts.username:
-      username = cb.user_get_username_by_name(opts.first_name, opts.last_name)
-      if username is None:
-        print "-> No configured user with name '%s %s' found!" % (opts.first_name, opts.last_name) 
-        return
+        username = cb.user_get_username_by_name(opts.first_name, opts.last_name)
+        if username is None:
+            print "-> No configured user with name '%s %s' found!" % (opts.first_name, opts.last_name) 
+            return
     else:
-      username = opts.username
-      if cb.user_info(username) is None:
-        print "-> No configured user with name '%s' found!" % (opts.username)
-        return
-      print username
+        username = opts.username
+        if cb.user_info(username) is None:
+            print "-> No configured user with name '%s' found!" % (opts.username)
+            return
+        print username
 
     output_user_info(cb.user_info(username))
 
