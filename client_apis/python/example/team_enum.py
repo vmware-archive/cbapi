@@ -36,15 +36,20 @@ def main(argv):
     # enumerate all teams
     #
     teams = cb.team_enum()
+    
     # output a banner
     #
-    print "%-12s  %-14s" % ("id", "name")
-    print "%s+%s" % ("-"*15, "-"*20)
-
+    print "%s+%s+%s" % ("-"*15, "-"*20, "-"*20)
+    
     # output a row about each team
     #
     for team in teams:
-        print "%-12s| %-14s" % (team['id'], team['name'])
+        print "%-12s| %-14s" % ("id", team['id'])
+        print "%-12s| %-14s" % ("name", team['name'])
+        print "sensor groups which this team has access to:"
+        print team['group_access']
+        for group in team['group_access']:
+            print "%-12s: %-14s | %-10s: %-s " % ("Access Category", group['access_category'],"Group Name", group['group_name'])   
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

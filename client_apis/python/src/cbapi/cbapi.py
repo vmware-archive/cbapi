@@ -405,11 +405,12 @@ class CbApi(object):
 
         return r.json()
     
-    def user_add_from_data(self, username, first_name, last_name, password, confirm_password, global_admin, teams, email):
+    def user_add_from_data(self, validate_server_cert, username, first_name, last_name, password, confirm_password, global_admin, teams, email):
         '''
         add a new user to the server
         '''
         request = {\
+                    'validate_server_cert' : validate_server_cert,\
                     'username' : username,\
                     'first_name' : first_name,\
                     'last_name' : last_name,\
@@ -454,6 +455,26 @@ class CbApi(object):
         # did not find it
         #
         return None
+    
+    def team_get_id_by_name(self, name):
+        '''
+        retrieve information about an existing team, specified by name
+        '''
+    
+        teams = self.team_enum()
+        for team in teams:
+            if team['name'] == name:
+                return team['id']    
+            
+    def group_get_id_by_name(self, name):
+        '''
+        retrieve information about an existing group, specified by name
+        '''
+        
+        groups = self.group_enum()
+        for group in groups:
+            if group['name'] == name:
+                return group['id']
 	
     def feed_enum(self):
         '''
@@ -484,7 +505,7 @@ class CbApi(object):
         enumerate all teams
         '''
         
-        url = "%s/api/teams" % (self.server,)
+        url = "%s/api/team" % (self.server,)
         
         r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
         r.raise_for_status()
@@ -492,7 +513,17 @@ class CbApi(object):
         return r.json() 
     
     def group_enum(self):
-        return 
+        '''
+        enumerate all sensor groups
+        '''
+        
+        url = "%s/api/group" % (self.server,)
+        
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        
+        return r.json()         
+        
         
     def feed_info(self, id):
         '''
@@ -502,9 +533,9 @@ class CbApi(object):
         '''
         feeds = self.feed_enum()
         for feed in feeds:
-          if str(feed['id']) == str(id):
-              return feed 
-
+            if str(feed['id']) == str(id):
+                return feed 
+        
     def user_info(self, username):
         '''
         retrieve information about an existing user, as specified by username 
@@ -514,17 +545,8 @@ class CbApi(object):
         users = self.user_enum()
         for user in users:
           if user['username'] == username:
-              return user 
+            return user 
           
-    def team_get_id_by_name(self, name):
-        '''
-        retrieve information about an existing team, specified by name
-        '''
-        
-        teams = self.team_enum()
-        for team in teams:
-            if team['name'] == name:
-                return team['id']
     
     def team_info(self, id):
         '''
@@ -536,7 +558,22 @@ class CbApi(object):
         r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
         r.raise_for_status()
         
-        return r.json()         
+        return r.json()    
+    
+    
+    def group_info(self, id):
+        '''
+        retrieve information about an existing group, specified by id
+        '''
+        
+        url = "%s/api/group/%s" % (self.server, id)
+        
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        
+        #for some reason this is returning a list of length one with the group as the one elt
+        group_list = r.json() 
+        return group_list[0]
         
     def output_user_activity(self):
         '''

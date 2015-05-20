@@ -37,11 +37,11 @@ def main(argv):
     #
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
 
-    if opts.failures and opts.successes: 
+    if opts.failures and opts.successes or (not opts.failures and not opts.successes): 
         cb.output_user_activity()
-    if not opts.failures:
+    if not opts.failures and opts.successes:
         cb.output_user_activity_success()
-    if not opts.successes:
+    if not opts.successes and opts.failures:
         cb.output_user_activity_failure()   
 
 if __name__ == "__main__":

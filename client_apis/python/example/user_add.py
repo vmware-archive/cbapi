@@ -9,7 +9,7 @@ sys.path.append('../src/cbapi')
 import cbapi 
 
 def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Add a new feed to the Carbon Black server")
+    parser = optparse.OptionParser(usage="%prog [options]", description="Add a new user to the Carbon Black server")
 
     # for each supported output type, add an option
     #
@@ -17,7 +17,7 @@ def build_cli_parser():
                       help="CB server's URL.  e.g., http://127.0.0.1 ")
     parser.add_option("-a", "--apitoken", action="store", default=None, dest="token",
                       help="API Token for Carbon Black server")
-    parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
+    parser.add_option("-n", "--no-ssl-verify", action="store_false", default = True, dest="ssl_verify",
                       help="Do not verify server SSL certificate.")
     parser.add_option("-u", "--username", action="store", default=None, dest="username")
     parser.add_option("-f", "--first_name", action="store", default=None, dest="first_name",
@@ -41,7 +41,7 @@ def build_cli_parser():
 def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
-    if not opts.server_url or not opts.token or not opts.username or not opts.first_name or not opts.last_name or not opts.password or not opts.confirm_password or not opts.global_admin or not opts.teams or not opts.email:
+    if not opts.server_url or not opts.token or not opts.username or not opts.first_name or not opts.last_name or not opts.password or not opts.confirm_password or not opts.teams or not opts.email:
         print "Missing required param; run with --help for usage"
         sys.exit(-1)
     if not opts.password == opts.confirm_password:
@@ -54,9 +54,8 @@ def main(argv):
     # add the feed.  The feed metadata (name, icon, etc.) will be pulled from
     # the feed itself  
     #
-    results = cb.user_add_from_data(opts.username, opts.first_name, opts.last_name, opts.password, opts.confirm_password, opts.global_admin, opts.teams, opts.email)
+    results = cb.user_add_from_data(opts.ssl_verify, opts.username, opts.first_name, opts.last_name, opts.password, opts.confirm_password, opts.global_admin, opts.teams, opts.email)
 
-    print
     print "-> User added"  
     print "   -------------------------"
     print "   username     : %s" % (results['username'],)
@@ -66,7 +65,6 @@ def main(argv):
     print "   Global Administrator  : %s" % (results['global_admin'],)
     print "   Teams  : %s" % (results['teams'],)
     print "   Email Address  : %s" % (results['email'],)
-    print
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
