@@ -454,8 +454,10 @@ class CbApi(object):
     def group_add_from_data(self, alert_criticality, banning_enabled, collect_cross_procs, collect_emet_events,
                             collect_filemods, collect_filewritemd5s, collect_moduleinfo, collect_moduleloads,
                             collect_netconns, collect_nonbinary_filewrites, collect_processes, collect_regmods,
-                            collect_storefiles, collect_usercontext, name, sensorbackend_server, sensor_exe_name,
-                            sensor_version, tamper_level, vdi_enabled):
+                            collect_storefiles, collect_usercontext, datastore_server, max_licenses, name,
+                            quota_eventlog_bytes, quota_eventlog_percent, quota_storefile_bytes, quota_storefile_percent,
+                            sensor_exe_name, sensor_version, sensorbackend_server, site_id, tamper_level,
+                            team_access, vdi_enabled):
         '''
         adds a new group to the server
         '''
@@ -475,11 +477,18 @@ class CbApi(object):
             'collect_regmods' : collect_regmods, \
             'collect_storefiles' : collect_storefiles, \
             'collect_usercontext' : collect_usercontext, \
+            'datastore_server' :datastore_server, \
+            'max_licenses' : max_licenses, \
             'name' : name, \
-            'sensorbackend_server' : sensorbackend_server, \
+            'quota_eventlog_bytes' : quota_eventlog_bytes, \
+            'quota_eventlog_percent' : quota_eventlog_percent, \
+            'quota_storefile_bytes': quota_storefile_bytes, \
+            'quota_storefile_percent' : quota_storefile_percent, \
             'sensor_exe_name' : sensor_exe_name, \
+            'sensorbackend_server' : sensorbackend_server, \
             'sensor_version' : sensor_version, \
             'tamper_level' : tamper_level, \
+            'team_access' : team_access, \
             'vdi_enabled' : vdi_enabled, \
         }
         
@@ -518,20 +527,17 @@ class CbApi(object):
         #
         return None
     
-    def user_find_username(self, username):
+  
+    def team_get_id_by_name(self, name):
         '''
-        helper fucntion to find the username        
-        '''
-    
-    def team_get_teamname(self, name):
-        '''
-        retrieve information about an existing team, specified by name
+        retrieve id of
+        an existing team, specified by name
         '''
     
         teams = self.team_enum()
         for team in teams:
             if team['name'] == name:
-                return team
+                return team['id']
         
         #did not find it
         return None
@@ -615,8 +621,8 @@ class CbApi(object):
         '''
         users = self.user_enum()
         for user in users:
-          if user['username'] == username:
-            return user 
+            if user['username'] == username:
+                return user 
           
     
     def team_info(self, id):

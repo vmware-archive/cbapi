@@ -27,13 +27,12 @@ def build_cli_parser():
     return parser
 
 def output_group_info(group):
-    print group
     print "%s" % (group['name'])
     print "%s" % ('-' * 80,)
     for key in group.keys():
         if 'team_access' == key:
             print_team_access(group['team_access'])
-        if not 'icon' or not 'team_access' == key:
+        elif not 'icon' == key:
             print "%-20s : %s" % (key, group[key])
             
 def print_team_access(team_access):

@@ -30,8 +30,15 @@ def output_team_info(team):
     print "%s" % (team['name'])
     print "%s" % ('-' * 80,)
     for key in team.keys():
-        if not 'icon' == key:
+        if 'group_access' == key:
+            print_group_access(team['group_access'])
+        elif not 'icon' == key:
             print "%-20s : %s" % (key, team[key])
+            
+def print_group_access(groups):
+    print "Sensor groups this team has access to:"
+    for i in range(length(groups)):
+        print "%-12s: %-14s | %-10s: %-s " % ("Access Category", group[i]['access_category'],"Group Name", group[i]['name'])      
 
 def main(argv):
     parser = build_cli_parser()

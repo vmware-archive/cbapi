@@ -44,20 +44,13 @@ def main(argv):
     # output a row about each team
     #
     for team in teams:
-        
-        
-        
-        
         print "%-12s| %-14s" % ("id", team['id'])
         print "%-12s| %-14s" % ("name", team['name'])
-        print
-        
-        
-        ##TODO: group_accesses
-        #print "sensor groups which this team has access to:"
-        #print team['group_access']         #TODO: fix this!!
-        #for group in team['group_access']:
-            #print "%-12s: %-14s | %-10s: %-s " % ("Access Category", group['access_category'],"Group Name", group['group_name'])   
+        print "sensor groups this team has access to:"
+        print team['group_access']
+        for group in team['group_access']:
+            print "%-12s: %-14s | %-10s: %-s " % ("Access Category", group['access_category'],"Group Name", group['name'])    
+      
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
