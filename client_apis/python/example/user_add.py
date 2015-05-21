@@ -65,6 +65,12 @@ def main(argv):
     #
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
     
+    #checks if username is already in use
+    user = cb.user_get_username(opts.username)
+    if user != None:
+        print "Username in use"
+        sys.exit(-1)
+    
 
     parser2 = build_cli_parser2(cb)
     opts, args = parser2.parse_args(argv)
