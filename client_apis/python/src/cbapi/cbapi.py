@@ -453,6 +453,46 @@ class CbApi(object):
         
         
         return r.json()
+    
+    def group_add_from_data(self, alert_criticality, banning_enabled, collect_cross_procs, collect_emet_events,
+                            collect_filemods, collect_filewritemd5s, collect_moduleinfo, collect_moduleloads,
+                            collect_netconns, collect_nonbinary_filewrites, collect_processes, collect_regmods,
+                            collect_storefiles, collect_usercontext, name, sensorbackend_server, sensor_exe_name,
+                            sensor_version, tamper_level, vdi_enabled):
+        '''
+        adds a new group to the server
+        '''
+        
+        request = {\
+            'alert_criticality' : alert_criticality, \
+            'banning_enabled' : banning_enabled, \
+            'collect_cross_procs' : collect_cross_procs, \
+            'collect_emet_events' : collect_emet_events, \
+            'collect_filemods' : collect_filemods, \
+            'collect_filewritemd5s' : collect_filewritemd5s, \
+            'collect_moduleinfo' : collect_moduleinfo, \
+            'collect_moduleloads' : collect_moduleloads, \
+            'collect_netconns' : collect_netconns, \
+            'collect_nonbinary_filewrites' : collect_nonbinary_filewrites, \
+            'collect_processes' : collect_processes, \
+            'collect_regmods' : collect_regmods, \
+            'collect_storefiles' : collect_storefiles, \
+            'collect_usercontext' : collect_usercontext, \
+            'name' : name, \
+            'sensorbackend_server' : sensorbackend_server, \
+            'sensor_exe_name' : sensor_exe_name, \
+            'sensor_version' : sensor_version, \
+            'tamper_level' : tamper_level, \
+            'vdi_enabled' : vdi_enabled, \
+        }
+        
+        url = "%s/api/group" % (self.server,)
+        
+        
+        r = requests.post(url, headers=self.token_header, data = json.dumps(request), verify=self.ssl_verify) 
+        r.raise_for_status()
+        return r.json()
+    
 
     def feed_get_id_by_name(self, name):
         '''
