@@ -20,36 +20,25 @@ def build_cli_parser():
     parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
                       help="Do not verify server SSL certificate.")    
     parser.add_option("-t", "--teamname", action = "store", default = None, dest = "teamname", help = "Feed Team Name")
-    parser.add_option("-i", "--id", action="store", default=None, dest="feedid",
-                      help="Feed Id") 
+    parser.add_option("-i", "--id", action="store", default=None, dest="teamid",
+                      help="Team Id") 
     
     return parser
 
 def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
-    if not opts.server_url or not opts.token :
+    if not opts.server_url or not opts.token or not opts.id:
         print "Missing required param; run with --help for usage"
         print "One of -f or -i must be specified"
         sys.exit(-1)
     
     
     # build a cbapi object
-    #
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
     
     
-    # TODO: Check whether this works at all!!!
-    if not opts.feedid:
-        teamname = cb.feed_get_id_by_name(opts.team)
-        if id is None:
-            print "-> No configured feed with name '%s' found!" % (opts.feedname) 
-            return
-    else:
-        teamname = opts.teamname
-    
-    # delete the feed
-    #    
+    # deletes the team
     cb.team_delete(teamname)    
     
     print "-> Team deleted [team=%s]" % (teamname,)

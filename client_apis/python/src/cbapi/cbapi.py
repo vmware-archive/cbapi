@@ -354,7 +354,7 @@ class CbApi(object):
                   }
 
         if id is not None:
-          request['id'] = id
+            request['id'] = id
         
         url = "%s/api/v1/watchlist" % (self.server,)
 
@@ -423,9 +423,6 @@ class CbApi(object):
         url = "%s/api/user" % (self.server,)
        
         r = requests.post(url, headers=self.token_header, data = json.dumps(request), verify=self.ssl_verify)
-        #a = requests.get(url)
-        #print a.data['teams']
-        
         r.raise_for_status()
         
         return r.json()
@@ -433,7 +430,7 @@ class CbApi(object):
     def team_add_from_data(self, team_name,groups):
         
         '''
-        adds new team to the server
+        Adds a new team
         '''
         
         #TODO: How to compute id_count
@@ -521,7 +518,12 @@ class CbApi(object):
         #
         return None
     
-    def team_get_id_by_name(self, name):
+    def user_find_username(self, username):
+        '''
+        helper fucntion to find the username        
+        '''
+    
+    def team_get_teamname(self, name):
         '''
         retrieve information about an existing team, specified by name
         '''
@@ -529,7 +531,10 @@ class CbApi(object):
         teams = self.team_enum()
         for team in teams:
             if team['name'] == name:
-                return team['id']    
+                return team
+        
+        #did not find it
+        return None
             
     def group_get_id_by_name(self, name):
         '''
@@ -570,7 +575,7 @@ class CbApi(object):
         enumerate all teams
         '''
         
-        url = "%s/api/team" % (self.server,)
+        url = "%s/api/teams" % (self.server,)
         
         r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
         r.raise_for_status()
@@ -720,9 +725,12 @@ class CbApi(object):
         
         return r.json()
     
-    def team_del(self,teamname):
+    def team_del(self,id):
+        '''
+        deletes a team, as specified by id
+        '''
         
-        url = "%s/api/team/%s" % (self.server, teamname)         #TODO: Verify that this url works!!!
+        url = "%s/api/team/%s" % (self.server, )         #TODO: Verify that this url works!!!
         
         r = requests.delete(url, header = self.token_header, verify = self.ssl_verify)
         r.raise_for_status()

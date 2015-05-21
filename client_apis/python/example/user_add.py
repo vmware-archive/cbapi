@@ -65,6 +65,7 @@ def main(argv):
     #
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
     
+
     parser2 = build_cli_parser2(cb)
     opts, args = parser2.parse_args(argv)
     
@@ -77,6 +78,7 @@ def main(argv):
      
     # add user to the UI
     results = cb.user_add_from_data(opts.username, opts.first_name, opts.last_name, opts.password, opts.confirm_password, opts.global_admin, user_teams, opts.email)
+
 
     print "-> User added"  
     print "   -------------------------"
