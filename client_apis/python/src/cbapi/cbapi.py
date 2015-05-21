@@ -436,7 +436,7 @@ class CbApi(object):
         #TODO: How to compute id_count
         
         request = {\
-            'groups' : group_name, \
+            'group_access' : groups, \
 #            'id' : id_count,\ 
             'name' : team_name, \
         }
@@ -450,6 +450,33 @@ class CbApi(object):
         
         
         return r.json()
+    
+    def add_team_to_group(self,group,team_name):
+        
+        
+        request = {\
+            'team_name' : team_name, \
+            'access_category' : group['name']
+
+        }
+        
+        group_number = group['id']
+        
+        print group['name']
+        
+        url = "%s/api/group/%s" % (self.server,group_number)
+        
+        print url
+        
+        sys.exit(-1)
+        
+        
+        r = requests.post(url, header = self.token_header, data = json.dumps(request), verify = self.ssl_verify)
+        
+        r.raise_for_status()
+        
+        print "hello"        
+        
     
     def group_add_from_data(self, alert_criticality, banning_enabled, collect_cross_procs, collect_emet_events,
                             collect_filemods, collect_filewritemd5s, collect_moduleinfo, collect_moduleloads,
@@ -527,8 +554,22 @@ class CbApi(object):
         #
         return None
     
-  
-    def team_get_id_by_name(self, name):
+
+    def user_get_username(self, input_username):
+        '''
+        helper fucntion to find the username        
+        '''
+        for user in self.user_enum():
+            if user['username'] == input_username:
+                return input_username
+        
+        #did not find the username
+        #
+        return None
+        
+    
+    def team_get_teamname(self, name):
+
         '''
         retrieve id of
         an existing team, specified by name

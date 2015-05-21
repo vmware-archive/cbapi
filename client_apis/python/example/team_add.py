@@ -9,7 +9,7 @@ import cbapi
 
 
 def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Add a new feed to the Carbon Black server")
+    parser = optparse.OptionParser(usage="%prog [options]", description="Add a new team to the Carbon Black server")
     
     parser.add_option("-c", "--cburl", action="store", default=None, dest="server_url",
                       help="CB server's URL.  e.g., http://127.0.0.1 ")
@@ -20,7 +20,7 @@ def build_cli_parser():
     parser.add_option("-t", "--teamname", action = "store", default = None, dest = "team_name",
                       help = "Team Name")
     parser.add_option("-g", "--group_acccesses", action = "store", default = None, dest = "group_access_list",
-                      help = "List of Group Accesses")
+                      help = "List of Group Accesses. 'a' for Administrative access; 'v' for Viewer Access; 'n' for No Access. ie. 'nav' = group_1 admin access, group_2 view access, group_3 no access ")
 
     
     
@@ -45,15 +45,65 @@ def main(argv):
     if team != None:
         print "Team Name already exists."
         sys.exit(-1)
+             
     
     
     
-    ##TODO: Manipulate groups at the same time
+    access_list = opts.group_access_list    
+    groups = cb.group_enum()
+    
+    #checks if there is the right number of groups
+    if len(groups) != len(access_list):
+        print "There must be the right number of groups in the input"
+        sys.exit(-1)
+        
+
+    
+    for i in range(0,len(access_list)):
+        numberString = access_list[i]
+        if numberString == 'a':
+            '''
+            Admin Access
+            '''
+            number = 1
+        elif numberString == 'v':
+            '''
+            Viewer Access
+            '''
+            number = 2
+        elif numberString == 'n':
+            '''
+            No Access
+            '''
+            number = 3
+        else:
+            print "Only digits 'v','a',and 'n' are valid; Type '-h' for help on the notation"
+            sys.exit(-1)
+        
+        
+        group = groups[i]
+        
+        cb.add_team_to_group(group,opts.team_name)
+        
+        
+        sys.exit(-1)        
+        
+       
+        
+        # TODO: function: Add team to group's team_access
+    
+    
+        
+   
+    ##TODO: Manipulate groups at the same timeformat(,],)
+            
+    
+    sys.exit(-1)
     
     
 
     
-    results = cb.team_add_from_data(opts,team_name)
+    results = cb.team_add_from_data(opts.team_name,opts.group_access_list)
 
     print
     print "-> Team added"  

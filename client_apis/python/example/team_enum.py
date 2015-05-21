@@ -52,5 +52,6 @@ def main(argv):
             print "%-12s: %-14s | %-10s: %-s " % ("Access Category", group['access_category'],"Group Name", group['name'])    
       
 
+
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
