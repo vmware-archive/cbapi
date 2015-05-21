@@ -26,8 +26,8 @@ def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
     if not opts.server_url or not opts.token:
-      print "Missing required param; run with --help for usage"
-      sys.exit(-1)
+        print "Missing required param; run with --help for usage"
+        sys.exit(-1)
 
     # build a cbapi object
     #
@@ -44,12 +44,20 @@ def main(argv):
     # output a row about each team
     #
     for team in teams:
+        
+        
+        
+        
         print "%-12s| %-14s" % ("id", team['id'])
         print "%-12s| %-14s" % ("name", team['name'])
-        print "sensor groups which this team has access to:"
-        print team['group_access']
-        for group in team['group_access']:
-            print "%-12s: %-14s | %-10s: %-s " % ("Access Category", group['access_category'],"Group Name", group['group_name'])   
+        print
+        
+        
+        ##TODO: group_accesses
+        #print "sensor groups which this team has access to:"
+        #print team['group_access']         #TODO: fix this!!
+        #for group in team['group_access']:
+            #print "%-12s: %-14s | %-10s: %-s " % ("Access Category", group['access_category'],"Group Name", group['group_name'])   
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
