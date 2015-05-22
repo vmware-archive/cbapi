@@ -405,12 +405,11 @@ class CbApi(object):
 
         return r.json()
     
-    def user_add_from_data(self, validate_server_cert, username, first_name, last_name, password, confirm_password, global_admin, teams, email):
+    def user_add_from_data(self, username, first_name, last_name, password, confirm_password, global_admin, teams, email):
         '''
         add a new user to the server
         '''
         request = {\
-                    'validate_server_cert' : validate_server_cert,\
                     'username' : username,\
                     'first_name' : first_name,\
                     'last_name' : last_name,\
@@ -556,30 +555,28 @@ class CbApi(object):
         return None
     
 
-    def user_get_username(self, input_username):
+    def user_get_user_by_username(self, input_username):
         '''
         helper fucntion to find the username        
         '''
         for user in self.user_enum():
             if user['username'] == input_username:
-                return input_username
+                return user
         
         #did not find the username
         #
         return None
         
-    
-    def team_get_teamname(self, name):
 
+    def team_get_team_by_name(self, name):
         '''
-        retrieve id of
-        an existing team, specified by name
+        retrieve an existing team, specified by name
         '''
     
         teams = self.team_enum()
         for team in teams:
             if team['name'] == name:
-                return team['id']
+                return team
         
         #did not find it
         return None

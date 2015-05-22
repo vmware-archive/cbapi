@@ -22,8 +22,6 @@ def build_cli_parser():
     parser.add_option("-g", "--group_acccesses", action = "store", default = None, dest = "group_access_list",
                       help = "List of Group Accesses. 'a' for Administrative access; 'v' for Viewer Access; 'n' for No Access. ie. 'nav' = group_1 admin access, group_2 view access, group_3 no access ")
 
-    
-    
     return parser
 
 def main(argv):
@@ -34,20 +32,14 @@ def main(argv):
     if not opts.server_url or not opts.token or not opts.team_name or not opts.group_access_list:
         print "Missing required paramaters; Run --help (-h) for information on usage"
         sys.exit(-1)
-    
-   
-    
         
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify = opts.ssl_verify)
     
     #checks if the team name is already in use
-    team = cb.team_get_teamname(opts.team_name)
+    team = cb.team_get_team_by_name(opts.team_name)
     if team != None:
         print "Team Name already exists."
         sys.exit(-1)
-             
-    
-    
     
     access_list = opts.group_access_list    
     groups = cb.group_enum()
@@ -57,51 +49,47 @@ def main(argv):
         print "There must be the right number of groups in the input"
         sys.exit(-1)
         
-
+    group_access = [1] * len(access_list)
+    
     
     for i in range(0,len(access_list)):
+        group = groups[i]
+        
         numberString = access_list[i]
-        if numberString == 'a':
-            '''
-            Admin Access
-            '''
-            number = 1
-        elif numberString == 'v':
-            '''
-            Viewer Access
-            '''
-            number = 2
+        
+        if numberString == 'a':           
+            str = "Administrator"
+        elif numberString == 'v':           
+            str = "Viewer"
         elif numberString == 'n':
-            '''
-            No Access
-            '''
-            number = 3
+            str = "No Access"
         else:
             print "Only digits 'v','a',and 'n' are valid; Type '-h' for help on the notation"
             sys.exit(-1)
+            
+        group_access[i] = {\
+            'group_id': group['id'],\
+            'access_category': str,\
+            'group_name': group['name']
+        }      
+        print group_access[i]
         
         
-        group = groups[i]
         
-        cb.add_team_to_group(group,opts.team_name)
+        #cb.add_team_to_group(group,opts.team_name)
         
         
-        sys.exit(-1)        
+        #sys.exit(-1)        
         
        
         
         # TODO: function: Add team to group's team_access
     
     
-        
+    cb.team_add_from_data(opts.team_name,group_access)
    
     ##TODO: Manipulate groups at the same timeformat(,],)
             
-    
-    sys.exit(-1)
-    
-    
-
     
     results = cb.team_add_from_data(opts.team_name,opts.group_access_list)
 
@@ -114,3 +102,10 @@ def main(argv):
     
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
+
+
+
+
+
+
+

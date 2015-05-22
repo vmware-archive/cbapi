@@ -8,7 +8,6 @@ sys.path.append('../src/cbapi')
 
 import cbapi 
 
-team_enrollment = []
 
 def build_cli_parser():
     parser = optparse.OptionParser(usage="%prog [options]", description="Add a new user to the Carbon Black server")
@@ -33,57 +32,64 @@ def build_cli_parser():
     parser.add_option("-g", "--global_admin", action="store_true", default= False, dest="global_admin",
                       help="Assign user as global administrator")
     parser.add_option("-e", "--email", action="store", default= None, dest="email",
-                      help="Email address of the user") 
+                      help="Email address of the user")
+    parser.add_option("-t", "--on_teams", action = "store", default = [], dest = "on_teams",
+                      help= "type a string of yes (y) and no (n) for whether or not this user should be assigned to each team, i.e. yny means user is on teams 1 and 3")
     
     return parser
     
-def build_cli_parser2(cb):
-    
-    print cb.team_enum()
-    parser2 = optparse.OptionParser(usage="%prog [options]", description="Add a new user to the Carbon Black server")
-    for team in cb.team_enum():
-        on_team = "team_%s" % (team['team_name'])
-        parser2.add_option("-n", "--team_%s", action="store_true", default = False, dest = on_team,
-                          help = "Will this user be on %s? Include -n if so") % (team['team_name'])
-        if opts.on_team:
-            team_enrollment.append(True)
-        else:
-            team_enrollment.append(False)
-            
-    return parser2
+
+
 
 def main(argv):
+    
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
+    
     if not opts.server_url or not opts.token or not opts.username or not opts.first_name or not opts.last_name or not opts.password or not opts.confirm_password or not opts.email:
         print "Missing required param; run with --help for usage"
         sys.exit(-1)
+        
     if not opts.password == opts.confirm_password:
         print "passwords did not match"
         sys.exit(-1)
+        
     # build a cbapi object
     #
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
     
     #checks if username is already in use
-    user = cb.user_get_username(opts.username)
+    user = cb.user_get_user_by_username(opts.username)
     if user != None:
         print "Username in use"
         sys.exit(-1)
-    
-
-    parser2 = build_cli_parser2(cb)
-    opts, args = parser2.parse_args(argv)
-    
-    user_teams = []
+        
+    on_teams = opts.on_teams #input string from the user i.e ynnyy    
     curr_teams = cb.team_enum()
-    for i in range(curr_teams.length()):
-        if team_enrollment[i] == True:
-            user_teams.append(curr_teams[i])
-    
+            
+    #checks if there is the right number of teams
+    if len(on_teams) != len(curr_teams):
+        print "There must be the right number of teams in the input"
+        sys.exit(-1)
+                
+    teams = []
+    for i in range(0,len(on_teams)):
+        
+        team = curr_teams[i] #the current team in existence
+                
+        choice = on_teams[i] #whether or not the user is on that team (y or n)
+                
+        if choice == 'y':           
+            teams.append(team)
+        elif choice == 'n':           
+            continue
+        else:
+            print "Only digits 'y' and 'n' are allowed; Type '-h' for help on the notation"
+            sys.exit(-1)   
+
      
     # add user to the UI
-    results = cb.user_add_from_data(opts.username, opts.first_name, opts.last_name, opts.password, opts.confirm_password, opts.global_admin, user_teams, opts.email)
+    cb.user_add_from_data(opts.username, opts.first_name, opts.last_name, opts.password, opts.confirm_password, opts.global_admin, teams, opts.email)
 
 
     print "-> User added"  
