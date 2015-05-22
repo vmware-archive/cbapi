@@ -489,7 +489,7 @@ class CbApi(object):
         adds a new group to the server
         '''
         
-        request = {\
+        request = [{\
             'alert_criticality' : alert_criticality, \
             'banning_enabled' : banning_enabled, \
             'collect_cross_procs' : collect_cross_procs, \
@@ -512,16 +512,17 @@ class CbApi(object):
             'quota_storefile_bytes': quota_storefile_bytes, \
             'quota_storefile_percent' : quota_storefile_percent, \
             'sensor_exe_name' : sensor_exe_name, \
-            'sensorbackend_server' : sensorbackend_server, \
             'sensor_version' : sensor_version, \
+            'sensorbackend_server' : sensorbackend_server, \
+            'site_id' : site_id, \
             'tamper_level' : tamper_level, \
             'team_access' : team_access, \
             'vdi_enabled' : vdi_enabled, \
-        }
+        }]
         
         url = "%s/api/group" % (self.server,)
         
-        
+            
         r = requests.post(url, headers=self.token_header, data = json.dumps(request), verify=self.ssl_verify) 
         r.raise_for_status()
         return r.json()

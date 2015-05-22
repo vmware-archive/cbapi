@@ -9,6 +9,7 @@ sys.path.append('../src/cbapi')
 
 import cbapi 
 
+# Testing corrupted thing
 def build_cli_parser():
     parser = optparse.OptionParser(usage="%prog [options]", description="Enumerate all semsor groups")
 

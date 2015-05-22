@@ -61,7 +61,7 @@ def build_cli_parser():
                       help = "Quota Storefile Bytes")
     parser.add_option("-y", "--quota_storefile_percent", action = "store", default = 1, dest = "quota_storefile_percent",
                       help = "Quota Storefile Percent")
-    parser.add_option("-z", "--sensor_exe_name", action= "store", default="", dest = "sensor_exe_name",
+    parser.add_option("-z", "--sensor_exe_name", action= "store", default="null", dest = "sensor_exe_name",
                       help= "Sensor Name")  
     parser.add_option("--aa", "--sensor_version", action= "store", default="Manual", dest = "sensor_version",
                       help= "Sensor Upgrade Policy")    
@@ -82,7 +82,7 @@ def build_cli_parser():
 def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
-    if not opts.server_url or not opts.token or not opts.name or not opts.sensorbackend_server:
+    if not opts.server_url or not opts.token: #or not opts.name: #or not opts.sensorbackend_server:
         print "Missing required param; run with --help for usage"
         print "Must include the first two fields with server info and also Sensor Group Name and Server URL"
         sys.exit(-1)
@@ -103,6 +103,7 @@ def main(argv):
                                      opts.sensor_version, opts.sensorbackend_server, opts.site_id, opts.tamper_level, 
                                      opts.team_access, opts.vdi_enabled)
 
+    print "group added."
     for key in group.keys():
         print "%-20s : %s" % (key, group[key])
 
