@@ -7,6 +7,7 @@ for line in lines:
     if "@blueprint.route" not in line:
         continue
     else:
+        line.lstrip("@blueprint.route")
         output_file.write(line)
 
 

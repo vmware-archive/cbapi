@@ -554,6 +554,20 @@ class CbApi(object):
         
         #did not find it
         return None
+    
+    def team_get_id_by_name(self, name):
+        '''
+        retrieve an existing team id, specified by name
+        '''
+    
+        teams = self.team_enum()
+        for team in teams:
+            if team['name'] == name:
+                return team['id']
+    
+        #did not find it
+        return None    
+    
             
     def group_get_id_by_name(self, name):
         '''
@@ -741,12 +755,7 @@ class CbApi(object):
         
         url = "%s/api/user/%s" % (self.server, username)
         
-        print url
-        
         r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
-        
-        
-        print "user deleted me thinks"
         r.raise_for_status()
         
         return r.json()

@@ -11,7 +11,7 @@ import cbapi
 
 def build_cli_parser():
     
-    parser = optparse.OptionParser(usage="%prog [options]", description="Delete an existing feed")
+    parser = optparse.OptionParser(usage="%prog [options]", description="Delete an existing team")
 
     parser.add_option("-c", "--cburl", action="store", default=None, dest="server_url",
                       help="CB server's URL.  e.g., http://127.0.0.1 ")
