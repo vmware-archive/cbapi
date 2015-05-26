@@ -62,16 +62,16 @@ def main(argv):
     group_access = [1] * len(access_list)
     for i in range(0,len(access_list)):
         group = groups[i]
-        numberString = access_list[i]
+        letter = access_list[i]
         
-        if numberString == 'a':           
+        if letter == 'a':           
             str = "Administrator"
-        elif numberString == 'v':           
+        elif letter == 'v':           
             str = "Viewer"
-        elif numberString == 'n':
+        elif letter == 'n':
             str = "No Access"
         else:
-            print "Only digits 'v','a',and 'n' are valid; Type '-h' for help on the notation"
+            print "Only letters 'v','a',and 'n' are valid; Type '-h' for help on the notation"
             sys.exit(-1)
             
         group_access[i] = {\

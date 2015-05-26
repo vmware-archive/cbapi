@@ -28,6 +28,7 @@ def build_cli_parser():
 def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
+
     if not opts.server_url or not opts.token or (not opts.teamname and not opts.teamid):
         print "Missing required param; run with --help for usage"
         print "One of -t or -i must be specified"
