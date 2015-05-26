@@ -646,10 +646,11 @@ class CbApi(object):
         
         note: the endpoint /api/v1/feed/<id> is not supported as of CB server 5.0
         '''
-        feeds = self.feed_enum()
-        for feed in feeds:
-            if str(feed['id']) == str(id):
-                return feed 
+        url = "%s/api/v1/feed/%s" % (self.server, id)
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
         
     def user_info(self, username):
         '''
@@ -657,24 +658,21 @@ class CbApi(object):
         
         note: the endpoint /api/users/<id> is not supported as of CB server 5.0
         '''
-        users = self.user_enum()
-        for user in users:
-            if user['username'] == username:
-                return user 
-          
+        url = "%s/api/user/%s" % (self.server, username)
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
     
     def team_info(self, id):
         '''
         retrieve information about an existing team, specified by id
         '''
-        
-        teams = self.team_enum()
-        
-        for team in teams:
-            if str(team['id']) == id:
-                return team
-            
-        return None
+        url = "%s/api/team/%s" % (self.server, id)
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
     
     
     def group_info(self, id):
