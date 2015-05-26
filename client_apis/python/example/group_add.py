@@ -105,7 +105,7 @@ def main(argv):
     
     teams = cb.team_enum()
     
-    #Verifies that the correct number of inputs for opts.team_access was written down.
+    #TODO: Verifies that the correct number of inputs for opts.team_access was written down.
     #
     if len(team) != len(opts.team_access):
         print "Number of characters in the team_access must be same as number of teams. Check 'team_enum.py' to see the number of teams"
