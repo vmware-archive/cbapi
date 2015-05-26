@@ -47,9 +47,7 @@ def main(argv):
         print "%-12s| %-14s" % ("id", team['id'])
         print "%-12s| %-14s" % ("name", team['name'])
         print "sensor groups this team has access to:"
-        
         info = cb.team_info(team['id'])
-
         for group in info['group_access']:
             print "%-12s: %-14s | %-10s: %-s " % ("Access Category", group['access_category'],"Group Name", group['group_name'])    
       

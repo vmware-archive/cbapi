@@ -30,9 +30,9 @@ def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
     if not opts.server_url or not opts.token or (not opts.feedname and not opts.feedid):
-      print "Missing required param; run with --help for usage"
-      print "One of -f or -i must be specified"
-      sys.exit(-1)
+        print "Missing required param; run with --help for usage"
+        print "One of -f or -i must be specified"
+        sys.exit(-1)
 
     # build a cbapi object
     #

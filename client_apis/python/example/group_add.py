@@ -9,7 +9,7 @@ sys.path.append('../src/cbapi')
 import cbapi 
 
 def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Add a new feed to the Carbon Black server")
+    parser = optparse.OptionParser(usage="%prog [options]", description="Add a new group to the Carbon Black server")
 
     # for each supported output type, add an option
     #

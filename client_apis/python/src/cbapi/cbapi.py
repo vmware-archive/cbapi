@@ -432,11 +432,9 @@ class CbApi(object):
         Adds a new team
         '''
         
-        #TODO: How to compute id_count
         
         request = {\
             'group_access' : groups, \
-#            'id' : id_count,\ 
             'name' : team_name, \
         }
         
@@ -643,12 +641,13 @@ class CbApi(object):
         retrieve information about an existing team, specified by id
         '''
         
-        url = "%s/api/team/%s" % (self.server, id)
+        teams = self.team_enum()
         
-        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
-        r.raise_for_status()
-        
-        return r.json()    
+        for team in teams:
+            if str(team['id']) == id:
+                return team
+            
+        return None
     
     
     def group_info(self, id):
@@ -662,7 +661,11 @@ class CbApi(object):
         r.raise_for_status()
         
         #for some reason this is returning a list of length one with the group as the one elt
-        group_list = r.json() 
+        group_list = r.json()
+        
+        if not group_list:
+            return None
+        
         return group_list[0]
         
     def output_user_activity(self):
@@ -741,11 +744,10 @@ class CbApi(object):
         
         url = "%s/api/user/%s" % (self.server, username)
         
-        print url
         
         r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
         
-        
+        #TODO: There is a 500 Internal Server Error
         print "user deleted me thinks"
         r.raise_for_status()
         
@@ -761,7 +763,20 @@ class CbApi(object):
         r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
         r.raise_for_status()
         
-        return r.json()
+        #return r.json()
+    
+    def group_del(self,id):
+        '''
+        deletes a group, as specified by id
+        '''
+        
+        url = "%s/api/group/%s" % (self.server, id)
+        
+        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        
+        #return r.json()
+        
         
     def feed_modify(self, id, feed):
         '''

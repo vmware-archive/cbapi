@@ -36,14 +36,11 @@ def main(argv):
 
     # build a cbapi object
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
-    
-    
-    #un = cb.user_get_username_by_name(opts.user_name)
-    
-    
+        
+    user_info = cb.user_info(opts.user_name)    
     
     # delete the user
-    cb.user_del(opts.user_name)
+    cb.user_del(user_info['username'])
 
     print "-> User deleted [user = %s]" % (opts.user_name)
 
