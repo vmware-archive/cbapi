@@ -51,13 +51,6 @@ def main(argv):
     #
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
 
-    if opts.groupid and opts.groupname:
-        groupA = cb.group_info(opts.groupid)
-        groupB = cb.group_get_id_by_name(opts.groupname)
-        
-        if groupA != groupB:
-            print "helloo"
-            sys.exit(-1)
 
 
     if not opts.groupid:
