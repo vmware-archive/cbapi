@@ -553,6 +553,19 @@ class CbApi(object):
         #did not find it
         return None
     
+    def team_get_team_by_id(self, id):
+        '''
+        retrieve an existing team, specified by id
+        '''
+
+        teams = self.team_enum()
+        for team in teams:
+            if team['id'] == id:
+                return team
+
+        #did not find it
+        return None    
+    
     def team_get_id_by_name(self, name):
         '''
         retrieve an existing team id, specified by name
@@ -751,27 +764,21 @@ class CbApi(object):
 
         return r.json()
     
-    def user_del(self,username):
+    def user_del(self, username):
         '''
         deletes a user, as specified by username
         '''
-        
+        request = {'username': username}
+
         url = "%s/api/user/%s" % (self.server, username)
         
-<<<<<<< HEAD
-        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
-=======
-        
-        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
-        
-        #TODO: There is a 500 Internal Server Error
-        print "user deleted me thinks"
->>>>>>> 2c94c17993e8f38c97e8fac3b30caa43bd0485b8
+        r = requests.delete(url, headers=self.token_header, data = json.dumps(request), verify=self.ssl_verify)
+
         r.raise_for_status()
         
         return r.json()
     
-    def team_del(self,id):
+    def team_del(self, id):
         '''
         deletes a team, as specified by id
         '''
@@ -783,7 +790,7 @@ class CbApi(object):
         
         #return r.json()
     
-    def group_del(self,id):
+    def group_del(self, id):
         '''
         deletes a group, as specified by id
         '''

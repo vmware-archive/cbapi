@@ -33,7 +33,7 @@ def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)    
     
-    if not opts.server_url or not opts.token or (not opts.username and (not opts.first_name or not opts.last_name)):
+    if not opts.server_url or not opts.token or not opts.username and (not opts.first_name or not opts.last_name):
         print "Missing required param; run with --help for usage"
         print "One of -u or -f and -l must be specified"
         sys.exit(-1)
@@ -44,17 +44,17 @@ def main(argv):
     if not opts.username:
         un = cb.user_get_username_by_name(opts.first_name, opts.last_name)
         if un is None:
-            print "-> No current user found with username: %s" % (opts.username)
+            print "-> No current user found with name: %s %s" % opts.first_name, opts.last_name
              
     else:
         un = opts.username
         if cb.user_get_user_by_username(un) is None:
-            print "-> No current user found with username: %s" % (opts.username)
+            print "-> No current user found with username: %s" % opts.username
     
     # delete the user
     cb.user_del(un)
 
-    print "-> User deleted [user = %s]" % (un)
+    print "-> User deleted [user = %s]" % un
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
