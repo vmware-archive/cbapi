@@ -450,32 +450,6 @@ class CbApi(object):
         
         return r.json()
     
-    def add_team_to_group(self,group,team_name):
-        
-        
-        request = {\
-            'team_name' : team_name, \
-            'access_category' : group['name']
-
-        }
-        
-        group_number = group['id']
-        
-        print group['name']
-        
-        url = "%s/api/group/%s" % (self.server,group_number)
-        
-        print url
-        
-        sys.exit(-1)
-        
-        
-        r = requests.post(url, header = self.token_header, data = json.dumps(request), verify = self.ssl_verify)
-        
-        r.raise_for_status()
-        
-        print "hello"        
-        
     
     def group_add_from_data(self, alert_criticality, banning_enabled, collect_cross_procs, collect_emet_events,
                             collect_filemods, collect_filewritemd5s, collect_moduleinfo, collect_moduleloads,
@@ -761,11 +735,18 @@ class CbApi(object):
         return r.json()
     
     def user_del(self,username):
-        
+        '''
+        deletes a user, as specified by username
+        '''
         
         url = "%s/api/user/%s" % (self.server, username)
         
+        print url
+        
         r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
+        
+        
+        print "user deleted me thinks"
         r.raise_for_status()
         
         return r.json()
@@ -775,9 +756,9 @@ class CbApi(object):
         deletes a team, as specified by id
         '''
         
-        url = "%s/api/team/%s" % (self.server, )         #TODO: Verify that this url works!!!
-        
-        r = requests.delete(url, header = self.token_header, verify = self.ssl_verify)
+        url = "%s/api/team/%s" % (self.server, id)
+                
+        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
         r.raise_for_status()
         
         return r.json()

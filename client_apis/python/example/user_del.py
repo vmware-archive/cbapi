@@ -22,8 +22,7 @@ def build_cli_parser():
                       help="Do not verify server SSL certificate.")
     parser.add_option("-u", "--username", action="store", default=None, dest="user_name",
                       help="User Name")     
-    #parser.add_option("-i", "--id", action="store", default=None, dest="userid",
-                      #help="User Id")
+
     return parser
 
 def main(argv):
@@ -38,7 +37,10 @@ def main(argv):
     # build a cbapi object
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
     
-    un = cb.user_get_username_by_name(username)
+    
+    #un = cb.user_get_username_by_name(opts.user_name)
+    
+    
     
     # delete the user
     cb.user_del(opts.user_name)

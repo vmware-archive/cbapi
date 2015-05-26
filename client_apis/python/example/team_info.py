@@ -37,8 +37,8 @@ def output_team_info(team):
             
 def print_group_access(groups):
     print "Sensor groups this team has access to:"
-    for i in range(length(groups)):
-        print "%-12s: %-14s | %-10s: %-s " % ("Access Category", group[i]['access_category'],"Group Name", group[i]['name'])      
+    for i in range(len(groups)):
+        print "%-12s: %-14s | %-10s: %-s " % ("Access Category", groups[i]['access_category'],"Group Name", groups[i]['group_name'])      
 
 def main(argv):
     parser = build_cli_parser()
@@ -60,7 +60,7 @@ def main(argv):
     else:
         id = opts.teamid
         teams = cb.team_enum()
-        print teams
+        #print teams
         if cb.team_info(id) is None:
             
             print "-> No configured team with id '%s' found!" % (opts.teamid)

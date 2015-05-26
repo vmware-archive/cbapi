@@ -28,7 +28,7 @@ def build_cli_parser():
 def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
-    if not opts.server_url or not opts.token or not opts.id:
+    if not opts.server_url or not opts.token or not opts.teamid:
         print "Missing required param; run with --help for usage"
         print "One of -f or -i must be specified"
         sys.exit(-1)
@@ -38,11 +38,12 @@ def main(argv):
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
     
     
-    # deletes the team
-    cb.team_delete(teamname)    
     
-    print "-> Team deleted [team=%s]" % (teamname,)
+    # deletes the team
+    cb.team_del(opts.teamid)    
+    
+    print "-> Team deleted [team=%s]" % (opts.teamname,)
 
 
-    if __name__ == "__main__":
-        sys.exit(main(sys.argv[1:]))    
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))    

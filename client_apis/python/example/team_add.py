@@ -20,7 +20,7 @@ def build_cli_parser():
     parser.add_option("-t", "--teamname", action = "store", default = None, dest = "team_name",
                       help = "Team Name")
     parser.add_option("-g", "--group_acccesses", action = "store", default = None, dest = "group_access_list",
-                      help = "List of Group Accesses. 'a' for Administrative access; 'v' for Viewer Access; 'n' for No Access. ie. 'nav' = group_1 admin access, group_2 view access, group_3 no access ")
+                      help = "List of Group Accesses. 'a' for Administrative access; 'v' for Viewer Access; 'n' for No Access. ie. 'nav' = group_1 no access, group_2 admin access, group_3 view access. See group_enum.py for group rdering")
 
     return parser
 
@@ -32,7 +32,7 @@ def main(argv):
     if not opts.server_url or not opts.token or not opts.team_name or not opts.group_access_list:
         print "Missing required paramaters; Run --help (-h) for information on usage"
         sys.exit(-1)
-        
+        e
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify = opts.ssl_verify)
     
     #checks if the team name is already in use
