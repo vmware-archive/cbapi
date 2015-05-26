@@ -60,7 +60,6 @@ def main(argv):
     else:
         id = opts.teamid
         teams = cb.team_enum()
-        #print teams
         if cb.team_info(id) is None:
             
             print "-> No configured team with id '%s' found!" % (opts.teamid)

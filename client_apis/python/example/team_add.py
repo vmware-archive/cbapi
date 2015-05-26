@@ -32,10 +32,15 @@ def main(argv):
     if not opts.server_url or not opts.token or not opts.team_name or not opts.group_access_list:
         print "Missing required paramaters; Run --help (-h) for information on usage"
         sys.exit(-1)
-        e
+        
+        
+        
+    # build a cbapi object
+    #    
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify = opts.ssl_verify)
     
     #checks if the team name is already in use
+    #
     team = cb.team_get_team_by_name(opts.team_name)
     if team != None:
         print "Team Name already exists."
@@ -45,16 +50,18 @@ def main(argv):
     groups = cb.group_enum()
     
     #checks if there is the right number of groups
+    #
     if len(groups) != len(access_list):
         print "There must be the right number of groups in the input"
         sys.exit(-1)
         
+        
+        
+    #stores the access types for all the groups
+    #
     group_access = [1] * len(access_list)
-    
-    
     for i in range(0,len(access_list)):
         group = groups[i]
-        
         numberString = access_list[i]
         
         if numberString == 'a':           
@@ -72,31 +79,18 @@ def main(argv):
             'access_category': str,\
             'group_name': group['name']
         }      
-        print group_access[i]
         
-        
-        
-        #cb.add_team_to_group(group,opts.team_name)
-        
-        
-        #sys.exit(-1)        
-        
-       
-        
-        # TODO: function: Add team to group's team_access
-    
-    
-    cb.team_add_from_data(opts.team_name,group_access)
+    #Adds the team
+    #
+    results = cb.team_add_from_data(opts.team_name,group_access)
    
-    ##TODO: Manipulate groups at the same timeformat(,],)
             
     
-    results = cb.team_add_from_data(opts.team_name,opts.group_access_list)
 
     print
     print "-> Team added"  
     print "   -------------------------"
-    print "   TeamName  : %s" % (results['teamname'],)
+    print "   TeamName  : %s" % (results['name'],)
     print
     
     
