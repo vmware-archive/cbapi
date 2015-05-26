@@ -94,26 +94,26 @@ def main(argv):
         sys.exit(-1)
 
     # build a cbapi object
-    #
+    #    
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
 
 
 
-    
-    #stores the access types for all the groups
-    #
-    
     teams = cb.team_enum()
     
-    #TODO: Verifies that the correct number of inputs for opts.team_access was written down.
+    #Verifies that the correct number of inputs for opts.team_access was written down.
     #
-    if len(team) != len(opts.team_access):
+    if len(teams) != len(opts.team_access):
         print "Number of characters in the team_access must be same as number of teams. Check 'team_enum.py' to see the number of teams"
         sys.exit(-1)
     
+        
+            
+    #stores the access types for all the groups
+    #
     team_access = [1] * len(opts.team_access)
-    print len(opts.team_access)
     for i in range(0,len(team_access)):
+        
         team = teams[i]
         letter = opts.team_access[i]
 
@@ -135,9 +135,9 @@ def main(argv):
             'team_name': group['name']
         }
         
-        sys.exit(-1)
-
-
+        
+    print "blah"
+    print team_access
     #add the group 
     #
     group = cb.group_add_from_data(opts.alert_criticality, opts.banning_enabled, opts.collect_cross_procs, 
