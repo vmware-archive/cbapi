@@ -35,8 +35,8 @@ def build_cli_parser():
                       help= "Collect EMET events") #DONE
     parser.add_option("-g", "--collect_filemods", action= "store_false", default=True, dest = "collect_filemods",
                       help= "Collect File Modifications ")    #DONE
-    parser.add_option("-i", "--collect_filewritemd5s", action= "store_true", default=True, dest = "collect_filewritemd5s",
-                      help= "Collect writing of md5 files ")    
+    parser.add_option("-i", "--collect_filewritemd5s", action= "store_false", default=True, dest = "collect_filewritemd5s",
+                      help= "Collect writing of md5 files ")    #What is this?
     parser.add_option("-j", "--collect_moduleinfo", action= "store_false", default=True, dest = "collect_moduleinfo",
                       help= "Collect module info")    #DONE
     parser.add_option("-k", "--collect_moduleloads", action= "store_false", default=True, dest = "collect_moduleloads",
@@ -54,9 +54,9 @@ def build_cli_parser():
     parser.add_option("-r", "--collect_usercontext", action= "store_false", default=True, dest = "collect_usercontext",
                       help= "Collect Process user context") #DONE
     parser.add_option("-s", "--datastore_server", action = "store", default=None, dest = "datastore_server",
-                      help = "Datastore Server")
+                      help = "Datastore Server") #What is this?
     parser.add_option("-t", "--name", action= "store", default=None, dest = "name",
-                      help= "Sensor Group Name")      
+                      help= "Sensor Group Name")  #DONE    
     parser.add_option("-u", "--max_licenses", action = "store", default= -1, dest = "max_licenses",
                       help= "Max Licenses") 
     parser.add_option("-v", "--quota_eventlog_bytes", action = "store", default = 1073741824, dest = "quota_eventlog_bytes",
@@ -72,13 +72,14 @@ def build_cli_parser():
     parser.add_option("--aa", "--sensor_version", action= "store", default="Manual", dest = "sensor_version",
                       help= "Sensor Upgrade Policy")    #DONE
     parser.add_option("--ab", "--sensorbackend_server", action= "store", default=None, dest = "sensorbackend_server",
-                      help= "Server URL")    
+                      help= "Server URL")    #DONE
     parser.add_option("--ac", "--site_id", action = "store", default = 1, dest = "site_id",
                       help = "Site ID") #DONE
     parser.add_option("--ad", "--tamper_level", action= "store_true", default=False, dest = "tamper_level",
                       help= "Tamper Level") #DONE    
     parser.add_option("--ae," "--team_access", action = "store", default = [], dest = "team_access",
-                      help = "List of Group Accesses. 'a' for Administrative access; 'v' for Viewer Access; 'n' for No Access. ie. 'nav' = group_1 no access, group_2 admin access, group_3 view access. See team_enum.py for group ordering") 
+                      help = "List of Group Accesses. 'a' for Administrative access; 'v' for Viewer Access; 'n' for No Access. ie. 'nav' = group_1 no access, group_2 admin access, group_3 view access. See team_enum.py for group ordering")
+    #DONE
     parser.add_option("--af", "--vdi_enabled", action= "store_true", default=False, dest = "vdi_enabled",
                       help= "Enable VDI Behavior")    #DONE
     
@@ -88,7 +89,7 @@ def build_cli_parser():
 def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
-    if not opts.server_url or not opts.token:
+    if not opts.server_url or not opts.token or not opts.name or not opts.sensorbackend_server:
         print "Missing required param; run with --help for usage"
         print "Must include the first two fields with server info as well as Sensor Group Name and Server URL"
         sys.exit(-1)
@@ -127,17 +128,13 @@ def main(argv):
             print "Only digits 'v','a',and 'n' are valid; Type '-h' for help on the notation"
             sys.exit(-1)
 
-
-        print str
         team_access[i] = {\
             'access_category': str,\
-            'team_id': group['id'],\
-            'team_name': group['name']
+            'team_id': team['id'],\
+            'team_name': team['name']
         }
         
-        
-    print "blah"
-    print team_access
+    
     #add the group 
     #
     group = cb.group_add_from_data(opts.alert_criticality, opts.banning_enabled, opts.collect_cross_procs, 
@@ -148,7 +145,7 @@ def main(argv):
                                      opts.max_licenses, opts.name, opts.quota_eventlog_bytes, opts.quota_eventlog_percent,
                                      opts.quota_storefile_bytes, opts.quota_storefile_percent, opts.sensor_exe_name, 
                                      opts.sensor_version, opts.sensorbackend_server, opts.site_id, opts.tamper_level, 
-                                     opts.team_access, opts.vdi_enabled)
+                                     team_access, opts.vdi_enabled)
 
     print "group added."
     for key in group.keys():
