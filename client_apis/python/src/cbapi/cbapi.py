@@ -566,7 +566,21 @@ class CbApi(object):
         #did not find it
         return None    
     
+    
+    def group_get_group_by_name(self,name):
+        '''
+        retrieve information about an existing group, specified by name
+        '''      
+        
+        groups = self.group_enum()
+        for group in groups:
+            if group['name'] == name:
+                return group
             
+        return None
+            
+    
+        
     def group_get_id_by_name(self, name):
         '''
         retrieve information about an existing group, specified by name
@@ -576,6 +590,8 @@ class CbApi(object):
         for group in groups:
             if group['name'] == name:
                 return group['id']
+        
+        return None 
 	
     def feed_enum(self):
         '''
@@ -669,18 +685,27 @@ class CbApi(object):
         retrieve information about an existing group, specified by id
         '''
         
-        url = "%s/api/group/%s" % (self.server, id)
+        groups = self.group_enum()
+        for group in groups:
+            if str(group['id']) == id:
+                return group
         
-        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
-        r.raise_for_status()
+        #did not find it
+        return None
         
-        #for some reason this is returning a list of length one with the group as the one elt
-        group_list = r.json()
         
-        if not group_list:
-            return None
+        #url = "%s/api/group/%s" % (self.server, id)
         
-        return group_list[0]
+        #r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        #r.raise_for_status()
+        
+        ##for some reason this is returning a list of length one with the group as the one elt
+        #group_list = r.json()
+        
+        #if not group_list:
+            #return None
+        
+        #return group_list[0]
         
     def output_user_activity(self):
         '''
@@ -758,15 +783,9 @@ class CbApi(object):
         
         url = "%s/api/user/%s" % (self.server, username)
         
-<<<<<<< HEAD
+
         r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
-=======
-        
-        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
-        
-        #TODO: There is a 500 Internal Server Error
-        print "user deleted me thinks"
->>>>>>> 2c94c17993e8f38c97e8fac3b30caa43bd0485b8
+
         r.raise_for_status()
         
         return r.json()
