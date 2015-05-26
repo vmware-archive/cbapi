@@ -51,28 +51,29 @@ def main(argv):
     #
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
 
-    tempGroup = cb.group_info(opts.groupid)
-    tempID = cb.group_get_id_by_name(opts.groupname)
-
-
     if not opts.groupid:
-        if tempID is None:
-            print "-> No configured group with name '%s' found!" % (opts.groupname) 
-            return
+        id = cb.group_get_id_by_name(opts.groupname)
+        if id  is None:
+            print "-> No configured group with name '%s' found!" % (opts.groupname)
+            sys.exit(-1)
     else:
-        if tempGroup is None:
+        id = opts.groupid
+        if cb.group_info(id) is None:
             print "-> No configured group with id '%s' found!" % (opts.groupid)
-            return
-      
+            sys.exit(-1)
+
     #Verifies that the id and the groupname matches
     if opts.groupid and opts.groupname:
-        if tempGroup['id'] != tempID:
-            print "The Group ID and the Group Name don't match."
-            print "Check group_enum.py make sure the name and id matches."
+        group1 = cb.group_get_group_by_name()
+        group2 = cb.group_info(id)
+        if group1 != group2:
+            print "The Group ID and the Group Name don't correspond to the same group."
+            print "Check group_enum.py to make sure the name and id correspond to the same group."
             sys.exit(-1)
- 
 
-    output_group_info(tempGroup)
+
+    group = cb.group_info(id)
+    output_group_info(group)
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

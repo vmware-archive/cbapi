@@ -695,28 +695,19 @@ class CbApi(object):
         '''
         retrieve information about an existing group, specified by id
         '''
+
+        url = "%s/api/group/%s" % (self.server, id)
         
-        groups = self.group_enum()
-        for group in groups:
-            if str(group['id']) == id:
-                return group
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
         
-        #did not find it
-        return None
+        #for some reason this is returning a list of length one with the group as the one elt
+        group_list = r.json()
         
-        
-        #url = "%s/api/group/%s" % (self.server, id)
-        
-        #r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
-        #r.raise_for_status()
-        
-        ##for some reason this is returning a list of length one with the group as the one elt
-        #group_list = r.json()
-        
-        #if not group_list:
-            #return None
-        
-        #return group_list[0]
+        if not group_list:
+            return None
+        else:
+            return group_list[0]
         
     def output_user_activity(self):
         '''
