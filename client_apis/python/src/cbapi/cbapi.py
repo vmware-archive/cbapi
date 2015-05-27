@@ -307,6 +307,25 @@ class CbApi(object):
 
         return r.json()
 
+    def sensor_force_sync(self, sensor_id, group_id, event_log_flush_time):
+        '''
+        Force a single sensor to sync via the API
+        :param sensor_id: the sensor id
+        :param group_id: the id of the group this sensor belongs to
+        :param event_log_flush_time:
+        :return:
+        '''
+
+        url = "%s/api/v1/sensor/%s" % (self.server, sensor_id)
+        request = {\
+            "event_log_flush_time": event_log_flush_time,\
+            "group_id": group_id,\
+        }
+
+        r = requests.put(url, headers=self.token_header, verify=self.ssl_verify, data = json.dumps(request))
+        r.raise_for_status()
+
+
     def watchlist(self, id=None):
         '''
         get all watchlists or a single watchlist
@@ -407,7 +426,7 @@ class CbApi(object):
     
     def user_add_from_data(self, username, first_name, last_name, password, confirm_password, global_admin, teams, email):
         '''
-        add a new user to the server
+        add a new user to the Carbon Black server
         '''
         request = {\
                     'username' : username,\
@@ -495,7 +514,7 @@ class CbApi(object):
 
         true = True
         false = False
-        request = [{"collect_storefiles": True, "site_id": 1, "sensorbackend_server": "https://172.16.100.109:443", "id": 1, "collect_emet_events": True, "tamper_level": 0, "collect_processes": True, "collect_filemods": True, "collect_regmods": true, "team_access": [{"team_id": 1, "team_name": "Administrators", "access_category": "No Access"}, {"team_id": 2, "team_name": "Test", "access_category": "No Access"}, {"team_id": 9, "team_name": "Temporary Team", "access_category": "Administrator"}, {"team_id": 10, "team_name": "Team1", "access_category": "No Access"}, {"team_id": 11, "team_name": "Team2", "access_category": "No Access"}, {"team_id": 13, "team_name": "Team3", "access_category": "No Access"}, {"team_id": 14, "team_name": "Team4", "access_category": "No Access"}, {"team_id": 16, "team_name": "BarryTeam", "access_category": "Administrator"}], "quota_eventlog_percent": 1, "collect_moduleloads": true, "datastore_server": null, "banning_enabled": true, "quota_storefile_percent": 1, "max_licenses": -1, "collect_nonbinary_filewrites": true, "sensor_version": "005.001.000.50513", "collect_cross_procs": true, "vdi_enabled": false, "collect_usercontext": true, "alert_criticality": 3.0, "collect_netconns": true, "collect_filewritemd5s": true, "sensor_exe_name": "", "name": "Default Group", "quota_storefile_bytes": "1073741824", "quota_eventlog_bytes": "1073741824", "collect_moduleinfo": true}, {"collect_storefiles": true, "site_id": 1, "sensorbackend_server": "https://carbonblack.com", "id": 8, "collect_emet_events": true, "tamper_level": 1, "collect_processes": true, "collect_filemods": true, "collect_regmods": true, "team_access": [{"team_id": 1, "team_name": "Administrators", "access_category": "No Access"}, {"team_id": 2, "team_name": "Test", "access_category": "No Access"}, {"team_id": 9, "team_name": "Temporary Team", "access_category": "No Access"}, {"team_id": 10, "team_name": "Team1", "access_category": "No Access"}, {"team_id": 11, "team_name": "Team2", "access_category": "No Access"}, {"team_id": 13, "team_name": "Team3", "access_category": "No Access"}, {"team_id": 14, "team_name": "Team4", "access_category": "No Access"}, {"team_id": 16, "team_name": "BarryTeam", "access_category": "No Access"}], "quota_eventlog_percent": 1, "collect_moduleloads": true, "datastore_server": null, "banning_enabled": true, "quota_storefile_percent": 1, "max_licenses": -1, "collect_nonbinary_filewrites": true, "sensor_version": "Manual", "collect_cross_procs": true, "vdi_enabled": false, "collect_usercontext": true, "alert_criticality": 1.0, "collect_netconns": true, "collect_filewritemd5s": true, "sensor_exe_name": "", "name": "TestGroupl", "quota_storefile_bytes": "1073741824", "quota_eventlog_bytes": "1073741824", "collect_moduleinfo": true}]
+        request = [{"collect_storefiles": true, "site_id": 1, "sensorbackend_server": "https://carbon9.com", "id": 9, "collect_emet_events": true, "tamper_level": 0, "collect_processes": true, "collect_filemods": true, "collect_regmods": true, "team_access": [{"team_id": 1, "team_name": "Administrators", "access_category": "No Access"}, {"team_id": 2, "team_name": "Test", "access_category": "No Access"}, {"team_id": 9, "team_name": "Temporary Team", "access_category": "No Access"}, {"team_id": 10, "team_name": "Team1", "access_category": "No Access"}, {"team_id": 11, "team_name": "Team2", "access_category": "No Access"}, {"team_id": 13, "team_name": "Team3", "access_category": "No Access"}, {"team_id": 14, "team_name": "Team4", "access_category": "No Access"}, {"team_id": 16, "team_name": "BarryTeam", "access_category": "No Access"}, {"team_id": 27, "team_name": "teamteam", "access_category": "Administrator"}], "quota_eventlog_percent": 1, "collect_moduleloads": true, "datastore_server": None, "banning_enabled": false, "quota_storefile_percent": 1, "max_licenses": -1, "collect_nonbinary_filewrites": true, "sensor_version": "Manual", "collect_cross_procs": true, "vdi_enabled": false, "collect_usercontext": true, "alert_criticality": 1.0, "collect_netconns": true, "collect_filewritemd5s": true, "sensor_exe_name": "", "name": "AnotherGroup", "quota_storefile_bytes": "1073741824", "quota_eventlog_bytes": "1073741824", "collect_moduleinfo": true}]
         print request
         url = "%s/api/group" % (self.server,)
         
@@ -788,7 +807,7 @@ class CbApi(object):
         '''
         deletes a user, as specified by username
         '''
-        request = {'username': username}
+        print username
 
         url = "%s/api/user/%s" % (self.server, username)
         

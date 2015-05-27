@@ -73,7 +73,7 @@ def build_cli_parser():
                       help= "Collect EMET events")     
     
     #CAN'T FIND IN UI
-    #VERIFY THAT THESES ARE ALWAYS THE DEFAULT
+    #VERIFY THAT THESE ARE ALWAYS THE DEFAULT
     parser.add_option("--sid", "--site_id", action = "store", default = 1, dest = "site_id",
                       help = "Site ID") 
     parser.add_option("--dss", "--datastore_server", action = "store", default=None, dest = "datastore_server",
