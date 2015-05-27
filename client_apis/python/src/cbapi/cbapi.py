@@ -460,6 +460,8 @@ class CbApi(object):
         adds a new group to the server
         '''
         
+        
+        
         request = [{\
             'alert_criticality' : alert_criticality, \
             'banning_enabled' : banning_enabled, \
