@@ -26,8 +26,8 @@ def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
     if not opts.server_url or not opts.token:
-      print "Missing required param; run with --help for usage"
-      sys.exit(-1)
+        print "Missing required param; run with --help for usage"
+        sys.exit(-1)
 
     # build a cbapi object
     #
@@ -38,13 +38,13 @@ def main(argv):
     users = cb.user_enum()
     # output a banner
     #
-    print "%-12s  %-14s  %-12s  %-5s  %-20s  %s" % ("username", "First Name", "Last Name","Global Administrator?","teams", "Email Address")
-    print "%s+%s+%s+%s+%s+%s" % ("-"*15, "-"*20, "-"*15, "-"*8, "-"*23, "-"*25)
+    print "%-20s  %-14s  %-12s  %-5s  %-20s  %s" % ("username", "First Name", "Last Name","Global Admin","Email Address", "teams")
+    print "%s+%s+%s+%s+%s+%s" % ("-"*21, "-"*16, "-"*14, "-"*7, "-"*27, "-"*100)
 
     # output a row about each user
     #
     for user in users:
-        print "%-12s| %-14s | %-12s | %-5s | %-20s | %s" % (user['username'], user['first_name'], user['last_name'], user['global_admin'], user['teams'], user['email'])
+        print "%-21s| %-14s | %-12s | %-5s | %-25s | %s" % (user['username'], user['first_name'], user['last_name'], user['global_admin'], user['email'], user['teams'])
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

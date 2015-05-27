@@ -20,9 +20,9 @@ def build_cli_parser():
                       help="Do not verify server SSL certificate.")
     
     #Setting Tab
-    parser.add_option("--nm", "--name", action= "store", default=None, dest = "name",
+    parser.add_option("-m", "--name", action= "store", default=None, dest = "name",
                       help= "Settings: Sensor Group Name")  
-    parser.add_option("--sbs", "--sensorbackend_server", action= "store", default=None, dest = "sensorbackend_server",
+    parser.add_option("-s", "--sensorbackend_server", action= "store", default=None, dest = "sensorbackend_server",
                       help= "Settings: Server URL")      
     
     #Advanced Tab
@@ -83,9 +83,7 @@ def build_cli_parser():
     parser.add_option("--md", "--collect_filewritemd5s", action= "store_false", default=True, dest = "collect_filewritemd5s",
                       help= "Collect writing of md5 files ")   
 
-    
 
-    
     
     return parser
 
@@ -102,31 +100,69 @@ def main(argv):
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
 
 
-
     teams = cb.team_enum()
-    
 
-    #Checks if Null case
-    #TODO: Debug
+    
+    #Deals with the case that team_access was not in the input 
+    #
     if opts.team_access is None:
-        access_command = "v"*len(teams)
+        ## Default is all have no access
+        access_command = "n"*len(teams)
     else:
         #Verifies that the correct number of inputs for opts.team_access was written down.
         #
-        if len(teams) != len(opts.team_access):
-            print "%s is not a valid input." %(opts.team_access)
+        access_command = opts.team_access
+        if len(teams) != len(access_command):
+            print "%s is not a valid input." %(access_command)
             print "Number of characters must be same as number of teams."
             print "There are %s teams" %(len(teams))
             print "Check 'team_enum.py' to see ordering of teams"            
             sys.exit(-1)        
-        access_command = opts.team_access
+        
     
     
-                
+    #Checks for correct input in alert_criticality
+    #
+    try:
+        alert_number = int(opts.alert_criticality)
+    except:
+        print "Alert Criticality Level must be an integer"
+        sys.exit(-1)
+    if alert_number < 1 or alert_number > 5:
+        print "Alert Criticality Level must be between 1-5"
     
     
-    #stores the access types for all the groups
-    #TODO: Null case
+    #Checks correct input for the Max Disk Usage
+    #
+    try: 
+        mdu_Mega = int(opts.max_disk_usage_mega)
+        mdu_Perc = int(opts.max_disk_usage_per)
+    except:
+        print "Max Disk Usage must be an integer"
+        sys.exit(-1)
+    if mdu_Mega %2:
+        mdu_Mega = mdu_Mega + 1
+        print "GB quota must be an even number."
+        print "Inceasing by 1 to %s MB." % (mdu_Mega)
+        
+        
+    #Conversion of Sensor-side Max Disk Usage in megabytes and percents
+    #TODO: Verify        
+    if mdu_Mega > 10240 or mdu_Mega < 2:
+        print "Max Disk Usage should be greater than 2 MB and less than 10240 MB (10 GB)"
+        sys.exit(-1)
+    number_conversion = 524288 * mdu_Mega
+    if mdu_Perc > 25 or mdu_Perc < 2:
+        print "Max Disk Usage percent should be between 2% and 25%"
+        sys.exit(-1)
+        
+    odd = mdu_Perc % 2
+    percentA = mdu_Perc/2 + 1 if odd else mdu_Perc/2
+    percentB = mdu_Perc/2
+    
+    
+    #Stores the access types for all the groups
+    #
     t_Access = [1] * len(access_command)
     for i in range(0,len(t_Access)):
         
@@ -142,34 +178,12 @@ def main(argv):
         else:
             print "Only digits 'v','a',and 'n' are valid; Type '-h' for help on the notation"
             sys.exit(-1)
-
         t_Access[i] = {\
             'access_category': str,\
             'team_id': team['id'],\
             'team_name': team['name']
         }
-        
-    
-    #Conversion of Sensor-side Max Disk Usage in megabytes and percents
-    #TODO: Verify
-    try: 
-        mdu_Mega = int(opts.max_disk_usage_mega)
-        mdu_Perc = int(opts.max_disk_usage_per)
-    except:
-        print "Max Disk Usage must be an integer"
-        sys.exit(-1)
-    if mdu_Mega > 10240 or mdu_Mega < 2:
-        print "Max Disk Usage should be greater than 2 MB and less than 10240 MB (10 GB)"
-        sys.exit(-1)
-    number_conversion = 524288 * mdu_Mega #MB
-    if mdu_Perc > 25 or mdu_Perc < 2:
-        print "Max Disk Usage percent should be between 2% and 25%"
-        sys.exit(-1)
-    odd = mdu_Perc % 2 #Percent
-    percentA = mdu_Perc/2 + 1 if odd else mdu_Perc/2
-    percentB = mdu_Perc/2
-    
-    
+
     #add the group 
     #
     group = cb.group_add_from_data(opts.alert_criticality, opts.banning_enabled, opts.collect_cross_procs, 
