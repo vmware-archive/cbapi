@@ -29,7 +29,7 @@ def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
     
-    if not opts.server_url or not opts.token or not opts.team_name or not opts.group_access_list:
+    if not opts.server_url or not opts.token or not opts.team_name:
         print "Missing required paramaters; Run --help (-h) for information on usage"
         sys.exit(-1)
         
@@ -46,15 +46,26 @@ def main(argv):
         print "Team Name already exists."
         sys.exit(-1)
     
-    access_list = opts.group_access_list    
     groups = cb.group_enum()
+    access_list = opts.group_access_list        
+    
+    #Deals with the case that team_access was not in the input
+    #
+    if not access_list:
+        ##Default all groups have Admin Access
+        access_list = "a" * len(groups)
+    
+
     
     #checks if there is the right number of groups
     #
     if len(groups) != len(access_list):
-        print "There must be the right number of groups in the input"
+        print "%s is not a valid input." %(access_list)
+        print "Number of characters must be same as number of groups."
+        print "There are %s groups" %(len(groups))
+        print "Check 'group_enum.py' to see ordering of teams"       
         sys.exit(-1)
-        
+    
         
         
     #stores the access types for all the groups
@@ -80,6 +91,7 @@ def main(argv):
             'group_name': group['name']
         }      
         
+
     #Adds the team
     #
     results = cb.team_add_from_data(opts.team_name,group_access)

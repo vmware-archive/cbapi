@@ -19,7 +19,8 @@ def build_cli_parser():
                       help="API Token for Carbon Black server")
     parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
                       help="Do not verify server SSL certificate.")    
-    parser.add_option("-t", "--teamname", action = "store", default = None, dest = "teamname", help = "Feed Team Name")
+    parser.add_option("-t", "--teamname", action = "store", default = None, dest = "teamname",
+                      help = "Feed Team Name")
     parser.add_option("-i", "--id", action="store", default=None, dest="teamid",
                       help="Team Id") 
     
@@ -39,17 +40,22 @@ def main(argv):
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
 
     if not opts.teamid:
+        # Fidn the team id, if no teamid is given 
+        #
         id = cb.team_get_id_by_name(opts.teamname)
         if id is None:
             print "-> No team found with team name: %s" % (opts.teamname)
-        
-    else:
+            sys.exit(-1)
+    else:        
         id = opts.teamid
-        if cb.team_del(id) is None:
-            print "->No team found with team id: %s" %(opts.teamid) 
+        team = cb.team_get_team_by_id(id) 
         
+        if not team:
+            print "->No team found with team id: %s" %(id) 
+            sys.exit(-1)
+            
     # delete the team
-    team = cb.team_get_team_by_id(id)
+    #
     cb.team_del(id)    
     
     print "-> Team deleted [team=%s]" % (team['name'])

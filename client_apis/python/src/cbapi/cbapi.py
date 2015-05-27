@@ -584,8 +584,9 @@ class CbApi(object):
         '''
 
         teams = self.team_enum()
+        
         for team in teams:
-            if team['id'] == id:
+            if int(team['id']) == int(id):
                 return team
 
         #did not find it
@@ -811,7 +812,7 @@ class CbApi(object):
 
         url = "%s/api/user/%s" % (self.server, username)
         
-
+        print url
         r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
 
 
