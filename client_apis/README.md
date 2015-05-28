@@ -50,6 +50,15 @@ The following APIs are versioned.
 #### Feeds
 - [`/api/v1/feed`](#apiv1feed) - Feed enumeration, addition, modification, and deletion
 
+#### Users
+- [`/api/users`](#apiusers) - User enumeration
+- ['/api/user`](#apiuser) - User information retrieval, addition, and deletion
+
+#### Teams
+- [`/api/teams`](#apiteams) - Team enumeration
+- [`/api/team`](#apiteam) - Team addition
+- [`/api/team/<team_id>`](#apiteam
+
 #### Alerts
 - [`/api/v1/alert`](#apiv1alert) - Alert search
 - [`/api/v1/alert/<alertid>`] - Alert update and resolution

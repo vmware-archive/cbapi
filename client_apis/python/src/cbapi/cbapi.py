@@ -479,9 +479,7 @@ class CbApi(object):
         adds a new group to the server
         '''
         
-        
-        
-        request = [{\
+        request = {\
             'alert_criticality' : alert_criticality, \
             'banning_enabled' : banning_enabled, \
             'collect_cross_procs' : collect_cross_procs, \
@@ -510,12 +508,8 @@ class CbApi(object):
             'tamper_level' : tamper_level, \
             'team_access' : team_access, \
             'vdi_enabled' : vdi_enabled, \
-        }]
+        }
 
-        true = True
-        false = False
-        request = [{"collect_storefiles": true, "site_id": 1, "sensorbackend_server": "https://carbon9.com", "id": 9, "collect_emet_events": true, "tamper_level": 0, "collect_processes": true, "collect_filemods": true, "collect_regmods": true, "team_access": [{"team_id": 1, "team_name": "Administrators", "access_category": "No Access"}, {"team_id": 2, "team_name": "Test", "access_category": "No Access"}, {"team_id": 9, "team_name": "Temporary Team", "access_category": "No Access"}, {"team_id": 10, "team_name": "Team1", "access_category": "No Access"}, {"team_id": 11, "team_name": "Team2", "access_category": "No Access"}, {"team_id": 13, "team_name": "Team3", "access_category": "No Access"}, {"team_id": 14, "team_name": "Team4", "access_category": "No Access"}, {"team_id": 16, "team_name": "BarryTeam", "access_category": "No Access"}, {"team_id": 27, "team_name": "teamteam", "access_category": "Administrator"}], "quota_eventlog_percent": 1, "collect_moduleloads": true, "datastore_server": None, "banning_enabled": false, "quota_storefile_percent": 1, "max_licenses": -1, "collect_nonbinary_filewrites": true, "sensor_version": "Manual", "collect_cross_procs": true, "vdi_enabled": false, "collect_usercontext": true, "alert_criticality": 1.0, "collect_netconns": true, "collect_filewritemd5s": true, "sensor_exe_name": "", "name": "AnotherGroup", "quota_storefile_bytes": "1073741824", "quota_eventlog_bytes": "1073741824", "collect_moduleinfo": true}]
-        print request
         url = "%s/api/group" % (self.server,)
         
             
@@ -735,64 +729,20 @@ class CbApi(object):
         else:
             return group_list[0]
         
-    def output_user_activity(self):
+
+    def user_activity(self):
         '''
         retrieve all user activity from server
         '''
         
         url = "%s/api/useractivity" % (self.server,)
-    
-        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
-        r.raise_for_status()
-    
-        useractivity = r.json()
-        
-        print "%-12s| %-14s | %-12s | %-5s | %-20s" %("Username", "Timestamp", "Remote Ip", "Result", "Description")
-        for attempt in useractivity:
-            print "%-12s| %-14s | %-12s | %-5s | %-20s" % (attempt['username'], attempt['timestamp'], attempt['ip_address'], attempt['http_status'], attempt['http_description'])
-    
-    def output_user_activity_success(self):
-        '''
-        retrieve all user activity from server and filter out successful attempts
-        '''
-        
-        url = "%s/api/useractivity" % (self.server,)
         
         r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
         r.raise_for_status()
         
-        useractivity = r.json()
+        return r.json()
         
-        successes = []
-        for attempt in useractivity:
-            if attempt['http_status'] == 200:
-                successes.append(attempt)
-            
-        print "%-12s| %-14s | %-12s | %-5s | %-20s" %("Username", "Timestamp", "Remote Ip", "Result", "Description")
-        for attempt in successes:
-            print "%-12s| %-14s | %-12s | %-5s | %-20s" % (attempt['username'], attempt['timestamp'], attempt['ip_address'], attempt['http_status'], attempt['http_description'])  
-    
-    def output_user_activity_failure(self):
-        '''
-        retrieve all user activity from server and filter out successful attempts
-        '''
-        
-        url = "%s/api/useractivity" % (self.server,)
-        
-        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
-        r.raise_for_status()
-        
-        useractivity = r.json()
-        
-        failures = []
-        for attempt in useractivity:
-            if attempt['http_status'] == 403:
-                failures.append(attempt)
-        
-        print "%-12s| %-14s | %-12s | %-5s | %-20s" %("Username", "Timestamp", "Remote Ip", "Result", "Description")
-        for attempt in failures:
-            print "%-12s| %-14s | %-12s | %-5s | %-20s" % (attempt['username'], attempt['timestamp'], attempt['ip_address'], attempt['http_status'], attempt['http_description'])      
-    
+
     def feed_del(self, id):
         '''
         delete a feed, as specified by id

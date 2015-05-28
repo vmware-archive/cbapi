@@ -26,6 +26,47 @@ def build_cli_parser():
                       help="Show successful server access attempts.")    
     return parser
 
+
+
+def output_user_activity(useractivity):
+    '''
+    Output all the useractivity retrieved from the server
+    '''
+
+    print "%-12s| %-14s | %-12s | %-5s | %-20s" % ("Username", "Timestamp", "Remote Ip", "Result", "Description")
+    for attempt in useractivity:
+        print "%-12s| %-14s | %-12s | %-5s | %-20s" % (attempt['username'], attempt['timestamp'], attempt['ip_address'], attempt['http_status'], attempt['http_description'])
+
+
+def output_user_activity_successes(useractivity):
+    '''
+    Output the successful user attempts to connect to server
+    '''
+
+    successes = []
+    for attempt in useractivity:
+        if attempt['http_status'] == 200:
+            successes.append(attempt)
+
+    print "%-12s| %-14s | %-12s | %-5s | %-20s" % ("Username", "Timestamp", "Remote Ip", "Result", "Description")
+    for attempt in successes:
+        print "%-12s| %-14s | %-12s | %-5s | %-20s" % (attempt['username'], attempt['timestamp'], attempt['ip_address'], attempt['http_status'], attempt['http_description'])
+
+
+def output_user_activity_failures(useractivity):
+    '''
+    Output the failed user attempts to connect to server
+    '''
+    failures = []
+    for attempt in useractivity:
+        if attempt['http_status'] == 403:
+            failures.append(attempt)
+
+    print "%-12s| %-14s | %-12s | %-5s | %-20s" % ("Username", "Timestamp", "Remote Ip", "Result", "Description")
+    for attempt in failures:
+        print "%-12s| %-14s | %-12s | %-5s | %-20s" % (attempt['username'], attempt['timestamp'], attempt['ip_address'], attempt['http_status'], attempt['http_description'])
+
+
 def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
@@ -38,11 +79,11 @@ def main(argv):
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
 
     if opts.failures and opts.successes or (not opts.failures and not opts.successes): 
-        cb.output_user_activity()
+        output_user_activity(cb.user_activity())
     if not opts.failures and opts.successes:
-        cb.output_user_activity_success()
+        output_user_activity_successes(cb.user_activity())
     if not opts.successes and opts.failures:
-        cb.output_user_activity_failure()   
+        output_user_activity_failures(cb.user_activity())
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
