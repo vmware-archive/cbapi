@@ -43,9 +43,9 @@ def main(argv):
         sys.exit(-1)
 
     if not opts.remove and not (opts.certificate and opts.key):
-      print "Missing required param; run with --help for usage"
-      print "Either -C AND -K must be specified (to add SSL client certificates to a feed) or -r must be specified"
-      sys.exit(-1)
+        print "Missing required param; run with --help for usage"
+        print "Either -C AND -K must be specified (to add SSL client certificates to a feed) or -r must be specified"
+        sys.exit(-1)
 
     # build a cbapi object
     #

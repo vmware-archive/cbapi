@@ -10,7 +10,7 @@ sys.path.append('../src/cbapi')
 import cbapi 
 
 def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Delete an existing feed")
+    parser = optparse.OptionParser(usage="%prog [options]", description="Enumerate all teams")
 
     # for each supported output type, add an option
     #
@@ -20,37 +20,38 @@ def build_cli_parser():
                       help="API Token for Carbon Black server")
     parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
                       help="Do not verify server SSL certificate.")
-    parser.add_option("-f", "--feedname", action="store", default=None, dest="feedname",
-                      help="Feed Name")
-    parser.add_option("-i", "--id", action="store", default=None, dest="feedid",
-                      help="Feed Id")
     return parser
 
 def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
-    if not opts.server_url or not opts.token or (not opts.feedname and not opts.feedid):
+    if not opts.server_url or not opts.token:
         print "Missing required param; run with --help for usage"
-        print "One of -f or -i must be specified"
         sys.exit(-1)
 
     # build a cbapi object
     #
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
 
-    if not opts.feedid:
-      id = cb.feed_get_id_by_name(opts.feedname)
-      if id is None:
-        print "-> No configured feed with name '%s' found!" % (opts.feedname) 
-        return
-    else:
-      id = opts.feedid
-
-    # delete the feed
+    # enumerate all teams
     #
-    cb.feed_del(id)
+    teams = cb.team_enum()
+    
+    # output a banner
+    #
+    print "%s+%s+%s" % ("-"*15, "-"*20, "-"*20)
+    
+    # output a row about each team
+    #
+    for team in teams:
+        print "%-12s| %-14s" % ("id", team['id'])
+        print "%-12s| %-14s" % ("name", team['name'])
+        print "sensor groups this team has access to:"
+        info = cb.team_info(team['id'])
+        for group in info['group_access']:
+            print "%-12s: %-14s | %-10s: %-s " % ("Access Category", group['access_category'],"Group Name", group['group_name'])    
+      
 
-    print "-> Feed deleted [id=%s]" % (id,)
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

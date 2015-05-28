@@ -9,8 +9,9 @@ sys.path.append('../src/cbapi')
 
 import cbapi 
 
+# Testing corrupted thing
 def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Delete an existing feed")
+    parser = optparse.OptionParser(usage="%prog [options]", description="Enumerate all semsor groups")
 
     # for each supported output type, add an option
     #
@@ -20,37 +21,38 @@ def build_cli_parser():
                       help="API Token for Carbon Black server")
     parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
                       help="Do not verify server SSL certificate.")
-    parser.add_option("-f", "--feedname", action="store", default=None, dest="feedname",
-                      help="Feed Name")
-    parser.add_option("-i", "--id", action="store", default=None, dest="feedid",
-                      help="Feed Id")
+
     return parser
 
 def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
-    if not opts.server_url or not opts.token or (not opts.feedname and not opts.feedid):
+    if not opts.server_url or not opts.token:
         print "Missing required param; run with --help for usage"
-        print "One of -f or -i must be specified"
         sys.exit(-1)
+
 
     # build a cbapi object
     #
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
 
-    if not opts.feedid:
-      id = cb.feed_get_id_by_name(opts.feedname)
-      if id is None:
-        print "-> No configured feed with name '%s' found!" % (opts.feedname) 
-        return
-    else:
-      id = opts.feedid
-
-    # delete the feed
+    # enumerate all sensor groups
     #
-    cb.feed_del(id)
+    groups = cb.group_enum()
+    
+    # output a banner
+    #
+    print "%s+%s+%s" % ("-"*15, "-"*20, "-"*20)
 
-    print "-> Feed deleted [id=%s]" % (id,)
+    # output a row about each group
+    #
+    for group in groups:
+        print "%-12s| %-14s" % ("id", group['id'])
+        print "%-12s| %-14s" % ("name", group['name'])
+        print "teams with access to this sensor group:"
+        for team in group['team_access']:
+            print "%-12s: %-14s | %-10s: %-s " % ("Access Category", team['access_category'],"Team Name", team['team_name'])
+            
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
