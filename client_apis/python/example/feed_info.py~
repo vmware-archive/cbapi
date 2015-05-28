@@ -10,7 +10,7 @@ sys.path.append('../src/cbapi')
 import cbapi 
 
 def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Delete an existing feed")
+    parser = optparse.OptionParser(usage="%prog [options]", description="Display information about an existing feed")
 
     # for each supported output type, add an option
     #
@@ -26,13 +26,20 @@ def build_cli_parser():
                       help="Feed Id")
     return parser
 
+def output_feed_info(feed):
+    print "%s" % (feed['name'])
+    print "%s" % ('-' * 80,)
+    for key in feed.keys():
+        if not 'icon' == key:
+            print "%-20s : %s" % (key, feed[key])
+
 def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
     if not opts.server_url or not opts.token or (not opts.feedname and not opts.feedid):
-        print "Missing required param; run with --help for usage"
-        print "One of -f or -i must be specified"
-        sys.exit(-1)
+      print "Missing required param; run with --help for usage"
+      print "One of -f or -i must be specified"
+      sys.exit(-1)
 
     # build a cbapi object
     #
@@ -46,11 +53,7 @@ def main(argv):
     else:
       id = opts.feedid
 
-    # delete the feed
-    #
-    cb.feed_del(id)
-
-    print "-> Feed deleted [id=%s]" % (id,)
+    output_feed_info(cb.feed_info(id))
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
