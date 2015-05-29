@@ -1236,3 +1236,55 @@ sensor_count: total registered sensors
 active_sensor_count: number of sensors active within the last 24 hours
 num_eventlog_bytes: total backlog, in bytes, of eventlogs on active sensors.  See notes.
 num_storefile_bytes: total backlog, in bytes, of binary files (store files) on active sensors.  See notes.
+
+##### `/api/user/(username)` and `/api/users`
+User enumeration, addition, modification, and deletion
+
+*Supports*: `GET`, `POST`, `PUT`, `DELETE`
+
+##### Parameters:
+
+`username`: OPTIONAL the username of the user to modify or delete
+
+##### Returns:
+
+-With no username parameter GET `/api/users` returns a list of the current users
+-With a username parameter GET `/api/user/<username>` returns a JSON object with the structure of a user
+-With a username parameter DELETE `/api/user/<username>` returns a JSON object with the structure of the user that was deleted
+-With a username parameter PUT `/api/user/<username> returns a JSON object with the structure of the updated user
+-With no username parameter POST `/api/user` returns a JSON object with the structure of the added user
+
+A user has the following structure:
+
+-`username`: username of the user
+-`first_name`: First name of the user
+-`last_name`: Last name of the user
+-`global_admin`: Whether or not the user is a global administrator (True or False)
+-`auth_token`: Authorization token of the user
+-`teams`: List of teams that the user is a member of
+-`email`: email address of the user
+
+Example: GET https://172.16.100.109/api/user/jsmith
+
+{
+  "username": "jsmith",
+  "first_name": "John",
+  "last_name": "Smith",
+  "global_admin": false,
+  "auth_token": "dcbd1587c0c38f9e68d96572a41dbfca1c6f9f05",
+  "teams": [
+    {
+      "id": 1,
+      "name": "Administrators"
+    },
+    {
+      "id": 2,
+      "name": "Test"
+    }
+  ],
+  "email": "jsmith@Bit9.com"
+}
+
+
+
+
