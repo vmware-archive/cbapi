@@ -43,7 +43,7 @@ The following APIs are versioned.
 - [`/api/v1/group/<groupid>/installer/osx`](#osxinstaller) - PKG Sensor Installer for OSX
 - [`/api/v1/group/<groupid>/installer/linux`](#linuxinstaller) - Sensor Installer for Linux
 - [`/api/v1/sensor/statistics`](#sensorstatistics) - Global sensor status, including aggregate sensor data backlog
-- [`/api/v1/sensor/<sensor_id>](#apiv1sensorsensorid) -Sensor sync with event_log_flush_time
+- [`/api/v1/sensor/<sensor_id>`](#apiv1sensorsensorid) -Sensor sync with event_log_flush_time
 - [`/api/group`](#apigroup) - Sensor Group enumeration and addition
 - [`/api/group/<group_id>`](#apigroup<group_id>) Specific sensor group information retrieval and deletion
 
