@@ -760,6 +760,9 @@ class CbApi(object):
         '''
         print username
 
+        user = self.user_get_user_by_username(username)
+        #id = user['userid']
+
         url = "%s/api/user/%s" % (self.server, username)
         
         print url

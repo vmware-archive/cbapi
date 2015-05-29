@@ -53,12 +53,14 @@ The following APIs are versioned.
 #### Users
 - [`/api/users`](#apiusers) - User enumeration
 - ['/api/user`](#apiuser) - User information retrieval, addition, and deletion
+- [`/api/useractivity`] - Retrieve all, failed, or successful attempts from a user to connect to the server
 
 #### Teams
 - [`/api/teams`](#apiteams) - Team enumeration
 - [`/api/team`](#apiteam) - Team addition
-- [`/api/team/<team_id>`](#apiteam
+- [`/api/team/<team_id>`](#apiteam<team_id>) - Team information retrieval, and deletion
 
+#### SE
 #### Alerts
 - [`/api/v1/alert`](#apiv1alert) - Alert search
 - [`/api/v1/alert/<alertid>`] - Alert update and resolution
