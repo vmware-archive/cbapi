@@ -47,7 +47,7 @@ class CbApiWatchlistTest(unittest.TestCase):
     def test_add_invalid_watchlist(self):
         old_watchlists = cb.watchlist()
         self.assertIsNotNone(old_watchlists)
-        with self.assertRaises(Exception):
+        with self.assertRaises(requests.HTTPError):
             cb.watchlist_add(
                 type="bad_type",
                 name="%s %s" % (name_prefix, datetime.now().isoformat(' ')),
@@ -151,7 +151,7 @@ class CbApiWatchlistTest(unittest.TestCase):
 
         add_action_result = cb.watchlist_action_add(
             watchlist_id=watchlist_id,
-            action_type='email',
+            action_type_id=0,
             email_recipient_user_ids=[1]
         )
         self.assertGreater(add_action_result["action_id"], 0)
@@ -176,10 +176,21 @@ class CbApiWatchlistTest(unittest.TestCase):
         self.assertIsNotNone(actions)
         self.assertEqual(len(actions), 0)
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(requests.HTTPError):
             cb.watchlist_action_add(
                 watchlist_id=watchlist_id,
-                action_type='invalid_action',
+                action_type_id=400,
+                email_recipient_user_ids=[1]
+            )
+
+        actions = cb.watchlist_action_get(watchlist_id=watchlist_id)
+        self.assertIsNotNone(actions)
+        self.assertEqual(len(actions), 0)
+
+        with self.assertRaises(requests.HTTPError):
+            cb.watchlist_action_add(
+                watchlist_id=watchlist_id,
+                action_type_id=-1,
                 email_recipient_user_ids=[1]
             )
 
@@ -188,7 +199,6 @@ class CbApiWatchlistTest(unittest.TestCase):
         self.assertEqual(len(actions), 0)
         return
 
-    @unittest.skip("Duplicate action type validation has not been implemented")
     def test_add_duplicate_watchlist_action(self):
         add_result = cb.watchlist_add(
             type="modules",
@@ -205,7 +215,7 @@ class CbApiWatchlistTest(unittest.TestCase):
 
         add_action_result = cb.watchlist_action_add(
             watchlist_id=watchlist_id,
-            action_type='email',
+            action_type_id=0,
             email_recipient_user_ids=[1]
         )
         self.assertGreater(add_action_result["action_id"], 0)
@@ -218,7 +228,7 @@ class CbApiWatchlistTest(unittest.TestCase):
         with self.assertRaises(requests.HTTPError):
             cb.watchlist_action_add(
                 watchlist_id=watchlist_id,
-                action_type='email',
+                action_type_id=0,
                 email_recipient_user_ids=[1]
             )
         return
@@ -239,7 +249,7 @@ class CbApiWatchlistTest(unittest.TestCase):
 
         add_action_result = cb.watchlist_action_add(
             watchlist_id=watchlist_id,
-            action_type='email',
+            action_type_id=0,
             email_recipient_user_ids=[1]
         )
         self.assertGreater(add_action_result["action_id"], 0)
@@ -282,7 +292,7 @@ class CbApiWatchlistTest(unittest.TestCase):
 
         add_action_result = cb.watchlist_action_add(
             watchlist_id=watchlist_id,
-            action_type='email',
+            action_type_id=0,
             email_recipient_user_ids=[1]
         )
         self.assertGreater(add_action_result["action_id"], 0)
@@ -326,7 +336,7 @@ class CbApiWatchlistTest(unittest.TestCase):
 
         add_action_result = cb.watchlist_action_add(
             watchlist_id=watchlist_id,
-            action_type='email',
+            action_type_id=0,
             email_recipient_user_ids=[1]
         )
         self.assertGreater(add_action_result["action_id"], 0)
@@ -364,7 +374,7 @@ class CbApiWatchlistTest(unittest.TestCase):
 
         add_action_result = cb.watchlist_action_add(
             watchlist_id=watchlist_id,
-            action_type='email',
+            action_type_id=0,
             email_recipient_user_ids=[1]
         )
         self.assertGreater(add_action_result["action_id"], 0)
@@ -393,11 +403,19 @@ class CbApiWatchlistTest(unittest.TestCase):
     def tearDownClass(cls):
         watchlists = cb.watchlist()
         del_count = 0
+        fail_count = 0
         for watchlist in watchlists:
             if watchlist["name"].startswith(name_prefix):
-                cb.watchlist_del(watchlist["id"])
-                del_count += 1
+                try:
+                    cb.watchlist_del(watchlist["id"])
+                    del_count += 1
+                except:
+                    print "Unable to delete watchlist with ID %s" % watchlist["id"]
+                    fail_count += 1
+
         print "\n%s test watchlists deleted" % del_count
+        if fail_count > 0:
+            print "\n%s test watchlists were not deleted" % fail_count
         return
 
 
@@ -413,7 +431,7 @@ if __name__ == '__main__':
     token = sys.argv.pop()
     url = sys.argv.pop()
 
-    cb = CbApi(url, ssl_verify=False, token=token)
+    cb = CbApi(url, ssl_verify=False, token=token, client_validation_enabled=False)
 
     # run the unit tests
     #

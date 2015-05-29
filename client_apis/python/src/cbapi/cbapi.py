@@ -345,14 +345,14 @@ class CbApi(object):
         adds a new watchlist
         '''
 
-        if type not in ["modules", "events"]:
-            raise ValueError("Unexpected type. Should be one of (\"modules\", \"events\")")
-
         # as directed by the caller, provide basic feed validation
         if "cb.urlver" not in search_query:
             search_query = "cb.urlver=1&" + search_query
 
         if self.client_validation_enabled:
+            if type not in ["modules", "events"]:
+                raise ValueError("Unexpected type. Should be one of (\"modules\", \"events\")")
+
             if not "q=" in search_query:
                 raise ValueError("watchlist queries must be of the form: cb.urlver=1&q=<query>")
 
@@ -394,7 +394,7 @@ class CbApi(object):
 
         url = "%s/api/v1/watchlist/%s" % (self.server, id)
         
-        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
+        r = requests.delete(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
         r.raise_for_status()
 
         return r.json() 
@@ -411,11 +411,11 @@ class CbApi(object):
         return r.json()
 
     def watchlist_action_get(self, watchlist_id):
-        '''
+        """
         gets actions for a watchlist
         :param watchlist_id: the ID of the watchlist
         :return: an array of actions associated with the watchlist
-        '''
+        """
 
         url = "%s/api/v1/watchlist/%s/action" % (self.server, watchlist_id)
 
@@ -423,21 +423,14 @@ class CbApi(object):
         r.raise_for_status()
         return r.json()
 
-    def watchlist_action_add(self, watchlist_id, action_type, email_recipient_user_ids=[]):
+    def watchlist_action_add(self, watchlist_id, action_type_id, email_recipient_user_ids=[]):
         """
         add an action to a watchlist
         :param watchlist_id: the ID of the watchlist
-        :param action_type: one of ("email", "alert", "syslog")
+        :param action_type_id: the ID of the action type
         :param email_recipient_user_id: the ID of the user who will receive email
         :return: a dictionary with the new action ID in "action_id"
         """
-
-        action_types = ["email", "syslog", "httppost", "alert"]
-
-        if action_type not in action_types:
-            raise ValueError("Invalid action_type: %s" % action_type)
-
-        action_type_id = action_types.index(action_type)
 
         request = {
             "action_data": "{\"email_recipients\":[%s]}" % (",".join(str(user_id) for user_id in email_recipient_user_ids)),
@@ -471,7 +464,7 @@ class CbApi(object):
 
     def watchlist_action_del(self, watchlist_id, action_id):
         """
-        delet an action for a watchlist
+        delete an action for a watchlist
         :param watchlist_id: the ID of the watchlist
         :param action_id: the ID of the action on the watchlist
         :return: a dictionary with the request status in "result"
