@@ -5,7 +5,6 @@
 #
 
 import json
-import urllib
 import requests
 
 
@@ -344,6 +343,9 @@ class CbApi(object):
         adds a new watchlist
         '''
 
+        if type not in ["modules", "events"]:
+            raise ValueError("Unexpected type. Should be one of (\"modules\", \"events\")")
+
         # as directed by the caller, provide basic feed validation
         if basic_query_validation:
             if not "q=" in search_query:
@@ -352,7 +354,6 @@ class CbApi(object):
                 search_query = "cb.urlver=1&" + search_query 
 
             for kvpair in search_query.split('&'):
-                print kvpair
                 if len(kvpair.split('=')) != 2:
                     continue
                 if kvpair.split('=')[0] != 'q':
@@ -390,7 +391,7 @@ class CbApi(object):
 
         url = "%s/api/v1/watchlist/%s" % (self.server, id)
         
-        r = requests.delete(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
+        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
         r.raise_for_status()
 
         return r.json() 
@@ -402,6 +403,80 @@ class CbApi(object):
         url = "%s/api/v1/watchlist/%s" % (self.server, id)
 
         r = requests.put(url, headers=self.token_header, data=json.dumps(watchlist), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def watchlist_action_get(self, watchlist_id):
+        '''
+        gets actions for a watchlist
+        :param watchlist_id: the ID of the watchlist
+        :return: an array of actions associated with the watchlist
+        '''
+
+        url = "%s/api/v1/watchlist/%s/action" % (self.server, watchlist_id)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def watchlist_action_add(self, watchlist_id, action_type, email_recipient_user_ids=[]):
+        """
+        add an action to a watchlist
+        :param watchlist_id: the ID of the watchlist
+        :param action_type: one of ("email", "alert", "syslog")
+        :param email_recipient_user_id: the ID of the user who will receive email
+        :return: a dictionary with the new action ID in "action_id"
+        """
+
+        action_types = ["email", "syslog", "httppost", "alert"]
+
+        if action_type not in action_types:
+            raise ValueError("Invalid action_type: %s" % action_type)
+
+        action_type_id = action_types.index(action_type)
+
+        request = {
+            "action_data": "{\"email_recipients\":[%s]}" % (",".join(str(user_id) for user_id in email_recipient_user_ids)),
+            "action_type": action_type_id,
+            "group_id": watchlist_id,
+            "watchlist_id": watchlist_id
+        }
+
+        url = "%s/api/v1/watchlist/%s/action" % (self.server, watchlist_id)
+
+        r = requests.post(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def watchlist_action_modify(self, watchlist_id, action_id, action):
+        """
+        modify an action for a watchlist
+        :param watchlist_id: the ID of the watchlist
+        :param action_id: the ID of the action on the watchlist
+        :param action: a dictionary representing the modified action
+        :return: a dictionary with the request status in "result"
+        """
+
+        url = "%s/api/v1/watchlist/%s/action/%s" % (self.server, watchlist_id, action_id)
+
+        r = requests.put(url, headers=self.token_header, data=json.dumps(action), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def watchlist_action_del(self, watchlist_id, action_id):
+        """
+        delet an action for a watchlist
+        :param watchlist_id: the ID of the watchlist
+        :param action_id: the ID of the action on the watchlist
+        :return: a dictionary with the request status in "result"
+        """
+
+        url = "%s/api/v1/watchlist/%s/action/%s" % (self.server, watchlist_id, action_id)
+
+        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
         r.raise_for_status()
 
         return r.json()
