@@ -21,7 +21,7 @@ class CbApi(object):
         proc_detail = cb.process(proc['id'])
         print proc_detail['process']['start'], proc_detail['process']['hostname'], proc_detail['process']['path']
     """
-    def __init__(self, server, ssl_verify=True, token=None):
+    def __init__(self, server, ssl_verify=True, token=None, client_validation_enabled=True):
         """ Requires:
                 server -    URL to the Carbon Black server.  Usually the same as 
                             the web GUI.
@@ -39,6 +39,7 @@ class CbApi(object):
         self.ssl_verify = ssl_verify
         self.token = token
         self.token_header = {'X-Auth-Token': self.token}
+        self.client_validation_enabled = client_validation_enabled
 
     def info(self):
         """ Provide high-level information about the Carbon Black Enterprise Server.
@@ -281,10 +282,11 @@ class CbApi(object):
                     'Linux':      '/api/v1/group/%s/installer/linux' % (group_id,),\
                   }
 
-        # verify that the type parameter is a known value
-        #
-        if not mapping.has_key(type):
-            raise ValueError("Unrecognized type '%s'; should be one of 'WindowsEXE', 'WindowsMSI', 'OSX', or 'Linux'" % (type,))
+        if self.client_validation_enabled:
+            # verify that the type parameter is a known value
+            #
+            if not mapping.has_key(type):
+                raise ValueError("Unrecognized type '%s'; should be one of 'WindowsEXE', 'WindowsMSI', 'OSX', or 'Linux'" % (type,))
 
         # build the fully-qualified URL
         #
@@ -339,17 +341,18 @@ class CbApi(object):
         r.raise_for_status()
         return r.json()
 
-    def watchlist_add(self, type, name, search_query, id=None, readonly=False, basic_query_validation=True):
+    def watchlist_add(self, type, name, search_query, id=None, readonly=False):
         '''
         adds a new watchlist
         '''
 
         # as directed by the caller, provide basic feed validation
-        if basic_query_validation:
+        if "cb.urlver" not in search_query:
+            search_query = "cb.urlver=1&" + search_query
+
+        if self.client_validation_enabled:
             if not "q=" in search_query:
                 raise ValueError("watchlist queries must be of the form: cb.urlver=1&q=<query>")
-            if "cb.urlver" not in search_query:
-                search_query = "cb.urlver=1&" + search_query 
 
             for kvpair in search_query.split('&'):
                 print kvpair
@@ -357,7 +360,7 @@ class CbApi(object):
                     continue
                 if kvpair.split('=')[0] != 'q':
                     continue
-                
+
                 # the query itself must be percent-encoded
                 # verify there are only non-reserved characters present
                 # no logic to detect unescaped '%' characters
