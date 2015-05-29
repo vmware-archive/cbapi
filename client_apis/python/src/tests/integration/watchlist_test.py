@@ -24,6 +24,16 @@ name_prefix = "Test Watchlist"
 
 
 class CbApiWatchlistTest(unittest.TestCase):
+    def create_watchlist(self):
+        add_result = cb.watchlist_add(
+            type="modules",
+            name="%s %s" % (name_prefix, datetime.now().isoformat(' ')),
+            search_query="q=is_executable_image%3Afalse&cb.urlver=1&sort=server_added_timestamp%20desc",
+            readonly=False
+        )
+        self.assertGreater(add_result["id"], 0)
+        return add_result["id"]
+
     def test_get_watchlists(self):
         watchlists = cb.watchlist()
         self.assertIsNotNone(watchlists)
@@ -32,13 +42,8 @@ class CbApiWatchlistTest(unittest.TestCase):
     def test_add_watchlist(self):
         old_watchlists = cb.watchlist()
         self.assertIsNotNone(old_watchlists)
-        add_result = cb.watchlist_add(
-            type="modules",
-            name="%s %s" % (name_prefix, datetime.now().isoformat(' ')),
-            search_query="q=is_executable_image%3Afalse&cb.urlver=1&sort=server_added_timestamp%20desc",
-            readonly=False
-        )
-        self.assertGreater(add_result["id"], 0)
+
+        self.create_watchlist()
 
         new_watchlists = cb.watchlist()
         self.assertEqual(len(new_watchlists), len(old_watchlists) + 1)
@@ -78,42 +83,30 @@ class CbApiWatchlistTest(unittest.TestCase):
         return
 
     def test_modify_watchlist(self):
-        add_result = cb.watchlist_add(
-            type="modules",
-            name="%s %s" % (name_prefix, datetime.now().isoformat(' ')),
-            search_query="q=is_executable_image%3Afalse&cb.urlver=1&sort=server_added_timestamp%20desc",
-            readonly=False
-        )
-        self.assertGreater(add_result["id"], 0)
+        watchlist_id = self.create_watchlist()
 
-        initial_watchlist = cb.watchlist(id=add_result["id"])
+        initial_watchlist = cb.watchlist(id=watchlist_id)
         self.assertIsNotNone(initial_watchlist)
 
         modifications = {"search_query": "q=is_executable_image%3Atrue&cb.urlver=1&sort=server_added_timestamp%20desc"}
         modify_result = cb.watchlist_modify(
-            id=add_result["id"],
+            id=watchlist_id,
             watchlist=modifications
         )
         self.assertEqual(modify_result["result"], "success")
 
-        modified_watchlist = cb.watchlist(id=add_result["id"])
+        modified_watchlist = cb.watchlist(id=watchlist_id)
         self.assertNotEqual(modified_watchlist["search_query"], initial_watchlist["search_query"])
         self.assertEqual(modified_watchlist["search_query"], modifications["search_query"])
         return
 
     def test_modify_invalid_watchlist(self):
-        add_result = cb.watchlist_add(
-            type="modules",
-            name="%s %s" % (name_prefix, datetime.now().isoformat(' ')),
-            search_query="q=is_executable_image%3Afalse&cb.urlver=1&sort=server_added_timestamp%20desc",
-            readonly=False
-        )
-        self.assertGreater(add_result["id"], 0)
+        watchlist_id = self.create_watchlist()
         modifications = {"invalid_param": "foo"}
 
         with self.assertRaises(requests.HTTPError) as err:
             cb.watchlist_modify(
-                id=add_result["id"],
+                id=watchlist_id,
                 watchlist=modifications
             )
 
@@ -121,14 +114,7 @@ class CbApiWatchlistTest(unittest.TestCase):
         return
 
     def test_get_actions_for_watchlist(self):
-        add_result = cb.watchlist_add(
-            type="modules",
-            name="%s %s" % (name_prefix, datetime.now().isoformat(' ')),
-            search_query="q=is_executable_image%3Afalse&cb.urlver=1&sort=server_added_timestamp%20desc",
-            readonly=False
-        )
-        watchlist_id = add_result["id"]
-        self.assertGreater(add_result["id"], 0)
+        watchlist_id = self.create_watchlist()
 
         actions = cb.watchlist_action_get(watchlist_id=watchlist_id)
         self.assertIsNotNone(actions)
@@ -136,14 +122,7 @@ class CbApiWatchlistTest(unittest.TestCase):
         return
 
     def test_add_watchlist_action(self):
-        add_result = cb.watchlist_add(
-            type="modules",
-            name="%s %s" % (name_prefix, datetime.now().isoformat(' ')),
-            search_query="q=is_executable_image%3Afalse&cb.urlver=1&sort=server_added_timestamp%20desc",
-            readonly=False
-        )
-        watchlist_id = add_result["id"]
-        self.assertGreater(add_result["id"], 0)
+        watchlist_id = self.create_watchlist()
 
         actions = cb.watchlist_action_get(watchlist_id=watchlist_id)
         self.assertIsNotNone(actions)
@@ -163,14 +142,7 @@ class CbApiWatchlistTest(unittest.TestCase):
         return
 
     def test_add_invalid_watchlist_action(self):
-        add_result = cb.watchlist_add(
-            type="modules",
-            name="%s %s" % (name_prefix, datetime.now().isoformat(' ')),
-            search_query="q=is_executable_image%3Afalse&cb.urlver=1&sort=server_added_timestamp%20desc",
-            readonly=False
-        )
-        watchlist_id = add_result["id"]
-        self.assertGreater(add_result["id"], 0)
+        watchlist_id = self.create_watchlist()
 
         actions = cb.watchlist_action_get(watchlist_id=watchlist_id)
         self.assertIsNotNone(actions)
@@ -200,14 +172,7 @@ class CbApiWatchlistTest(unittest.TestCase):
         return
 
     def test_add_duplicate_watchlist_action(self):
-        add_result = cb.watchlist_add(
-            type="modules",
-            name="%s %s" % (name_prefix, datetime.now().isoformat(' ')),
-            search_query="q=is_executable_image%3Afalse&cb.urlver=1&sort=server_added_timestamp%20desc",
-            readonly=False
-        )
-        watchlist_id = add_result["id"]
-        self.assertGreater(add_result["id"], 0)
+        watchlist_id = self.create_watchlist()
 
         actions = cb.watchlist_action_get(watchlist_id=watchlist_id)
         self.assertIsNotNone(actions)
@@ -234,14 +199,7 @@ class CbApiWatchlistTest(unittest.TestCase):
         return
 
     def test_modify_watchlist_action(self):
-        add_result = cb.watchlist_add(
-            type="modules",
-            name="%s %s" % (name_prefix, datetime.now().isoformat(' ')),
-            search_query="q=is_executable_image%3Afalse&cb.urlver=1&sort=server_added_timestamp%20desc",
-            readonly=False
-        )
-        watchlist_id = add_result["id"]
-        self.assertGreater(add_result["id"], 0)
+        watchlist_id = self.create_watchlist()
 
         actions = cb.watchlist_action_get(watchlist_id=watchlist_id)
         self.assertIsNotNone(actions)
@@ -277,14 +235,7 @@ class CbApiWatchlistTest(unittest.TestCase):
         return
 
     def test_modify_invalid_watchlist_action(self):
-        add_result = cb.watchlist_add(
-            type="modules",
-            name="%s %s" % (name_prefix, datetime.now().isoformat(' ')),
-            search_query="q=is_executable_image%3Afalse&cb.urlver=1&sort=server_added_timestamp%20desc",
-            readonly=False
-        )
-        watchlist_id = add_result["id"]
-        self.assertGreater(add_result["id"], 0)
+        watchlist_id = self.create_watchlist()
 
         actions = cb.watchlist_action_get(watchlist_id=watchlist_id)
         self.assertIsNotNone(actions)
@@ -321,14 +272,7 @@ class CbApiWatchlistTest(unittest.TestCase):
         return
 
     def test_delete_watchlist_action(self):
-        add_result = cb.watchlist_add(
-            type="modules",
-            name="%s %s" % (name_prefix, datetime.now().isoformat(' ')),
-            search_query="q=is_executable_image%3Afalse&cb.urlver=1&sort=server_added_timestamp%20desc",
-            readonly=False
-        )
-        watchlist_id = add_result["id"]
-        self.assertGreater(add_result["id"], 0)
+        watchlist_id = self.create_watchlist()
 
         actions = cb.watchlist_action_get(watchlist_id=watchlist_id)
         self.assertIsNotNone(actions)
@@ -359,14 +303,7 @@ class CbApiWatchlistTest(unittest.TestCase):
         return
 
     def test_delete_invalid_watchlist_action(self):
-        add_result = cb.watchlist_add(
-            type="modules",
-            name="%s %s" % (name_prefix, datetime.now().isoformat(' ')),
-            search_query="q=is_executable_image%3Afalse&cb.urlver=1&sort=server_added_timestamp%20desc",
-            readonly=False
-        )
-        watchlist_id = add_result["id"]
-        self.assertGreater(add_result["id"], 0)
+        watchlist_id = self.create_watchlist()
 
         actions = cb.watchlist_action_get(watchlist_id=watchlist_id)
         self.assertIsNotNone(actions)
