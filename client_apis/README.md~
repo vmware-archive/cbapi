@@ -1256,16 +1256,16 @@ User enumeration, addition, modification, and deletion
 
 A user has the following structure:
 
--`username`: username of the user
--`first_name`: First name of the user
--`last_name`: Last name of the user
--`global_admin`: Whether or not the user is a global administrator (True or False)
--`auth_token`: Authorization token of the user
--`teams`: List of teams that the user is a member of
--`email`: email address of the user
++ `username`: username of the user  
++ `first_name`: First name of the user  
++ `last_name`: Last name of the user  
++ `global_admin`: Whether or not the user is a global administrator (True or False)  
++ `auth_token`: Authorization token of the user  
++ `teams`: List of teams that the user is a member of  
++ `email`: email address of the user  
 
 Example: GET https://172.16.100.109/api/user/jsmith
-
+```
 {
   "username": "jsmith",
   "first_name": "John",
@@ -1284,7 +1284,7 @@ Example: GET https://172.16.100.109/api/user/jsmith
   ],
   "email": "jsmith@Bit9.com"
 }
-
+```
 
 
 
