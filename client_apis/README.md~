@@ -1237,35 +1237,39 @@ active_sensor_count: number of sensors active within the last 24 hours
 num_eventlog_bytes: total backlog, in bytes, of eventlogs on active sensors.  See notes.
 num_storefile_bytes: total backlog, in bytes, of binary files (store files) on active sensors.  See notes.
 
+
 #### `/api/user/(username)` and `/api/users`
-User enumeration, addition, modification, and deletion
+User enumeration, addition, modification, and deletion.
 
 *Supports*: `GET`, `POST`, `PUT`, `DELETE`
 
 ##### Parameters:
 
-`username`: OPTIONAL the username of the user to modify or delete
+`username`: OPTIONAL the username of the user to retrieve, modify or delete.
 
 ##### Returns:
 
-+ With no username parameter GET `/api/users` returns a list of the current users  
-+ With a username parameter GET `/api/user/<username>` returns a JSON object with the structure of a user  
-+ With a username parameter DELETE `/api/user/<username>` returns a JSON object with the structure of the user that   was deleted
-+ With a username parameter PUT `/api/user/<username> returns a JSON object with the structure of the updated user  
-+ With no username parameter POST `/api/user` returns a JSON object with the structure of the added user  
++ With no username parameter, GET `/api/users` returns a list of the current users.  
++ With a username parameter, GET `/api/user/<username>` returns a JSON object with the structure of a user.  
++ With a username parameter, DELETE `/api/user/<username>` returns a JSON object with the structure of the user   that was deleted.
++ With a username parameter, PUT `/api/user/<username> returns a JSON object with the structure of the updated user.  
++ With no username parameter, POST `/api/user` returns a JSON object with the structure of the added user.  
 
 A user has the following structure:
 
-+ `username`: username of the user  
-+ `first_name`: First name of the user  
-+ `last_name`: Last name of the user  
-+ `global_admin`: Whether or not the user is a global administrator (True or False)  
-+ `auth_token`: Authorization token of the user  
-+ `teams`: List of teams that the user is a member of  
-+ `email`: email address of the user  
++ `username`: username of the user.  
++ `first_name`: First name of the user.  
++ `last_name`: Last name of the user.  
++ `global_admin`: Whether or not the user is a global administrator (True or False).  
++ `auth_token`: Authorization token of the user.
++ `teams`: List of teams that the user is a member of.  
++ `email`: email address of the user.  
 
-Example: GET https://172.16.100.109/api/user/jsmith
+Example: 
+
 ```
+GET https://172.16.100.109/api/user/jsmith
+
 {
   "username": "jsmith",
   "first_name": "John",
@@ -1286,5 +1290,60 @@ Example: GET https://172.16.100.109/api/user/jsmith
 }
 ```
 
+#### `/api/team/(id)` and `/api/teams`
+Team enumeration, addition, modification, and deletion.
+
+*Supports*: `GET`, `POST`, `PUT`, `DELETE`
+
+#####Parameters:
+
+`id`: OPTIONAL the id of the team to retrieve, modify or delete.
+
+##### Returns: 
+
++ With an id parameter, `GET /api/team/<id>` returns a JSON object with the structure of the team to retrieve.
++ With an id parameter, `PUT /api/team/<id>` returns a JSON object with the structure of the updated team.
++ With an id parameter, `DELETE /api/team/<id>` returns a JSON object with the structure of the deleted team.
++ With no id parameter, `POST /api/team` returns a JSON object with the structure of the added team.
++ With no id parameter, `GET /api/teams` returns a JSON object with a list of the current teams.
+
+A team has the following structure:
+
++ `id`: the id of the team.
++ `group_access`: a list of sensor groups the team has access to.
++ `name`: the name of the group.
+
+Example: 
+
+```
+GET https://172.16.100.109/api/team/1
+ 
+{
+  "id": 1,
+  "group_access": [
+    {
+      "group_id": 1,
+      "access_category": "No Access",
+      "group_name": "Default Group"
+    },
+    {
+      "group_id": 9,
+      "access_category": "No Access",
+      "group_name": "AnotherGroup"
+    },
+    {
+      "group_id": 8,
+      "access_category": "No Access",
+      "group_name": "TestGroupl"
+    },
+    {
+      "group_id": 10,
+      "access_category": "No Access",
+      "group_name": "BarryGroup"
+    }
+  ],
+  "name": "Administrators"
+}
+```
 
 
