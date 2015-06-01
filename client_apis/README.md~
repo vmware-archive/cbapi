@@ -1293,7 +1293,9 @@ GET https://172.16.100.109/api/user/jsmith
 #### `/api/team/(id)` and `/api/teams`
 Team enumeration, addition, modification, and deletion.
 
-*Supports*: `GET`, `POST`, `PUT`, `DELETE`
+*Supports*: `GET`, `PUT`, `DELETE` for `/api/team/<id>`
+*Supports*: `POST` for `/api/team
+*Supports*: `GET` for /api/teams
 
 #####Parameters:
 
@@ -1345,5 +1347,142 @@ GET https://172.16.100.109/api/team/1
   "name": "Administrators"
 }
 ```
+#### /api/group/(id)
+Sensor group enumeration, modification, addition, and deletion.
+
+*Supports*: `GET`, `PUT`, `DELETE` for `/api/group/<id>
+*Supports*: `GET`, `POST` for `/api/group
+
+#####Parameters:
+
+`id`: OPTIONAL the id of the sensor group
+
+#####Returns:
+
++ With an id parameter, `GET /api/group/<id>` returns a list of length one with the one element being the JSON object with the structure of the retrieved sensor group.
++ With an id parameter, `PUT /api/group/<id>` returns a JSON object with the structure of the modified sensor group.
++ With an id parameter, `DELETE /api/group/<id>` returns a JSON object with the structure of the deleted sensor group.
++ With no id parameter, `GET /api/group` returns a list of the current sensor groups.
++ With no id parameter, `POST` /api/group returns a JSON object with the structure of the added sensor group.
+
+A sensor group has the following structure:
+
++ `alert_criticality`: a number 1-5 expressing the criticality of the alert.
++ `banning_enabled`: true/false enable banning.
++ `collect_cross_procs`: true/false collect cross process events.
++ `collect_emet_events`: true/false collect EMET events.
++ `collect_filemods`: true/false collect file modifications.
++ `collect_filewritemd5s`: true/false collect writing of md5 files.
++ `collect_moduleinfo`: true/false collect module info.
++ `collect_moduleloads`: true/false collect binary module(.dll, .sys, .exe) loads.
++ `collect_netconns`: true/false collect network connections.
++ `collect_nonbinary_filewrites`: true/false collect non-binary file writes.
++ `collect_processes`: true/false collect process information.
++ `collect_regmods`: true/false collect registry modifications.
++ `collect_storefiles`: true/false collect binary files.
++ `collect_usercontext`: true/false process user context.
++ `datastore_server`: the datastore server
++ `id`: the id of the sensor group
++ `max_licenses`: max number of licenses
++ `name`: name of the sensor group
++ `quota_eventlog_bytes`: limit in disk storage for eventlog
++ `quota_eventlog_percent`: percent of disk storage for eventlog
++ `quota_storefile_bytes`: limit in disk storage for storefiles 
++ `quota_storefile_percent`: percent of disk storage for storefiles
++ `sensor_exe_name`: sensor name
++ `sensor_version`: sensor upgrade policy
++ `sensorbackend_server`: server URL
++ `site_id`: the site id
++ `tamper_level`: tamper level settings (0 or 1 off or on)
++ `team_access` : a list of teams with access to this sensor group.
++ `vdi_enabled` : true/false enable VDI behavior
+
+Example:
+
+```
+GET: https://172.16.100.109/api/group/1
+
+[{
+    alert_criticality: 3
+    banning_enabled: true
+    collect_cross_procs: true
+    collect_emet_events: true
+    collect_filemods: true
+    collect_filewritemd5s: true
+    collect_moduleinfo: true
+    collect_moduleloads: true
+    collect_netconns: true
+    collect_nonbinary_filewrites: true
+    collect_processes: true
+    collect_regmods: true
+    collect_storefiles: true
+    collect_usercontext: true
+    datastore_server: null 
+    id: 1
+    max_licenses: -1
+    name: "Default Group"
+    quota_eventlog_bytes: "1073741824"
+    quota_eventlog_percent: 1
+    quota_storefile_bytes: "1073741824"
+    quota_storefile_percent: 1
+    sensor_exe_name: ""
+    sensor_version: "005.001.000.50513"
+    sensorbackend_server: "https://172.16.100.109:443"
+    site_id: 1
+    tamper_level: 0
+    team_access: [
+            {
+                team_id: 1, 
+                team_name: "Administrators", 
+                access_category: "No Access"
+            },
+            {
+                team_id: 2, 
+                team_name: "Test", 
+                access_category: "No Access"
+            },
+
+            {
+                team_id: 9, 
+                team_name: "Temporary Team", 
+                access_category: "Administrator"
+            },
+            {
+                team_id: 10, 
+                team_name: "Team1", 
+                access_category: "No Access"
+            },
+            {
+                team_id: 16, 
+                team_name: "BarryTeam", 
+                access_category: "Administrator"
+            }
+    ]
+    vdi_enabled: false
+}]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

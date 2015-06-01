@@ -1290,11 +1290,25 @@ GET https://172.16.100.109/api/user/jsmith
 }
 ```
 
+#### `/api/useractivity`
+Enumeration of attempts from users to connect to server.
+
+*Supports*: `GET` for `/api/useractivity`
+
+#####Parameters:
+
+None
+
+#####Returns:
+
+a list of the failed and successful attempts to access the server.
+
+
 #### `/api/team/(id)` and `/api/teams`
 Team enumeration, addition, modification, and deletion.
 
-*Supports*: `GET`, `PUT`, `DELETE` for `/api/team/<id>`
-*Supports*: `POST` for `/api/team
+*Supports*: `GET`, `PUT`, `DELETE` for `/api/team/<id>`  
+*Supports*: `POST` for `/api/team  
 *Supports*: `GET` for /api/teams
 
 #####Parameters:
