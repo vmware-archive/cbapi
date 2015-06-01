@@ -326,6 +326,27 @@ class CbApi(object):
         r = requests.put(url, headers=self.token_header, verify=self.ssl_verify, data = json.dumps(request))
         r.raise_for_status()
 
+    def server_enum(self):
+        """
+        Get all server nodes in the environment
+        """
+        url = "%s/api/server" % self.server
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def server_modify(self, server_id, server):
+        """
+        Update a server
+        :param server_id: The ID of the server to update
+        :param server: The modified server object
+        """
+        url = "%s/api/server/%s" % (self.server, server_id)
+
+        r = requests.put(url, headers=self.token_header, data=json.dumps(server), verify=self.ssl_verify)
+        r.raise_for_status()
+        return
 
     def watchlist(self, id=None):
         '''
