@@ -1237,7 +1237,7 @@ active_sensor_count: number of sensors active within the last 24 hours
 num_eventlog_bytes: total backlog, in bytes, of eventlogs on active sensors.  See notes.
 num_storefile_bytes: total backlog, in bytes, of binary files (store files) on active sensors.  See notes.
 
-##### `/api/user/(username)` and `/api/users`
+#### `/api/user/(username)` and `/api/users`
 User enumeration, addition, modification, and deletion
 
 *Supports*: `GET`, `POST`, `PUT`, `DELETE`
@@ -1248,11 +1248,11 @@ User enumeration, addition, modification, and deletion
 
 ##### Returns:
 
--With no username parameter GET `/api/users` returns a list of the current users
--With a username parameter GET `/api/user/<username>` returns a JSON object with the structure of a user
--With a username parameter DELETE `/api/user/<username>` returns a JSON object with the structure of the user that was deleted
--With a username parameter PUT `/api/user/<username> returns a JSON object with the structure of the updated user
--With no username parameter POST `/api/user` returns a JSON object with the structure of the added user
++ With no username parameter GET `/api/users` returns a list of the current users  
++ With a username parameter GET `/api/user/<username>` returns a JSON object with the structure of a user  
++ With a username parameter DELETE `/api/user/<username>` returns a JSON object with the structure of the user that   was deleted
++ With a username parameter PUT `/api/user/<username> returns a JSON object with the structure of the updated user  
++ With no username parameter POST `/api/user` returns a JSON object with the structure of the added user  
 
 A user has the following structure:
 
