@@ -61,8 +61,12 @@ class CbApiUserTest(unittest.TestCase):
 
     ## Get user tests
 
+    def test_get_unknown_user(self):
+        username = "unknown-user"
+        self._assert_user_doesnt_exist(username)
+
     def test_get_current_user(self):
-        cur_user = cb.user_info(None)
+        cur_user = cb.user_info(username=None)
         self.assertIsNotNone(cur_user)
 
         self._verify_retrieved_user(cur_user)
@@ -127,6 +131,7 @@ class CbApiUserTest(unittest.TestCase):
         with self.assertRaises(requests.HTTPError) as cm:
             cb.user_del(username)
 
+        # TODO: 2015.06.01 (dplummer): seems like it would be better to have an HTTP 400 or 404 rather than a 500
         self.assertEqual(cm.exception.response.status_code, 500)
 
     def test_delete_new_user(self):
