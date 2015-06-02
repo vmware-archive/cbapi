@@ -32,7 +32,7 @@ class CbApiUserTest(unittest.TestCase):
             uid_hex = cls.gen_uid_hex()
 
             user = {
-                'username': 'testuser ' + uid_hex,
+                'username': 'testuser' + uid_hex,
                 'first_name': 'IntegrationUser_' + uid_hex,
                 'last_name': 'TestUser',
                 'email': 'integration.testuser ' + uid_hex + '@example.com',
@@ -80,6 +80,18 @@ class CbApiUserTest(unittest.TestCase):
         user_add_params['username'] = None
 
         # should not be able to create user with no username
+        with self.assertRaises(requests.HTTPError) as cm:
+            cb.user_add_from_data(**user_add_params)
+
+        self.assertEqual(cm.exception.response.status_code, 400)
+
+    def test_create_user_username_with_special_chars(self):
+        user_data = self.TestDataGen.gen_user()
+
+        user_add_params = self._convert_user_data_to_user_add_params(user_data)
+        user_add_params['username'] = "testuser " + self.TestDataGen.gen_uid_hex()
+
+        # should not be able to create user with a space in the username
         with self.assertRaises(requests.HTTPError) as cm:
             cb.user_add_from_data(**user_add_params)
 
