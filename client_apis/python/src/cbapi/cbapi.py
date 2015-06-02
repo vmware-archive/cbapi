@@ -406,6 +406,55 @@ class CbApi(object):
 
         return r.json()
 
+
+    def feed_enum(self):
+        '''
+        enumerate all configured feeds
+        '''
+
+        url = "%s/api/v1/feed" % (self.server,)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def feed_info(self, id):
+        '''
+        retrieve information about an existing feed, as specified by id
+
+        note: the endpoint /api/v1/feed/<id> is not supported as of CB server 5.0
+        '''
+        url = "%s/api/v1/feed/%s" % (self.server, id)
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def feed_modify(self, id, feed):
+        '''
+        updates a feed
+        '''
+        url = "%s/api/v1/feed/%s" % (self.server, id)
+
+        r = requests.put(url, headers=self.token_header, data=json.dumps(feed), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def feed_del(self, id):
+        '''
+        delete a feed, as specified by id
+        '''
+
+        url = "%s/api/v1/feed/%s" % (self.server, id)
+
+        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+
     def feed_add_from_url(self, feed_url, enabled, validate_server_cert, use_proxy):
         '''
         add a new feed to the Carbon Black server, as specified by URL
@@ -418,105 +467,11 @@ class CbApi(object):
                   }
 
         url = "%s/api/v1/feed" % (self.server,)
-        
+
         r = requests.post(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
         r.raise_for_status()
 
         return r.json()
-    
-    def user_add_from_data(self, username, first_name, last_name, password, confirm_password, global_admin, teams, email):
-        '''
-        add a new user to the Carbon Black server
-        '''
-        request = {\
-                    'username' : username,\
-                    'first_name' : first_name,\
-                    'last_name' : last_name,\
-                    'password' : password,\
-                    'confirm_password' : confirm_password,\
-                    'global_admin' : global_admin,\
-                    'teams' : teams,\
-                    'email' : email,\
-                  }
-        url = "%s/api/user" % (self.server,)
-       
-        r = requests.post(url, headers=self.token_header, data = json.dumps(request), verify=self.ssl_verify)
-        r.raise_for_status()
-        
-        return r.json()
-    
-    def team_add_from_data(self, team_name,groups):
-        
-        '''
-        Adds a new team
-        '''
-        
-        
-        request = {\
-            'group_access' : groups, \
-            'name' : team_name, \
-        }
-        
-        url = "%s/api/team" % (self.server,)
-        
-        
-        r = requests.post(url, headers=self.token_header, data = json.dumps(request), verify=self.ssl_verify)
-        
-        r.raise_for_status()
-        
-        
-        return r.json()
-    
-    
-    def group_add_from_data(self, alert_criticality, banning_enabled, collect_cross_procs, collect_emet_events,
-                            collect_filemods, collect_filewritemd5s, collect_moduleinfo, collect_moduleloads,
-                            collect_netconns, collect_nonbinary_filewrites, collect_processes, collect_regmods,
-                            collect_storefiles, collect_usercontext, datastore_server, max_licenses, name,
-                            quota_eventlog_bytes, quota_eventlog_percent, quota_storefile_bytes, quota_storefile_percent,
-                            sensor_exe_name, sensor_version, sensorbackend_server, site_id, tamper_level,
-                            team_access, vdi_enabled):
-        '''
-        adds a new group to the server
-        '''
-        
-        request = {\
-            'alert_criticality' : alert_criticality, \
-            'banning_enabled' : banning_enabled, \
-            'collect_cross_procs' : collect_cross_procs, \
-            'collect_emet_events' : collect_emet_events, \
-            'collect_filemods' : collect_filemods, \
-            'collect_filewritemd5s' : collect_filewritemd5s, \
-            'collect_moduleinfo' : collect_moduleinfo, \
-            'collect_moduleloads' : collect_moduleloads, \
-            'collect_netconns' : collect_netconns, \
-            'collect_nonbinary_filewrites' : collect_nonbinary_filewrites, \
-            'collect_processes' : collect_processes, \
-            'collect_regmods' : collect_regmods, \
-            'collect_storefiles' : collect_storefiles, \
-            'collect_usercontext' : collect_usercontext, \
-            'datastore_server' :datastore_server, \
-            'max_licenses' : max_licenses, \
-            'name' : name, \
-            'quota_eventlog_bytes' : quota_eventlog_bytes, \
-            'quota_eventlog_percent' : quota_eventlog_percent, \
-            'quota_storefile_bytes': quota_storefile_bytes, \
-            'quota_storefile_percent' : quota_storefile_percent, \
-            'sensor_exe_name' : sensor_exe_name, \
-            'sensor_version' : sensor_version, \
-            'sensorbackend_server' : sensorbackend_server, \
-            'site_id' : site_id, \
-            'tamper_level' : tamper_level, \
-            'team_access' : team_access, \
-            'vdi_enabled' : vdi_enabled, \
-        }
-
-        url = "%s/api/group" % (self.server,)
-        
-            
-        r = requests.post(url, headers=self.token_header, data = json.dumps(request), verify=self.ssl_verify) 
-        r.raise_for_status()
-        return r.json()
-    
 
     def feed_get_id_by_name(self, name):
         '''
@@ -530,289 +485,11 @@ class CbApi(object):
         # did not find it
         #
         return None
-    
-
-    def user_get_username_by_name(self, first_name, last_name):
-        '''
-        helper function to find the username given a user's first and last name
-        '''
-
-        for user in self.user_enum():
-            if user['first_name'].lower() == first_name.lower() and user['last_name'].lower() == last_name.lower():
-                return user['username']
-
-        # did not find it
-        #
-        return None
-    
-
-    def user_get_user_by_username(self, input_username):
-        '''
-        helper fucntion to find the username        
-        '''
-        for user in self.user_enum():
-            if user['username'] == input_username:
-                return user
-        
-        #did not find the username
-        #
-        return None
-        
-
-    def team_get_team_by_name(self, name):
-        '''
-        retrieve an existing team, specified by name
-        '''
-    
-        teams = self.team_enum()
-        for team in teams:
-            if team['name'] == name:
-                return team
-        
-        #did not find it
-        return None
-    
-    def team_get_team_by_id(self, id):
-        '''
-        retrieve an existing team, specified by id
-        '''
-
-        teams = self.team_enum()
-        
-        for team in teams:
-            if int(team['id']) == int(id):
-                return team
-
-        #did not find it
-        return None    
-    
-    def team_get_id_by_name(self, name):
-        '''
-        retrieve an existing team id, specified by name
-        '''
-    
-        teams = self.team_enum()
-        for team in teams:
-            if team['name'] == name:
-                return team['id']
-    
-        #did not find it
-        return None    
-    
-    
-    def group_get_group_by_name(self,name):
-        '''
-        retrieve information about an existing group, specified by name
-        '''      
-        
-        groups = self.group_enum()
-        for group in groups:
-            if group['name'] == name:
-                return group
-            
-        return None
-            
-    
-        
-    def group_get_id_by_name(self, name):
-        '''
-        retrieve information about an existing group, specified by name
-        '''
-        
-        groups = self.group_enum()
-        for group in groups:
-            if group['name'] == name:
-                return group['id']
-        
-        return None 
-	
-    def feed_enum(self):
-        '''
-        enumerate all configured feeds
-        '''
-
-        url = "%s/api/v1/feed" % (self.server,)
-
-        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
-        r.raise_for_status()
-
-        return r.json()
-
-    def user_enum(self):
-        '''
-        enumerate all users
-        '''
-
-        url = "%s/api/users" % (self.server,)
-
-        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
-        r.raise_for_status()
-
-        return r.json()
-    
-    def team_enum(self):
-        '''
-        enumerate all teams
-        '''
-        
-        url = "%s/api/teams" % (self.server,)
-        
-        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
-        r.raise_for_status()   
-        
-        return r.json() 
-    
-    def group_enum(self):
-        '''
-        enumerate all sensor groups
-        '''
-        
-        url = "%s/api/group" % (self.server,)
-        
-        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
-        r.raise_for_status()
-        
-        return r.json()         
-        
-
-        
-    def feed_info(self, id):
-        '''
-        retrieve information about an existing feed, as specified by id 
-        
-        note: the endpoint /api/v1/feed/<id> is not supported as of CB server 5.0
-        '''
-        url = "%s/api/v1/feed/%s" % (self.server, id)
-        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
-        r.raise_for_status()
-
-        return r.json()
-        
-    def user_info(self, username):
-        '''
-        retrieve information about an existing user, as specified by username 
-        
-        note: the endpoint /api/users/<id> is not supported as of CB server 5.0
-        '''
-        url = "%s/api/user/%s" % (self.server, username)
-        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
-        r.raise_for_status()
-
-        return r.json()
-    
-    def team_info(self, id):
-        '''
-        retrieve information about an existing team, specified by id
-        '''
-        url = "%s/api/team/%s" % (self.server, id)
-        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
-        r.raise_for_status()
-
-        return r.json()
-    
-    
-    def group_info(self, id):
-        '''
-        retrieve information about an existing group, specified by id
-        '''
-
-        url = "%s/api/group/%s" % (self.server, id)
-        
-        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
-        r.raise_for_status()
-        
-        #for some reason this is returning a list of length one with the group as the one elt
-        group_list = r.json()
-        
-        if not group_list:
-            return None
-        else:
-            return group_list[0]
-        
-
-    def user_activity(self):
-        '''
-        retrieve all user activity from server
-        '''
-        
-        url = "%s/api/useractivity" % (self.server,)
-        
-        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
-        r.raise_for_status()
-        
-        return r.json()
-        
-
-    def feed_del(self, id):
-        '''
-        delete a feed, as specified by id
-        '''
-        url = "%s/api/v1/feed/%s" % (self.server, id)
-
-        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
-        r.raise_for_status()
-
-        return r.json()
-    
-    def user_del(self, username):
-        '''
-        deletes a user, as specified by username
-        '''
-        print username
-
-        user = self.user_get_user_by_username(username)
-        #id = user['userid']
-
-        url = "%s/api/user/%s" % (self.server, username)
-        
-        print url
-        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
-
-
-        r.raise_for_status()
-        
-        return r.json()
-    
-    def team_del(self, id):
-        '''
-        deletes a team, as specified by id
-        '''
-        
-        url = "%s/api/team/%s" % (self.server, id)
-                
-        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
-        r.raise_for_status()
-        
-        #return r.json()
-    
-    def group_del(self, id):
-        '''
-        deletes a group, as specified by id
-        '''
-        
-        url = "%s/api/group/%s" % (self.server, id)
-        
-        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
-        r.raise_for_status()
-        
-        #return r.json()
-        
-        
-    def feed_modify(self, id, feed):
-        '''
-        updates a watchlist
-        '''
-        url = "%s/api/v1/feed/%s" % (self.server, id)
-
-        r = requests.put(url, headers=self.token_header, data=json.dumps(feed), verify=self.ssl_verify)
-        r.raise_for_status()
-
-        return r.json()
 
     def feed_synchronize(self, name, full_sync=True):
         '''
         force the synchronization of a feed
-        
+
         this triggers the CB server to refresh the feed.  it does not result in immediate
         tagging of any existing process or binary documents that match the feed.  it does result
         in any new incoming data from sensors being tagged on ingress.
@@ -867,6 +544,259 @@ class CbApi(object):
 
         return r.json()
 
+    def user_enum(self):
+        '''
+        enumerate all users
+        '''
+
+        url = "%s/api/users" % (self.server,)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def user_info(self, username):
+        '''
+        retrieve information about an existing user, as specified by username
+        '''
+
+        url = "%s/api/user/%s" % (self.server, username)
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def user_del(self, username):
+        '''
+        deletes a user, as specified by username
+        '''
+
+        url = "%s/api/user/%s" % (self.server, username)
+
+        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def user_add_from_data(self, username, first_name, last_name, password, confirm_password, global_admin, teams, email):
+        '''
+        add a new user to the Carbon Black server
+        '''
+        request = {\
+                    'username' : username,\
+                    'first_name' : first_name,\
+                    'last_name' : last_name,\
+                    'password' : password,\
+                    'confirm_password' : confirm_password,\
+                    'global_admin' : global_admin,\
+                    'teams' : teams,\
+                    'email' : email,\
+                  }
+        url = "%s/api/user" % (self.server,)
+
+        r = requests.post(url, headers=self.token_header, data = json.dumps(request), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def user_get_user_by_name(self, first_name, last_name):
+        '''
+        helper function to find the username given a user's first and last name
+        '''
+
+        for user in self.user_enum():
+            if user['first_name'].lower() == first_name.lower() and user['last_name'].lower() == last_name.lower():
+                return user
+
+        # did not find it
+        #
+        return None
+
+    def user_activity(self):
+        '''
+        retrieve all user activity from server
+        '''
+
+        url = "%s/api/useractivity" % (self.server,)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def team_enum(self):
+        '''
+        enumerate all teams
+        '''
+        
+        url = "%s/api/teams" % (self.server,)
+        
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()   
+        
+        return r.json()
+
+    def team_info(self, id):
+        '''
+        retrieve information about an existing team, specified by id
+        '''
+
+        url = "%s/api/team/%s" % (self.server, id)
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def team_del(self, id):
+        '''
+        deletes a team, as specified by id
+        '''
+
+        url = "%s/api/team/%s" % (self.server, id)
+
+        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def team_add_from_data(self, team_name,groups):
+
+        '''
+        Adds a new team
+        '''
+
+        request = {\
+            'group_access' : groups, \
+            'name' : team_name, \
+        }
+
+        url = "%s/api/team" % (self.server,)
+
+
+        r = requests.post(url, headers=self.token_header, data = json.dumps(request), verify=self.ssl_verify)
+
+        r.raise_for_status()
+
+
+        return r.json()
+
+    def team_get_team_by_name(self, name):
+        '''
+        retrieve an existing team, specified by name
+        '''
+
+        teams = self.team_enum()
+        for team in teams:
+            if team['name'] == name:
+                return team
+
+        #did not find it
+        return None
+
+    
+    def group_enum(self):
+        '''
+        enumerate all sensor groups
+        '''
+        
+        url = "%s/api/group" % (self.server,)
+        
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        
+        return r.json()
+
+    def group_info(self, id):
+        '''
+        retrieve information about an existing group, specified by id
+        '''
+
+        url = "%s/api/group/%s" % (self.server, id)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        group_list = r.json() #returns a list of length one with the group data
+
+        if not group_list:
+            return None
+        else:
+            return group_list[0] #return the only element in the list of length one
+
+    def group_del(self, id):
+        '''
+        deletes a group, as specified by id
+        '''
+
+        url = "%s/api/group/%s" % (self.server, id)
+
+        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def group_add_from_data(self, alert_criticality, banning_enabled, collect_cross_procs, collect_emet_events,
+                            collect_filemods, collect_filewritemd5s, collect_moduleinfo, collect_moduleloads,
+                            collect_netconns, collect_nonbinary_filewrites, collect_processes, collect_regmods,
+                            collect_storefiles, collect_usercontext, datastore_server, max_licenses, name,
+                            quota_eventlog_bytes, quota_eventlog_percent, quota_storefile_bytes, quota_storefile_percent,
+                            sensor_exe_name, sensor_version, sensorbackend_server, site_id, tamper_level,
+                            team_access, vdi_enabled):
+        '''
+        adds a new group to the server
+        '''
+
+        request = {\
+            'alert_criticality' : alert_criticality, \
+            'banning_enabled' : banning_enabled, \
+            'collect_cross_procs' : collect_cross_procs, \
+            'collect_emet_events' : collect_emet_events, \
+            'collect_filemods' : collect_filemods, \
+            'collect_filewritemd5s' : collect_filewritemd5s, \
+            'collect_moduleinfo' : collect_moduleinfo, \
+            'collect_moduleloads' : collect_moduleloads, \
+            'collect_netconns' : collect_netconns, \
+            'collect_nonbinary_filewrites' : collect_nonbinary_filewrites, \
+            'collect_processes' : collect_processes, \
+            'collect_regmods' : collect_regmods, \
+            'collect_storefiles' : collect_storefiles, \
+            'collect_usercontext' : collect_usercontext, \
+            'datastore_server' :datastore_server, \
+            'max_licenses' : max_licenses, \
+            'name' : name, \
+            'quota_eventlog_bytes' : quota_eventlog_bytes, \
+            'quota_eventlog_percent' : quota_eventlog_percent, \
+            'quota_storefile_bytes': quota_storefile_bytes, \
+            'quota_storefile_percent' : quota_storefile_percent, \
+            'sensor_exe_name' : sensor_exe_name, \
+            'sensor_version' : sensor_version, \
+            'sensorbackend_server' : sensorbackend_server, \
+            'site_id' : site_id, \
+            'tamper_level' : tamper_level, \
+            'team_access' : team_access, \
+            'vdi_enabled' : vdi_enabled, \
+        }
+
+        url = "%s/api/group" % (self.server,)
+
+
+        r = requests.post(url, headers=self.token_header, data = json.dumps(request), verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def group_get_group_by_name(self,name):
+        '''
+        retrieve an existing group, specified by group name
+        '''
+
+        groups = self.group_enum()
+        for group in groups:
+            if group['name'] == name:
+                return group
+
+        return None
+
     def alert_search(self, query_string, sort="created_time desc", rows=10, start=0):
         """ Search for processes.  Arguments: 
 
@@ -904,5 +834,24 @@ class CbApi(object):
     def alert_update(self, alert): 
         r = requests.post("%s/api/v1/alert/%s" % (self.server, alert['unique_id']), headers=self.token_header,
                           data=json.dumps(alert), verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def alert_add(self, query_string, rows, start, sort, facets):
+        '''
+        adds a new alert to the Carbon Black server
+        '''
+
+        request = {\
+            'query_string' : query_string,\
+            'rows' : rows,\
+            'start' : start,\
+            'sort' : sort,\
+            'facets' : facets,\
+        }
+
+        url = "%s/api/v1/alert" % (self.server,)
+
+        r = requests.post(url, headers=self.token_header, data = json.dumps(request), verify=self.ssl_verify)
         r.raise_for_status()
         return r.json()

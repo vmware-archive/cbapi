@@ -23,6 +23,7 @@ def build_cli_parser():
     return parser
 
 def main(argv):
+    print "***Run in full screen for neat output***"
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
     if not opts.server_url or not opts.token:
@@ -38,13 +39,18 @@ def main(argv):
     users = cb.user_enum()
     # output a banner
     #
-    print "%-20s  %-14s  %-12s  %-5s  %-20s  %s" % ("username", "First Name", "Last Name","Global Admin","Email Address", "teams")
-    print "%s+%s+%s+%s+%s+%s" % ("-"*21, "-"*16, "-"*14, "-"*7, "-"*27, "-"*100)
+    print "%-20s  %-14s  %-12s  %-5s  %-20s %-14s %s" % ("username", "First Name", "Last Name","Global Admin","Email Address", "# of teams", "team names")
+    print "%s+%s+%s+%s+%s+%s+%s" % ("-"*21, "-"*16, "-"*14, "-"*7, "-"*27, "-"*10, "-"*100)
 
     # output a row about each user
     #
     for user in users:
-        print "%-21s| %-14s | %-12s | %-5s | %-25s | %s" % (user['username'], user['first_name'], user['last_name'], user['global_admin'], user['email'], user['teams'])
+        num_teams = 0
+        team_names = []
+        for team in user['teams']:
+            num_teams += 1
+            team_names.append(team['name'])
+        print "%-21s| %-14s | %-12s | %-5s | %-25s | %-10s | %s" % (user['username'], user['first_name'], user['last_name'], user['global_admin'], user['email'], num_teams, team_names)
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
