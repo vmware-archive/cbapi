@@ -550,8 +550,6 @@ def build_cli_parser():
     #
     group = optparse.OptionGroup(parser, "Output source options",
                                  "Output options for events that control both the formatting and destination")
-    group.add_option("-f", "--format", action="store", default="json", dest="format",
-                      help="Output format; must be one of [json|table|csv]; default is table")
     group.add_option("-o", "--out-file", action="store", default=None, dest="outfile",
                       help="Write the formatted events to a log file (default is writting to stdout)")
     group.add_option('-t', '--tcp-out', action='store', default=None, dest='tcpout',
