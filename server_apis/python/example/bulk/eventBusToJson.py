@@ -408,6 +408,14 @@ def handle_event_json(msg_body, routing_key):
         if g_config['stripHighlights'] and 'highlights' in jobj:
             del jobj['highlights']
 
+
+        #
+        # keep the timestamp field name consistently
+        #
+        if 'event_timestamp' in jobj:
+            jobj['timestamp'] = jobj['event_timestamp']
+            del jobj['event_timestamp']
+
         #
         # when it makes sense add sensor
         # information to the object.  This is dependent

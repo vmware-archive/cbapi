@@ -367,5 +367,6 @@ class CbModInfoEvent(CbBaseEvent):
        
         dict['digsig'] = {}
         dict['digsig']['result'] = self.utf8_DigSig_Result
+        dict['timestamp'] = windows_time_to_unix_time(self.timestamp)
 
         return dict
