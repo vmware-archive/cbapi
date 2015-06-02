@@ -1024,3 +1024,68 @@ class CbApi(object):
                           data=json.dumps(alert), verify=self.ssl_verify)
         r.raise_for_status()
         return r.json()
+
+    def site_enum(self):
+        """
+        Get all sites
+        """
+
+        url = "%s/api/site" % self.server
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def site_info(self, site_id):
+        """
+        Get info for a site
+        :param site_id: the ID of the site
+        """
+        url = "%s/api/site/%s" % (self.server, site_id)
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def site_add(self, name, group_ids=[]):
+        """
+        Get info for a site
+        :param site: the site object to add
+        """
+
+        site = {
+            "name": name
+        }
+
+        for group_id in group_ids:
+            site["group_%s" % group_id] = group_id
+
+        url = "%s/api/site" % self.server
+        r = requests.post(url, headers=self.token_header, data=json.dumps(site), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def site_modify(self, site_id, site):
+        """
+        Get info for a site
+        :param site: the site object to add
+        """
+        url = "%s/api/site/%s" % (self.server, site_id)
+        r = requests.post(url, headers=self.token_header, data=json.dumps(site), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def site_del(self, site_id):
+        """
+        Get info for a site
+        :param site: the site object to add
+        """
+        url = "%s/api/site/%s" % (self.server, site_id)
+        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
