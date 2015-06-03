@@ -203,7 +203,10 @@ class S3Output(EventOutput):
         #
         key_name = "%s-%s" % (time.time(), ''.join(random.sample(string.lowercase, 4)))
         k = boto.s3.key.Key(bucket=self.bucket, name=key_name)
-        k.set_contents_from_string(eventdata + '\n') 
+
+        # ensure contents of s3 bucket are list of objects, even though this output path is 
+        # always only one object per call
+        k.set_contents_from_string("[%s]\n" % eventdata) 
 
 def lookup_host_details(sensor_id):
     """
