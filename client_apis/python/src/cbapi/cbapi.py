@@ -923,6 +923,21 @@ class CbApi(object):
         r.raise_for_status()
         
         #return r.json()
+
+    def team_modify(self, id, team):
+        """
+        Updates a team
+        :param id: The ID of the team to modify
+        :param team: The modified team object
+        :return: a JSON object indicating a successful result
+        """
+
+        url = "%s/api/team/%s" % (self.server, id)
+
+        r = requests.put(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
     
     def group_del(self, id):
         '''
