@@ -12,43 +12,16 @@ import unittest
 import sys
 import os
 import requests
-import uuid
 
 if __name__ == '__main__':
     sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../")))
 
 from cbapi.cbapi import CbApi
+from helpers.testdata_gen import TestDataGen
 
 cb = None
 
 class CbApiUserTest(unittest.TestCase):
-    class TestDataGen:
-        @staticmethod
-        def gen_uid_hex():
-            return uuid.uuid4().hex
-
-        @classmethod
-        def gen_user(cls):
-            uid_hex = cls.gen_uid_hex()
-
-            user = {
-                'username': 'testuser' + uid_hex,
-                'first_name': 'IntegrationUser_' + uid_hex,
-                'last_name': 'TestUser',
-                'email': 'integration.testuser ' + uid_hex + '@example.com',
-                'password': 'p@ssw0rd',
-                'global_admin': False,
-                'teams': []
-            }
-            return user
-
-        @classmethod
-        def gen_global_admin(cls):
-            user = cls.gen_user()
-            user['global_admin'] = True
-
-            return user
-
     ## List user tests
 
     def test_list_users(self):
@@ -74,7 +47,7 @@ class CbApiUserTest(unittest.TestCase):
     ## Create user tests
 
     def test_create_user_no_username(self):
-        user_data = self.TestDataGen.gen_user()
+        user_data = TestDataGen.gen_user()
 
         user_add_params = self._convert_user_data_to_user_add_params(user_data)
         user_add_params['username'] = None
@@ -86,10 +59,10 @@ class CbApiUserTest(unittest.TestCase):
         self.assertEqual(cm.exception.response.status_code, 400)
 
     def test_create_user_username_with_special_chars(self):
-        user_data = self.TestDataGen.gen_user()
+        user_data = TestDataGen.gen_user()
 
         user_add_params = self._convert_user_data_to_user_add_params(user_data)
-        user_add_params['username'] = "testuser " + self.TestDataGen.gen_uid_hex()
+        user_add_params['username'] = "testuser " + TestDataGen.gen_uid_hex()
 
         # should not be able to create user with a space in the username
         with self.assertRaises(requests.HTTPError) as cm:
@@ -98,7 +71,7 @@ class CbApiUserTest(unittest.TestCase):
         self.assertEqual(cm.exception.response.status_code, 400)
 
     def test_create_user_bad_password_confirm(self):
-        user_data = self.TestDataGen.gen_user()
+        user_data = TestDataGen.gen_user()
 
         user_add_params = self._convert_user_data_to_user_add_params(user_data)
         user_add_params['confirm_password'] = "wr0ngp@ssw0rd"
@@ -121,7 +94,7 @@ class CbApiUserTest(unittest.TestCase):
         username = first_user['username']
 
         # generate second user info, but then use the same username as the first user
-        second_user_data = self.TestDataGen.gen_user()
+        second_user_data = TestDataGen.gen_user()
         second_user_data['username'] = username
         second_user_add_params = self._convert_user_data_to_user_add_params(second_user_data)
 
@@ -183,7 +156,7 @@ class CbApiUserTest(unittest.TestCase):
 
     def _test_create_valid_user(self):
         # generate new user data
-        user_data = self.TestDataGen.gen_user()
+        user_data = TestDataGen.gen_user()
 
         # verify the user doesn't yet exist on the server
         self._assert_user_doesnt_exist(user_data['username'])
@@ -205,7 +178,7 @@ class CbApiUserTest(unittest.TestCase):
 
     def _test_create_valid_global_admin(self):
         # generate new global admin user data
-        user_data = self.TestDataGen.gen_global_admin()
+        user_data = TestDataGen.gen_global_admin()
 
         # verify the user doesn't yet exist on the server
         self._assert_user_doesnt_exist(user_data['username'])
