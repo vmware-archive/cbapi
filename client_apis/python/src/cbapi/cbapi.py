@@ -855,3 +855,101 @@ class CbApi(object):
         r = requests.post(url, headers=self.token_header, data = json.dumps(request), verify=self.ssl_verify)
         r.raise_for_status()
         return r.json()
+
+    def banning_enum(self):
+        '''
+        Enumerates all banned hashes
+        '''
+
+        url = "%s/api/v1/banning/blacklist" % (self.server,)
+
+        r = requests.get(url, headers=self.token_header,verify = self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def banning_info(self, md5):
+        '''
+        Retrieves the information of one banned hash, specified by md5hash
+        '''
+
+        url = "%s/api/v1/banning/blacklist/%s" % (self.server, md5)
+
+        r = requests.get(url,headers=self.token_header,verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def banning_update(self,md5, text):
+        '''
+        updates the Notes field of a banned hash
+        '''
+        url = "%s/api/v1/banning/blacklist/%s" % (self.server, md5)
+
+        r = requests.get(url, headers=self.token_header, verify = self.ssl_verify)
+        r.raise_for_status()
+
+        banned_hash = r.json()
+
+        request = {\
+            'username' : banned_hash['username'],\
+            'audit' : banned_hash['audit'],\
+            'block_count' : banned_hash['block_count'],\
+            'user_id' : banned_hash['user_id'],\
+            'timestamp' : banned_hash['timestamp'],\
+            'text' : text,\
+            'md5hash' : banned_hash['md5hash'],\
+            'enabled' : banned_hash['enabled'],\
+            'last_block_time' : banned_hash['last_block_time'],\
+            'last_block_sensor_id' :banned_hash['last_block_sensor_id'],\
+            'last_block_hostname' : banned_hash['last_block_hostname'],\
+
+            }
+
+        s = requests.put(url,headers=self.token_header,data = json.dumps(request),verify=self.ssl_verify)
+        s.raise_for_status()
+        return s.json()
+
+
+    def banning_add(self, md5):
+        '''
+        adds a new banned hash to the Carbon Black server or enables a pre-existing one
+        '''
+        url = "%s/api/v1/banning/blacklist" % (self.server,)
+
+        request = {\
+            'md5hash' : md5,\
+            }
+
+        r = requests.post(url,headers=self.token_header, data = json.dumps(request), verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def disable_ban(self, md5):
+        '''
+        disables a current banned hash on the server
+        '''
+        url = "%s/api/v1/banning/blacklist/%s" % (self.server, md5)
+
+        r = requests.delete(url,headers=self.token_header,verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+
+    def banning_restrictions(self):
+        '''
+        retrieves the restrictions for banning from the server
+        '''
+        url = "%s/api/v1/banning/restrictions" % (self.server,)
+
+        r = requests.get(url,headers=self.token_header,verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def banning_whitelist(self):
+        '''
+        retrieves the whitelist for banning from the server
+        '''
+        url = "%s/api/v1/banning/whitelist" % (self.server,)
+
+        r = requests.get(url,headers=self.token_header,verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()

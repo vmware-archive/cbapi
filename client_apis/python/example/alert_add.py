@@ -27,7 +27,7 @@ def build_cli_parser():
                       help="return this many rows, default = 10")
     parser.add_option("-s", "--start", action="store", default=0, dest="start",
                       help="start at this row. 0 by default")
-    parser.add_option("-t", "--sort", action="store", default= last_update desc, dest = "sort",
+    parser.add_option("-t", "--sort", action="store", default= "", dest = "sort",
                       help = "Sort rows by this field and order")
     parser.add_option("-f", "--facets", action="store_true", default = False, dest = "facets",
                       help = "Return facet results")
@@ -45,9 +45,11 @@ def main(argv):
     #
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
     alert = cb.alert_add(opts.query_string, opts.rows, opts.start, opts.sort, opts.facets)
+
+    print "alert_added."
     for key in alert.keys():
         print "%-20s : %s" % (key, alert[key])
-    print "alert_added."
+
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
