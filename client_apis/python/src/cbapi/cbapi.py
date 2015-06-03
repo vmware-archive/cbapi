@@ -5,7 +5,6 @@
 #
 
 import json
-import urllib
 import requests
 
 
@@ -21,7 +20,7 @@ class CbApi(object):
         proc_detail = cb.process(proc['id'])
         print proc_detail['process']['start'], proc_detail['process']['hostname'], proc_detail['process']['path']
     """
-    def __init__(self, server, ssl_verify=True, token=None):
+    def __init__(self, server, ssl_verify=True, token=None, client_validation_enabled=True):
         """ Requires:
                 server -    URL to the Carbon Black server.  Usually the same as 
                             the web GUI.
@@ -39,6 +38,7 @@ class CbApi(object):
         self.ssl_verify = ssl_verify
         self.token = token
         self.token_header = {'X-Auth-Token': self.token}
+        self.client_validation_enabled = client_validation_enabled
 
     def info(self):
         """ Provide high-level information about the Carbon Black Enterprise Server.
@@ -281,10 +281,11 @@ class CbApi(object):
                     'Linux':      '/api/v1/group/%s/installer/linux' % (group_id,),\
                   }
 
-        # verify that the type parameter is a known value
-        #
-        if not mapping.has_key(type):
-            raise ValueError("Unrecognized type '%s'; should be one of 'WindowsEXE', 'WindowsMSI', 'OSX', or 'Linux'" % (type,))
+        if self.client_validation_enabled:
+            # verify that the type parameter is a known value
+            #
+            if not mapping.has_key(type):
+                raise ValueError("Unrecognized type '%s'; should be one of 'WindowsEXE', 'WindowsMSI', 'OSX', or 'Linux'" % (type,))
 
         # build the fully-qualified URL
         #
@@ -325,6 +326,27 @@ class CbApi(object):
         r = requests.put(url, headers=self.token_header, verify=self.ssl_verify, data = json.dumps(request))
         r.raise_for_status()
 
+    def server_enum(self):
+        """
+        Get all server nodes in the environment
+        """
+        url = "%s/api/server" % self.server
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def server_modify(self, server_id, server):
+        """
+        Update a server
+        :param server_id: The ID of the server to update
+        :param server: The modified server object
+        """
+        url = "%s/api/server/%s" % (self.server, server_id)
+
+        r = requests.put(url, headers=self.token_header, data=json.dumps(server), verify=self.ssl_verify)
+        r.raise_for_status()
+        return
 
     def watchlist(self, id=None):
         '''
@@ -339,25 +361,28 @@ class CbApi(object):
         r.raise_for_status()
         return r.json()
 
-    def watchlist_add(self, type, name, search_query, id=None, readonly=False, basic_query_validation=True):
+    def watchlist_add(self, type, name, search_query, id=None, readonly=False):
         '''
         adds a new watchlist
         '''
 
         # as directed by the caller, provide basic feed validation
-        if basic_query_validation:
+        if "cb.urlver" not in search_query:
+            search_query = "cb.urlver=1&" + search_query
+
+        if self.client_validation_enabled:
+            if type not in ["modules", "events"]:
+                raise ValueError("Unexpected type. Should be one of (\"modules\", \"events\")")
+
             if not "q=" in search_query:
                 raise ValueError("watchlist queries must be of the form: cb.urlver=1&q=<query>")
-            if "cb.urlver" not in search_query:
-                search_query = "cb.urlver=1&" + search_query 
 
             for kvpair in search_query.split('&'):
-                print kvpair
                 if len(kvpair.split('=')) != 2:
                     continue
                 if kvpair.split('=')[0] != 'q':
                     continue
-                
+
                 # the query itself must be percent-encoded
                 # verify there are only non-reserved characters present
                 # no logic to detect unescaped '%' characters
@@ -402,6 +427,73 @@ class CbApi(object):
         url = "%s/api/v1/watchlist/%s" % (self.server, id)
 
         r = requests.put(url, headers=self.token_header, data=json.dumps(watchlist), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def watchlist_action_get(self, watchlist_id):
+        """
+        gets actions for a watchlist
+        :param watchlist_id: the ID of the watchlist
+        :return: an array of actions associated with the watchlist
+        """
+
+        url = "%s/api/v1/watchlist/%s/action" % (self.server, watchlist_id)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def watchlist_action_add(self, watchlist_id, action_type_id, email_recipient_user_ids=[]):
+        """
+        add an action to a watchlist
+        :param watchlist_id: the ID of the watchlist
+        :param action_type_id: the ID of the action type
+        :param email_recipient_user_id: the ID of the user who will receive email
+        :return: a dictionary with the new action ID in "action_id"
+        """
+
+        request = {
+            "action_data": "{\"email_recipients\":[%s]}" % (",".join(str(user_id) for user_id in email_recipient_user_ids)),
+            "action_type": action_type_id,
+            "group_id": watchlist_id,
+            "watchlist_id": watchlist_id
+        }
+
+        url = "%s/api/v1/watchlist/%s/action" % (self.server, watchlist_id)
+
+        r = requests.post(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def watchlist_action_modify(self, watchlist_id, action_id, action):
+        """
+        modify an action for a watchlist
+        :param watchlist_id: the ID of the watchlist
+        :param action_id: the ID of the action on the watchlist
+        :param action: a dictionary representing the modified action
+        :return: a dictionary with the request status in "result"
+        """
+
+        url = "%s/api/v1/watchlist/%s/action/%s" % (self.server, watchlist_id, action_id)
+
+        r = requests.put(url, headers=self.token_header, data=json.dumps(action), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def watchlist_action_del(self, watchlist_id, action_id):
+        """
+        delete an action for a watchlist
+        :param watchlist_id: the ID of the watchlist
+        :param action_id: the ID of the action on the watchlist
+        :return: a dictionary with the request status in "result"
+        """
+
+        url = "%s/api/v1/watchlist/%s/action/%s" % (self.server, watchlist_id, action_id)
+
+        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
         r.raise_for_status()
 
         return r.json()
@@ -953,3 +1045,68 @@ class CbApi(object):
                           data=json.dumps(alert), verify=self.ssl_verify)
         r.raise_for_status()
         return r.json()
+
+    def site_enum(self):
+        """
+        Get all sites
+        """
+
+        url = "%s/api/site" % self.server
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def site_info(self, site_id):
+        """
+        Get info for a site
+        :param site_id: the ID of the site
+        """
+        url = "%s/api/site/%s" % (self.server, site_id)
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def site_add(self, name, group_ids=[]):
+        """
+        Get info for a site
+        :param site: the site object to add
+        """
+
+        site = {
+            "name": name
+        }
+
+        for group_id in group_ids:
+            site["group_%s" % group_id] = group_id
+
+        url = "%s/api/site" % self.server
+        r = requests.post(url, headers=self.token_header, data=json.dumps(site), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def site_modify(self, site_id, site):
+        """
+        Get info for a site
+        :param site: the site object to add
+        """
+        url = "%s/api/site/%s" % (self.server, site_id)
+        r = requests.post(url, headers=self.token_header, data=json.dumps(site), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def site_del(self, site_id):
+        """
+        Get info for a site
+        :param site: the site object to add
+        """
+        url = "%s/api/site/%s" % (self.server, site_id)
+        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
