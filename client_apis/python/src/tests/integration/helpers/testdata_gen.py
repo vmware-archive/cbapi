@@ -36,3 +36,13 @@ class TestDataGen:
 
         return user
 
+    @classmethod
+    def gen_team(cls):
+        uid_hex = cls.gen_uid_hex()
+
+        team = {
+            'name': 'Test Team ' + uid_hex,
+            'group_access': []
+        }
+        return team
+
