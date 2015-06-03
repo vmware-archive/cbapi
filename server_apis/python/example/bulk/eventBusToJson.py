@@ -23,6 +23,7 @@
  - stdout
  - a TCP or UPP socket
  - a file
+ - a s3 bucket (requires boto library)
 
 '''
 
@@ -30,8 +31,11 @@
 import os
 import sys
 import json
+import time
 import socket
 import struct
+import random
+import string
 import requests
 import optparse
 
@@ -120,7 +124,7 @@ CAPTURE_EVENTS = [
 
 class EventOutput(object):
 
-    DESTINATIONS = ['udp', 'tcp', 'file', 'stdout']
+    DESTINATIONS = ['udp', 'tcp', 'file', 'stdout', 's3']
 
     def __init__(self, out_format, out_dest):
 
@@ -131,7 +135,7 @@ class EventOutput(object):
         self.dest = out_dest
 
     def output(self, eventdata):
-        raise Exception("Not Implimented")
+        raise Exception("Not Implemented")
 
 class StdOutOutput(EventOutput):
 
@@ -175,6 +179,31 @@ class TcpOutput(EventOutput):
 
     def output(self, eventdata):
         self.sock.send(eventdata + '\n')
+
+class S3Output(EventOutput):
+    def __init__(self, format, bucket):
+        super(S3Output, self).__init__(format, 's3')
+    
+        # 
+        # import boto here so it's only required if s3 output is used
+        #
+        import boto
+
+        # 
+        # s3 creds must be defined either in an environment variable, boto config
+        # or EC2 instance metadata.
+        #
+        self.conn = boto.connect_s3()
+        self.bucket = self.conn.get_bucket(bucket)
+
+    def output(self, eventdata):
+        #
+        # name keys as timestamp-xxxx where xxx is random 4 lowercase chars
+        # this (a) keeps a useful and predictable sort order and (b) avoids name collisions
+        #
+        key_name = "%s-%s" % (time.time(), ''.join(random.sample(string.lowercase, 4)))
+        k = boto.s3.key.Key(bucket=self.bucket, name=key_name)
+        k.set_contents_from_string(eventdata + '\n') 
 
 def lookup_host_details(sensor_id):
     """
@@ -556,6 +585,8 @@ def build_cli_parser():
                      help='Write the formatted events to a tcp host and port (format is HOST:IP)')
     group.add_option('-U', '--udp-out', action='store', default=None, dest='udpout',
                      help='Write the formatted events to a udp host and port (format is HOST:IP)')
+    group.add_option('-s', '--s3-out', action='store', default=None, dest='s3out',
+                     help='Write the formatted events to this S3 bucket')
     parser.add_option_group(group)
     return parser
 
@@ -586,6 +617,8 @@ if __name__ == '__main__':
     elif (opts.udpout):
         (host, port) = opts.udpout.split(':')
         g_output = UdpOutput(opts.format, host, int(port))
+    elif (opts.s3out):
+        g_output = S3Output(opts.format, opts.s3out)
     else:
         g_output = StdOutOutput(opts.format)
 
