@@ -951,3 +951,24 @@ class CbApi(object):
         r = requests.get(url,headers=self.token_header,verify=self.ssl_verify)
         r.raise_for_status()
         return r.json()
+
+    def binary_enum(self):
+        '''
+        Retrieves all the binary files stored in the server
+        '''
+        url = "%s/api/v1/binary" % (self.server,)
+
+        r = requests.get(url, headers=self.token_header,verify = self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def binary_info(self, md5):
+        '''
+        Retrieves a specific binary file from the Carbon Black server, specified by md5
+        '''
+        url = "%s/api/v1/binary/%s/summary" % (self.server, md5)
+
+        r = requests.get(url, headers=self.token_header,verify = self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
