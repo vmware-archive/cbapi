@@ -1488,8 +1488,8 @@ Banned hash enumeration, modification, addition, retrieval, and disabling.
 #####Returns:
 
 + With no md5 parameter, `GET /api/v1/banning/blacklist` returns a list of the currently banned hashes and their attributes, enabled or disabled.
-+ With no md5 parameter, `POST` /api/v1/banning/blacklist` returns a JSON object with the structure of the newly added banned hash
-+ With an md5 parameter, `GET /api/v1/banning/blacklist/md5 returns a JSON object with the structure of the retrieved banned hash
++ With no md5 parameter, `POST /api/v1/banning/blacklist` returns a JSON object with the structure of the newly added banned hash
++ With an md5 parameter, `GET /api/v1/banning/blacklist/md5` returns a JSON object with the structure of the retrieved banned hash
 + With an md5 parameter, `PUT /api/v1/banning/blacklist/md5` returns a JSON object with the structure of the newly updated banned hash
 + With an md5 parameter, `DELETE /api/v1/banning/blacklist/md5` returns a JSON object with the structure of the disabled hash.
 
@@ -1548,7 +1548,7 @@ Whitelist enumeration
 
 #####Returns:
 
-`GET` /api/v1/banning/whitelist` returns a JSON object with the structure of the retrieved whitelist
+`GET /api/v1/banning/whitelist` returns a JSON object with the structure of the retrieved whitelist
 
 A whitelist JSON object has the following structure:
 
@@ -1578,7 +1578,7 @@ Restrictions enumeration
 
 #####Returns:
 
-`GET` /api/v1/banning/restrictions returns a JSON object with the structure of the retrieved restrictions
+`GET /api/v1/banning/restrictions` returns a JSON object with the structure of the retrieved restrictions
 
 A restrictions JSON object has the following structure:
 

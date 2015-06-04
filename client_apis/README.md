@@ -1498,8 +1498,8 @@ A banned hash has the following structure:
 + `username`: the username of the current user
 + `audit` : modifications to the banned hash
 + `block_count` : number of times this hash has been blocked
-+ `user_id : id of the current user
-+ `timestamp : time of access
++ `user_id` : id of the current user
++ `timestamp` : time of access
 + `text` : The Notes section of the banned hash
 + `md5hash` : md5 hash of the file
 + `enabled` : Whether or not the CB server is scanning for this hash
