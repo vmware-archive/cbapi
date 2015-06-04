@@ -1480,11 +1480,12 @@ GET: https://172.16.100.109/api/group/1
     ]
     vdi_enabled: false
 }]
+```
 
 #### /api/v1/banning/blacklist/(md5)
 Banned hash enumeration, modification, addition, retrieval, and disabling.
 
-#####
+#####Returns:
 
 + With no md5 parameter, `GET /api/v1/banning/blacklist` returns a list of the currently banned hashes and their attributes, enabled or disabled.
 + With no md5 parameter, `POST` /api/v1/banning/blacklist` returns a JSON object with the structure of the newly added banned hash
@@ -1538,6 +1539,7 @@ GET https://172.16.100.109/api/v1/banning/blacklist/506708142bc63daba64f2d3ad1dc
     timestamp: "2015-06-03 16:53:24.755974-04:00"
     user_id: 25
     username: "testuser"
+```
 
 #### /api/v1/banning/whitelist 
 Whitelist enumeration
