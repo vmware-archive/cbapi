@@ -68,6 +68,12 @@ The following APIs are versioned.
 - [`/api/v1/alert`](#apiv1alert) - Alert search
 - [`/api/v1/alert/<alertid>`] - Alert update and resolution
 
+#### Banning 
+- [`/api/v1/banning/blacklist`] (#apiv1banningblacklist) - Banned md5 hash enumeration and addition
+- [`/api/v1/banning/blacklist/<md5>`] (#apiv1banningblacklistmd5) - Specific banned md5 hash retrieval,update, and disabling
+- [`/api/v1/banning/whitelist`] (#apiv1banningwhitelist) - Retrieval of the banned md5 hash whitelist
+- [`/api/v1/banning/restrictions`] (#apiv1banningrestrictions) - Retrieval of the banned md5 hash restrictions
+
 #### Licensing
 - [`/api/v1/license`](#apiv1license) - Server license status, requests, and application of new license
 
@@ -1364,8 +1370,8 @@ GET https://172.16.100.109/api/team/1
 #### /api/group/(id)
 Sensor group enumeration, modification, addition, and deletion.
 
-*Supports*: `GET`, `PUT`, `DELETE` for `/api/group/<id>
-*Supports*: `GET`, `POST` for `/api/group
+*Supports*: `GET`, `PUT`, `DELETE` for `/api/group/<id>`
+*Supports*: `GET`, `POST` for `/api/group`
 
 #####Parameters:
 
@@ -1377,7 +1383,7 @@ Sensor group enumeration, modification, addition, and deletion.
 + With an id parameter, `PUT /api/group/<id>` returns a JSON object with the structure of the modified sensor group.
 + With an id parameter, `DELETE /api/group/<id>` returns a JSON object with the structure of the deleted sensor group.
 + With no id parameter, `GET /api/group` returns a list of the current sensor groups.
-+ With no id parameter, `POST` /api/group returns a JSON object with the structure of the added sensor group.
++ With no id parameter, `POST /api/group` returns a JSON object with the structure of the added sensor group.
 
 A sensor group has the following structure:
 
@@ -1474,6 +1480,113 @@ GET: https://172.16.100.109/api/group/1
     ]
     vdi_enabled: false
 }]
+
+#### /api/v1/banning/blacklist/(md5)
+Banned hash enumeration, modification, addition, retrieval, and disabling.
+
+#####
+
++ With no md5 parameter, `GET /api/v1/banning/blacklist` returns a list of the currently banned hashes and their attributes, enabled or disabled.
++ With no md5 parameter, `POST` /api/v1/banning/blacklist` returns a JSON object with the structure of the newly added banned hash
++ With an md5 parameter, `GET /api/v1/banning/blacklist/md5 returns a JSON object with the structure of the retrieved banned hash
++ With an md5 parameter, `PUT /api/v1/banning/blacklist/md5` returns a JSON object with the structure of the newly updated banned hash
++ With an md5 parameter, `DELETE /api/v1/banning/blacklist/md5` returns a JSON object with the structure of the disabled hash.
+
+A banned hash has the following structure:
+
++ `username`: the username of the current user
++ `audit` : modifications to the banned hash
++ `block_count` : number of times this hash has been blocked
++ `user_id : id of the current user
++ `timestamp : time of access
++ `text` : The Notes section of the banned hash
++ `md5hash` : md5 hash of the file
++ `enabled` : Whether or not the CB server is scanning for this hash
++ `last_block_time` : the last time this hash was blocked
++ `last_block_hostname` : which sensor it was blocked on
+
+Example:
+```
+GET https://172.16.100.109/api/v1/banning/blacklist/506708142bc63daba64f2d3ad1dcd5bf
+
+    username : testuser
+    audit:
+       [0:{
+            enabled: false
+            text: "Testing"
+            timestamp: "2015-06-03 16:53:24.755974-04:00"
+            user_id: 25
+            username: "bwolfson"
+         }
+        1:{username: "testuser", timestamp: "2015-06-03 16:50:30.740464-04:00", text: null, enabled: true,…}
+        2: {username: "testuser", timestamp: "2015-06-03 16:43:51.345906-04:00", text: "updated enabled to False",…}
+        3: {username: "testuser", timestamp: "2015-06-03 16:33:02.317667-04:00", text: "updated enabled to False",…}
+        4: {username: "testuser", timestamp: "2015-06-03 16:32:59.524166-04:00", text: null, enabled: false,…}
+        5: {username: "testuser", timestamp: "2015-06-03 12:50:19.381888-04:00", text: "updated enabled to False",…}
+        6: {username: "admin", timestamp: "2015-05-20 02:23:34.638245-04:00", text: null, enabled: false,…}
+        7: {username: "admin", timestamp: "2015-05-20 01:50:50.276626-04:00", text: null, enabled: true,…}
+        8: {username: "admin", timestamp: "2015-05-20 01:50:39.626684-04:00", text: null, enabled: false,…}
+        9: {username: "admin", timestamp: "2015-05-20 01:49:01.719130-04:00", text: "", enabled: true, user_id: 1}
+       ]
+    block_count: 6
+    enabled: false  
+    last_block_hostname: "TORTISE"
+    last_block_sensor_id: 6
+    last_block_time: "2015-06-03 16:13:49.788000-04:00"
+    md5hash: "506708142bc63daba64f2d3ad1dcd5bf"
+    text: "Testing"
+    timestamp: "2015-06-03 16:53:24.755974-04:00"
+    user_id: 25
+    username: "testuser"
+
+#### /api/v1/banning/whitelist 
+Whitelist enumeration
+
+*Supports*: `GET` for `/api/v1/banning/whitelist`
+
+#####Returns:
+
+`GET` /api/v1/banning/whitelist` returns a JSON object with the structure of the retrieved whitelist
+
+A whitelist JSON object has the following structure:
+
++ `whitelist`: The list of current executables in the whitelist
+
+Example:
+```
+GET /api/v1/banning/whitelist
+
+    whitelist: 
+        [
+            0: "%SystemRoot%\system32\svchost.exe"
+            1: "%SystemRoot%\carbonblack\cb.exe"
+            2: "%SystemRoot%\system32\smss.exe"
+            3: "%SystemRoot%\system32\services.exe"
+            4: "%SystemRoot%\system32\csrss.exe"
+            5: "%SystemRoot%\system32\wininit.exe"
+            6: "%SystemRoot%\system32\winlogon.exe"
+            7: "%SystemRoot%\system32\lsass.exe"
+        ]
+
+####/api/v1/banning/restrictions
+Restrictions enumeration
+
+*Supports*: `GET` for `/api/v1/banning/restrictions`
+
+#####Returns:
+
+`GET` /api/v1/banning/restrictions returns a JSON object with the structure of the retrieved restrictions
+
+A restrictions JSON object has the following structure:
+
++ `patterns` : The list of executables in restrictions
+
+Example:
+```
+GET /api/v1/banning/restrictions
+
+
+
 
 
 

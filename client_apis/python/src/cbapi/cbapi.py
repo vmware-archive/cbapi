@@ -908,7 +908,6 @@ class CbApi(object):
         s.raise_for_status()
         return s.json()
 
-
     def banning_add(self, md5):
         '''
         adds a new banned hash to the Carbon Black server or enables a pre-existing one
@@ -932,7 +931,6 @@ class CbApi(object):
         r = requests.delete(url,headers=self.token_header,verify=self.ssl_verify)
         r.raise_for_status()
         return r.json()
-
 
     def banning_restrictions(self):
         '''
