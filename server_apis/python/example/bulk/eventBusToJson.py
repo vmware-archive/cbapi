@@ -201,6 +201,7 @@ class S3Output(EventOutput):
         # name keys as timestamp-xxxx where xxx is random 4 lowercase chars
         # this (a) keeps a useful and predictable sort order and (b) avoids name collisions
         #
+	import boto
         key_name = "%s-%s" % (time.time(), ''.join(random.sample(string.lowercase, 4)))
         k = boto.s3.key.Key(bucket=self.bucket, name=key_name)
 
@@ -621,7 +622,8 @@ if __name__ == '__main__':
         (host, port) = opts.udpout.split(':')
         g_output = UdpOutput(opts.format, host, int(port))
     elif (opts.s3out):
-        g_output = S3Output(opts.format, opts.s3out)
+        g_output = S3Output("s3", opts.s3out)
+        #g_output = S3Output(opts.format, opts.s3out)
     else:
         g_output = StdOutOutput(opts.format)
 
