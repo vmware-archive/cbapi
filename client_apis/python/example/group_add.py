@@ -38,8 +38,8 @@ def build_cli_parser():
                       help= "Advanced: Sensor Upgrade Policy") 
     parser.add_option("-b", "--banning_enabled", action= "store_true", default=False, dest = "banning_enabled",
                       help= "Advanced: enable banning")
-    parser.add_option("--tl", "--tamper_level", action= "store_true", default=False, dest = "tamper_level",
-                      help= "Advanced: Tamper Level")  
+    parser.add_option("--tl", "--tamper_level", action= "store", default=0, dest = "tamper_level",
+                      help= "Advanced: Tamper Level, type either 1 or 0")
     parser.add_option("--ac", "--alert_criticality", action="store", default=1, dest="alert_criticality",
                       help= "Advanced: Type a number 1-5 for alert criticality")     
     

@@ -95,8 +95,6 @@ def main(argv):
     #Adds the team
     #
     results = cb.team_add_from_data(opts.team_name,group_access)
-   
-            
     
 
     print

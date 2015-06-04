@@ -52,10 +52,12 @@ def main(argv):
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
 
     if not opts.groupid:
-        id = cb.group_get_id_by_name(opts.groupname)
-        if id  is None:
+        group = cb.group_get_group_by_name(opts.groupname)
+        if group is None:
             print "-> No configured group with name '%s' found!" % (opts.groupname)
             sys.exit(-1)
+        else:
+            id = group['id']
     else:
         id = opts.groupid
         if cb.group_info(id) is None:

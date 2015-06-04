@@ -3,8 +3,7 @@ import struct
 import socket
 import pprint
 import optparse 
-import requests 
-requests.packages.urllib3.disable_warnings()
+
 
 # in the github repo, cbapi is not in the example directory
 sys.path.append('../src/cbapi')
@@ -63,10 +62,12 @@ def main(argv):
   #  import pdb; pdb.set_trace()
 	
     if not opts.username:
-        username = cb.user_get_username_by_name(opts.first_name, opts.last_name)
-        if username is None:
+        user = cb.user_get_user_by_name(opts.first_name, opts.last_name)
+        if user is None:
             print "-> No configured user with name '%s %s' found!" % (opts.first_name, opts.last_name) 
-            return
+            sys.exit(-1)
+        else:
+             username = user['username']
     else:
         username = opts.username
         if cb.user_info(username) is None:

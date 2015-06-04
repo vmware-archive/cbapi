@@ -42,12 +42,13 @@ def main(argv):
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
     
     if not opts.username:
-        un = cb.user_get_username_by_name(opts.first_name, opts.last_name)
+        user = cb.user_get_user_by_name(opts.first_name, opts.last_name)
+        un = user['username']
         if un is None:
             print "-> No current user found with name: %s %s" % opts.first_name, opts.last_name   
     else:
         un = opts.username
-        if cb.user_get_user_by_username(un) is None:
+        if cb.user_info(un) is None:
             print "-> No current user found with username: %s" % opts.username
     
     
