@@ -59,48 +59,48 @@ def main(argv):
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
     
     #checks if username is already in use
-    user = cb.user_info(opts.username)
-    if user != None:
+    in_use = False
+    for user in cb.user_enum():
+        if opts.username == user['username']:
+            in_use = True
+
+    if in_use:
         print "Username in use"
         sys.exit(-1)
-        
-    on_teams = opts.on_teams #input string from the user i.e ynnyy    
-    curr_teams = cb.team_enum()
+    else:
+        on_teams = opts.on_teams #input string from the user i.e ynnyy
+        curr_teams = cb.team_enum()
             
-    #checks if there is the right number of teams
-    if len(on_teams) != len(curr_teams):
-        print "There must be the right number of teams in the input"
-        sys.exit(-1)
-                
-    teams = []
-    for i in range(0,len(on_teams)):
-        
-        team = curr_teams[i] #the current team in existence
-                
-        choice = on_teams[i] #whether or not the user is on that team (y or n)
-                
-        if choice == 'y':           
-            teams.append(team)
-        elif choice == 'n':           
-            continue
+        #checks if there is the right number of teams
+        if len(on_teams) != len(curr_teams):
+            print "There must be the right number of teams in the input"
+            sys.exit(-1)
         else:
-            print "Only digits 'y' and 'n' are allowed; Type '-h' for help on the notation"
-            sys.exit(-1)   
+            teams = []
+            for i in range(0,len(on_teams)):
+        
+                team = curr_teams[i] #the current team in existence
+                
+                choice = on_teams[i] #whether or not the user is on that team (y or n)
+                
+                if choice == 'y':
+                    teams.append(team)
+                elif choice == 'n':
+                    continue
+                else:
+                    print "Only digits 'y' and 'n' are allowed; Type '-h' for help on the notation"
+                    sys.exit(-1)
 
-     
-    # add user to the UI
-    cb.user_add_from_data(opts.username, opts.first_name, opts.last_name, opts.password, opts.confirm_password, opts.global_admin, teams, opts.email)
+            team_ids = [1]*len(teams)
+            for i in range(0,len(teams)):
+                team = teams[i]
+                team_ids[i] = team['id']
+
+            # add user to the UI
+            results = cb.user_add_from_data(opts.username, opts.first_name, opts.last_name, opts.password, opts.confirm_password, opts.global_admin, team_ids, opts.email)
 
 
-    print "-> User added"  
-    print "   -------------------------"
-    print "   username     : %s" % (results['username'],)
-    print "   First Name  : %s" % (results['first_name'],)
-    print "   Last Name  : %s" % (results['last_name'],)
-    print "   Password  : %s" % (results['password'])
-    print "   Global Administrator  : %s" % (results['global_admin'],)
-    print "   Teams  : %s" % (results['teams'],)
-    print "   Email Address  : %s" % (results['email'],)
+            print "-> User added"
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

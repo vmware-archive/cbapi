@@ -61,12 +61,16 @@ def main(argv):
             id = team['id']
     else:
         id = opts.teamid
-        teams = cb.team_enum()
-        if cb.team_info(id) is None:
+        does_exist = False
+        for team in cb.team_enum():
+            if id == team['id']:
+                does_exist = True
+
+        if not does_exist:
             print "-> No configured team with id '%s' found!" % (id)
             sys.exit(-1)
-      
-    output_team_info(cb.team_info(id))
+        else:
+            output_team_info(cb.team_info(id))
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

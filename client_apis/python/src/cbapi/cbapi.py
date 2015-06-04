@@ -670,7 +670,7 @@ class CbApi(object):
 
         return r.json()
 
-    def user_add_from_data(self, username, first_name, last_name, password, confirm_password, global_admin, teams, email):
+    def user_add_from_data(self, username, first_name, last_name, password, confirm_password, global_admin, team_ids, email):
         '''
         add a new user to the Carbon Black server
         '''
@@ -681,8 +681,8 @@ class CbApi(object):
                     'password' : password,\
                     'confirm_password' : confirm_password,\
                     'global_admin' : global_admin,\
-                    'teams' : teams,\
-                    'email' : email,\
+                    'teams' : team_ids,\
+                    'email' : email
                   }
         url = "%s/api/user" % (self.server,)
 
