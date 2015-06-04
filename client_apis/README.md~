@@ -1567,6 +1567,7 @@ GET /api/v1/banning/whitelist
             6: "%SystemRoot%\system32\winlogon.exe"
             7: "%SystemRoot%\system32\lsass.exe"
         ]
+```
 
 ####/api/v1/banning/restrictions
 Restrictions enumeration
@@ -1585,6 +1586,18 @@ Example:
 ```
 GET /api/v1/banning/restrictions
 
+    patterns: 
+        [
+            0: "%SystemRoot%\system32\svchost.exe"
+            1: "%SystemRoot%\carbonblack\cb.exe"
+            2: "%SystemRoot%\system32\smss.exe"
+            3: "%SystemRoot%\system32\services.exe"
+            4: "%SystemRoot%\system32\csrss.exe"
+            5: "%SystemRoot%\system32\wininit.exe"
+            6: "%SystemRoot%\system32\winlogon.exe"
+            7: "%SystemRoot%\system32\lsass.exe"
+        ]
+```
 
 
 
