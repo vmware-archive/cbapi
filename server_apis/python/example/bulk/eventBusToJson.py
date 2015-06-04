@@ -201,7 +201,7 @@ class S3Output(EventOutput):
         # name keys as timestamp-xxxx where xxx is random 4 lowercase chars
         # this (a) keeps a useful and predictable sort order and (b) avoids name collisions
         #
-	import boto
+        import boto
         key_name = "%s-%s" % (time.time(), ''.join(random.sample(string.lowercase, 4)))
         k = boto.s3.key.Key(bucket=self.bucket, name=key_name)
 
