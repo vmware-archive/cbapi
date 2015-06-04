@@ -126,12 +126,11 @@ class EventOutput(object):
 
     DESTINATIONS = ['udp', 'tcp', 'file', 'stdout', 's3']
 
-    def __init__(self, out_format, out_dest):
+    def __init__(self, out_dest):
 
         if out_dest not in EventOutput.DESTINATIONS:
             raise ValueError("output destination (%s) not a valid destination value" % out_dest)
 
-        self.oformat = out_format
         self.dest = out_dest
 
     def output(self, eventdata):
@@ -139,16 +138,16 @@ class EventOutput(object):
 
 class StdOutOutput(EventOutput):
 
-    def __init__(self, format):
-        super(StdOutOutput, self).__init__(format, 'stdout')
+    def __init__(self):
+        super(StdOutOutput, self).__init__('stdout')
 
     def output(self, eventdata):
         print eventdata
 
 class FileOutput(EventOutput):
 
-    def __init__(self, format, outfile):
-        super(FileOutput, self).__init__(format, 'file')
+    def __init__(self, outfile):
+        super(FileOutput, self).__init__('file')
 
         self.fout = open(outfile, 'a')
 
@@ -158,8 +157,8 @@ class FileOutput(EventOutput):
 
 class UdpOutput(EventOutput):
 
-    def __init__(self, format, host, port):
-        super(UdpOutput, self).__init__(format, 'udp')
+    def __init__(self, host, port):
+        super(UdpOutput, self).__init__('udp')
 
         self.ip = socket.gethostbyname(host)
         self.port = port
@@ -170,8 +169,8 @@ class UdpOutput(EventOutput):
 
 
 class TcpOutput(EventOutput):
-    def __init__(self, format, host, port):
-        super(TcpOutput, self).__init__(format, 'tcp')
+    def __init__(self, host, port):
+        super(TcpOutput, self).__init__('tcp')
 
         ip = socket.gethostbyname(host)
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -181,8 +180,8 @@ class TcpOutput(EventOutput):
         self.sock.send(eventdata + '\n')
 
 class S3Output(EventOutput):
-    def __init__(self, format, bucket):
-        super(S3Output, self).__init__(format, 's3')
+    def __init__(self, bucket):
+        super(S3Output, self).__init__('s3')
     
         # 
         # import boto here so it's only required if s3 output is used
@@ -201,7 +200,7 @@ class S3Output(EventOutput):
         # name keys as timestamp-xxxx where xxx is random 4 lowercase chars
         # this (a) keeps a useful and predictable sort order and (b) avoids name collisions
         #
-	import boto
+        import boto
         key_name = "%s-%s" % (time.time(), ''.join(random.sample(string.lowercase, 4)))
         k = boto.s3.key.Key(bucket=self.bucket, name=key_name)
 
@@ -375,6 +374,10 @@ def handle_event_pb(protobuf_bytes, routing_key):
     event_obj['event_type'] = event_obj['type']
     event_obj['type'] = routing_key
 
+    # and the server indetifier
+    if ('cb_server' in g_config):
+        event_obj['cb_server'] = g_config['cb_server']
+
     dumpEvent(event_obj)
 
 def get_proc_guid_from_id(id):
@@ -461,7 +464,7 @@ def handle_event_json(msg_body, routing_key):
                 d.update[hinfo]
 
         else:
-            # rather than track the correct objecsts - just look
+            # rather than track the correct objects - just look
             # for a sensor id
             if ('sensor_id' in jobj):
                 hinfo = lookup_host_details(jobj['sensor_id'])
@@ -470,6 +473,16 @@ def handle_event_json(msg_body, routing_key):
         # fixup terminology on process id/guid so that "process_guid" always
         # refers to the process guid (minus segment)
         jobj = fixup_proc_guids(jobj)
+
+        #
+        # add the "cb_server" field to the json.  This is used
+        # to tie the event to a specific cluster/server in environments
+        # where multiple servers are deployed
+        # some of the watchlist events have a server_name field but that
+        # might reference a minion within a cluster or can sometimes be blank
+        #
+        if ('cb_server' in g_config):
+            jobj['cb_server'] = g_config['cb_server']
 
         dumpEvent(jobj)
 
@@ -576,6 +589,9 @@ def build_cli_parser():
     group = optparse.OptionGroup(parser, "General Configuration")
     group.add_option("-P", "--pretty", action="store_true", default=False, dest="pretty",
                      help="Output JSON in pretty print format (easy to read) (default is False)")
+    group.add_option("-S", "--server-name", action='store', default=None, dest='server_name',
+                     help='Add a server name "cb_server" to the JSON output.  This helps for multiple-server deployments.')
+    parser.add_option_group(group)
 
 
     #
@@ -604,6 +620,9 @@ if __name__ == '__main__':
 
     g_config['prettyPrint'] = opts.pretty
 
+    if opts.server_name is not None:
+        g_config['cb_server'] = opts.server_name
+
     # cbapi info for host lookups
     if opts.url is not None:
         cbapi['url'] = opts.url
@@ -614,18 +633,17 @@ if __name__ == '__main__':
 
     # output processing
     if (opts.outfile):
-        g_output = FileOutput(opts.format, opts.outfile)
+        g_output = FileOutput( opts.outfile)
     elif (opts.tcpout):
         (host, port) = opts.tcpout.split(':')
-        g_output = TcpOutput(opts.format, host, int(port))
+        g_output = TcpOutput(host, int(port))
     elif (opts.udpout):
         (host, port) = opts.udpout.split(':')
-        g_output = UdpOutput(opts.format, host, int(port))
+        g_output = UdpOutput(host, int(port))
     elif (opts.s3out):
-        g_output = S3Output("s3", opts.s3out)
-        #g_output = S3Output(opts.format, opts.s3out)
+        g_output = S3Output(opts.s3out)
     else:
-        g_output = StdOutOutput(opts.format)
+        g_output = StdOutOutput()
 
     user = opts.user
     pwd = opts.pwd
