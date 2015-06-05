@@ -72,6 +72,13 @@ class CbApiAlertTestCase(unittest.TestCase):
         self.assertEqual(len(alerts['results']), 0)
 
     def test_first_set_update_alert(self):
+
+        alerts = cb.alert_search(CbApiAlertTestCase.watchlist_name)
+        self.assertIsNotNone(alerts)
+        self.assertIsNotNone(alerts['results'])
+        self.assertNotEqual(len(alerts['results']), 0)
+        self.alert_to_update = alerts['results'][0]
+
         # Update Alert
         self.alert_to_update['status'] = 'resolved'
         result = cb.alert_update(self.alert_to_update)
