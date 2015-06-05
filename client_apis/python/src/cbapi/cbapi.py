@@ -6,7 +6,6 @@
 
 import json
 import requests
-from datetime import datetime
 
 
 class CbApi(object):
@@ -214,7 +213,8 @@ class CbApi(object):
         """
         r = requests.post("%s/api/v1/settings/global/platformserver" % (self.server,), \
                                                                         headers=self.token_header, \
-                                                                        data = json.dumps(platform_server_config))
+                                                                        data = json.dumps(platform_server_config), \
+                                                                        verify=self.ssl_verify)
 
     def test_platform_server_config(self):
         """
