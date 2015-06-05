@@ -97,7 +97,7 @@ def main(argv):
                 team_ids[i] = team['id']
 
             # add user to the UI
-            results = cb.user_add_from_data(opts.username, opts.first_name, opts.last_name, opts.password, opts.confirm_password, opts.global_admin, team_ids, opts.email)
+            results = cb.user_add_from_data(opts.username, opts.first_name, opts.last_name, opts.password, opts.global_admin, team_ids, opts.email)
 
 
             print "-> User added"
