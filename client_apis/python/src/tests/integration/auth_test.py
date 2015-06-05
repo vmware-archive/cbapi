@@ -8,36 +8,60 @@
     as parameters.
 """
 
-from datetime import datetime
-import hashlib
+import os
 import requests
 import sys
 import unittest
 
+if __name__ == '__main__':
+    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../")))
+
+from cbapi.cbapi import CbApi
+from helpers.testdata_gen import TestDataGen
 from helpers.auth_helper import Creds4Token
+
+cb = None
+
 
 class CbApiAuthTest(unittest.TestCase):
 
     def test_get_token(self):
-        token = Creds4Token.get_token(url, test_username, test_password)
-        self.assertIsNotNone(token)
+        user = TestDataGen.gen_user()
+        cb.user_add_from_data(
+            username=user["username"],
+            password=user["password"],
+            confirm_password=user["password"],
+            first_name=user["first_name"],
+            last_name=user["last_name"],
+            teams=user["teams"],
+            email=user["email"],
+            global_admin=False
+        )
+
+        auth_token = Creds4Token.get_token(url, user["username"], user["password"])
+        self.assertIsNotNone(auth_token)
+        return
 
     def test_get_token_invalid_username(self):
-        with self.assertRaises(requests.HTTPError):
+        with self.assertRaises(requests.HTTPError) as err:
             Creds4Token.get_token(url, "nowaythisusernameexists", "thisismypassword")
 
+        self.assertEqual(err.exception.response.status_code, 403)
+        return
+
 if __name__ == '__main__':
-    if 4 != len(sys.argv):
-        print "usage   : python auth_test.py server_url username password"
-        print "example : python auth_test.py https://cb.my.org admin p@ssw0rd\n"
+    if 3 != len(sys.argv):
+        print "usage   : python auth_test.py server_url api_token"
+        print "example : python auth_test.py https://cb.my.org 3ab23b1bdhjj3jdjcjhh2kl\n"
         sys.exit(0)
 
     # instantiate a global CbApi object
     # all unit tests will use this object
     #
-    test_password = sys.argv.pop()
-    test_username = sys.argv.pop()
+    token = sys.argv.pop()
     url = sys.argv.pop()
+
+    cb = CbApi(url, ssl_verify=False, token=token, client_validation_enabled=False)
 
     # run the unit tests
     #

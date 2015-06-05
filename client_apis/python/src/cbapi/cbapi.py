@@ -69,6 +69,122 @@ class CbApi(object):
                 verify=self.ssl_verify)
         r.raise_for_status()
 
+    def concurrent_license_info(self, start_date, end_date):
+        """
+        Get the concurrent license info for a given date range
+        :param start_date: the start date
+        :param end_date: the end date
+        """
+        url = "{}/api/concurrent_license_info/{:%Y%m%d}/{:%Y%m%d}".format(self.server, start_date, end_date)
+        r = requests.get(url=url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def communication_settings(self):
+        """
+        Get the current communication settings
+        """
+        url = "%s/api/communication_settings" % self.server
+        r = requests.get(url=url,  headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def communication_settings_modify(
+        self,
+        settings=None,
+        enabled=None,
+        statistics=None,
+        community_participation=None,
+        mail_server_type=None,
+        smtp_connection_type=None,
+        smtp_server=None,
+        smtp_port=None,
+        smtp_username=None,
+        smtp_password=None
+    ):
+        """
+        Update communication settings. Settings can be updated individually or as a part of one settings dictionary
+        :param settings: the full communication settings dictionary
+        :param enabled: is Alliance communication enabled
+        :param statistics: are performance statistics enabled
+        :param community_participation: support the Alliance Threat Intelligence Community
+        :param mail_server_type: one of ("own", "cb", or "none"). "own" requires smtp_* arguments to be populated
+        :param smtp_connection_type: one of ("tls", "ssl", or "insecure")
+        :param smtp_server: the name of the user's own mail server
+        :param smtp_port: the port of the user's own mail server
+        :param smtp_username: the username for the user's own mail server
+        :param smtp_password: the password for the user's own mail server
+        """
+
+        request = settings or {}
+
+        if enabled is not None:
+            request["enabled"] = enabled
+
+        if statistics is not None:
+            request["statistics"] = statistics
+
+        if community_participation is not None:
+            request["community_participation"] = community_participation
+
+        if mail_server_type is not None:
+            request["mail_server_type"] = mail_server_type
+
+        if smtp_connection_type is not None:
+            request["smtp_connection_type"] = smtp_connection_type
+
+        if smtp_server is not None:
+            request["smtp_server"] = smtp_server
+
+        if smtp_port is not None:
+            request["smtp_port"] = smtp_port
+
+        if smtp_username is not None:
+            request["smtp_username"] = smtp_username
+
+        if smtp_password is not None:
+            request["smtp_password"] = smtp_password
+
+        if self.client_validation_enabled:
+            for key in ["enabled", "statistics", "community_participation"]:
+                if key in request and request[key] is None:
+                    raise ValueError("%s cannot be None" % key)
+
+            if "mail_server_type" in request:
+                if request["mail_server_type"] not in ["cb", "own", "none", ""]:  # "none" and "" both mean disabled
+                    raise ValueError("Invalid mail_server_type: %s" % request["mail_server_type"])
+
+                if request["mail_server_type"] == "own":
+                    for key in ["smtp_connection_type", "smtp_server", "smtp_port", "smtp_username", "smtp_pasword"]:
+                        if key in request and request[key] is None:
+                            raise ValueError("%s is required when mail_server_type is \"own\"" % key)
+
+                    if request["smtp_connection_type"] not in ["tls", "ssl", "insecure"]:
+                        raise ValueError("Invalid smtp_connection_type: %s" % request["smtp_connection_type"])
+
+        url = "%s/api/communication_settings" % self.server
+        r = requests.post(url=url,  headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def check_for_new_feeds(self):
+        """
+        Check for new alliance feeds
+        """
+        url = "%s/api/internal/alliance" % self.server
+        r = requests.post(url=url,  headers=self.token_header, data=json.dumps({}), verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def alliance_status(self):
+        """
+        Get the alliance status
+        """
+        url = "%s/api/v1/alliance_status" % self.server
+        r = requests.get(url=url,  headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
     def get_platform_server_config(self):
         """ Get Bit9 Platform Server configuration
             This includes server address and authentication information
@@ -97,7 +213,18 @@ class CbApi(object):
         """
         r = requests.post("%s/api/v1/settings/global/platformserver" % (self.server,), \
                                                                         headers=self.token_header, \
-                                                                        data = json.dumps(platform_server_config))
+                                                                        data = json.dumps(platform_server_config), \
+                                                                        verify=self.ssl_verify)
+
+    def test_platform_server_config(self):
+        """
+        Tests the current Bit9 Platform Server configuration
+        This includes the server address, username, and password
+
+        Must authenticate as a global administrator to have the rights to set this config
+        """
+        url = "%s/api/v1/settings/global/platformserver/test" % self.server
+        r = requests.get(url=url, headers=self.token_header)
         r.raise_for_status()
 
     def process_search(self, query_string, start=0, rows=10, sort="last_update desc"):
