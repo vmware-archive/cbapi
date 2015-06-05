@@ -14,7 +14,6 @@ import os
 import json
 import requests
 import time
-import paramiko, base64
 
 
 if __name__ == '__main__':
@@ -22,31 +21,9 @@ if __name__ == '__main__':
 
 from cbapi.cbapi import CbApi
 from datetime import datetime
+from helpers.ssh_helper import SSHHelper
 
 cb = None
-
-class ShhHelper:
-    @classmethod
-    def execute_command(cls, server, user, password, command):
-        client = paramiko.SSHClient()
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        client.connect(server, username=user, password=password)
-
-        transport = client.get_transport()
-        session = transport.open_session()
-        session.set_combine_stderr(True)
-        session.get_pty()
-
-        session.exec_command("sudo -k %s" % command)
-        stdin = session.makefile('wb', -1)
-        stdout = session.makefile('rb', -1)
-        stdin.write(password +'\n')
-        stdin.flush()
-
-        for line in stdout.read().splitlines():
-            print '... ' + line.strip('\n')
-
-        client.close()
 
 class CbApiAlertTestCase(unittest.TestCase):
     @classmethod
@@ -68,39 +45,38 @@ class CbApiAlertTestCase(unittest.TestCase):
             email_recipient_user_ids=[1]
         )
 
-        ShhHelper.execute_command(server, user, password, '/usr/bin/python -m cb.maintenance.job_runner --master -s watchlist_search')
+        SSHHelper.execute_command(server, ssh_user, ssh_password, '/usr/bin/python -m cb.maintenance.job_runner --master -s watchlist_search')
         time.sleep(20)
-        ShhHelper.execute_command(server, user, password, '/usr/share/cb/cbsolr --soft-commit')
+        SSHHelper.execute_command(server, ssh_user, ssh_password, '/usr/share/cb/cbsolr --soft-commit')
         time.sleep(5)
 
-    def test_all_positive_cases(self):
-
+    def test_first_set_get_all_alerts(self):
         # Get All Alerts
         alerts = cb.alert_search('')
         self.assertIsNotNone(alerts)
         self.assertIsNotNone(alerts['results'])
         self.assertNotEqual(len(alerts['results']), 0)
-        # print json.dumps(alerts, indent=4, sort_keys=True)
 
+    def test_first_set_search_for_specific(self):
         # Search For A Specific Alert
         alerts = cb.alert_search(CbApiAlertTestCase.watchlist_name)
         self.assertIsNotNone(alerts)
         self.assertIsNotNone(alerts['results'])
         self.assertNotEqual(len(alerts['results']), 0)
-        alert_to_update = alerts['results'][0]
-        #print json.dumps(alert_to_update, indent=4, sort_keys=True)
+        self.alert_to_update = alerts['results'][0]
 
+    def test_first_set_search_for_nonexisting(self):
         # "Search For A Non Existing Alert
         alerts = cb.alert_search('watch_list_non')
         self.assertIsNotNone(alerts)
         self.assertEqual(len(alerts['results']), 0)
 
+    def test_first_set_update_alert(self):
         # Update Alert
-        alert_to_update['status'] = 'resolved'
-        result = cb.alert_update(alert_to_update)
+        self.alert_to_update['status'] = 'resolved'
+        result = cb.alert_update(self.alert_to_update)
         self.assertIsNotNone(result)
         self.assertEqual(result['result'], 'success')
-        #print json.dumps(result, indent=4, sort_keys=True)
 
         time.sleep(20)
         alerts = cb.alert_search(CbApiAlertTestCase.watchlist_name)
@@ -109,7 +85,7 @@ class CbApiAlertTestCase(unittest.TestCase):
         self.assertNotEqual(len(alerts['results']), 0)
 
         for alert in alerts['results']:
-            if alert['unique_id'] == alert_to_update['unique_id']:
+            if alert['unique_id'] == self.alert_to_update['unique_id']:
                 self.assertEqual(alert['status'], 'Resolved')
 
         return
@@ -194,8 +170,8 @@ if __name__ == '__main__':
     #
     server = sys.argv[1]
     token = sys.argv[2]
-    user = sys.argv[3]
-    password = sys.argv[4]
+    ssh_user = sys.argv[3]
+    ssh_password = sys.argv[4]
     url = "https://"+server
     cb = CbApi(url, ssl_verify=False, token=token)
 
