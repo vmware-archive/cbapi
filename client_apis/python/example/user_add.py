@@ -59,7 +59,7 @@ def main(argv):
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
     
     #checks if username is already in use
-    user = cb.user_get_user_by_username(opts.username)
+    user = cb.user_info(opts.username)
     if user != None:
         print "Username in use"
         sys.exit(-1)

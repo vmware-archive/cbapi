@@ -53,17 +53,18 @@ def main(argv):
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
 
     if not opts.teamid:
-        id = cb.team_get_id_by_name(opts.teamname)
-        if id is None:
+        team = cb.team_get_team_by_name(opts.teamname)
+        if team is None:
             print "-> No configured team with name '%s' found!" % (opts.teamname) 
-            return
+            sys.exit(-1)
+        else:
+            id = team['id']
     else:
         id = opts.teamid
         teams = cb.team_enum()
         if cb.team_info(id) is None:
-            
-            print "-> No configured team with id '%s' found!" % (opts.teamid)
-            return
+            print "-> No configured team with id '%s' found!" % (id)
+            sys.exit(-1)
       
     output_team_info(cb.team_info(id))
 

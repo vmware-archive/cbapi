@@ -1362,7 +1362,7 @@ def build_blueprint(cfg, sensor_backend, xsrf):
 
     @blueprint.route('/api/user/<username>/permissions', methods=['GET'])
     @auth_db.requires_auth()
-    def user_group_permission(username):
+    def group_permission(username):
          permissions = auth_db.user_group_permissions(g.db_session, username)
          response = make_response_json(permissions, indent=2)
          response.headers['Acess-Control-Allow-Origin'] = "*"   #RICH: Is this intended ?

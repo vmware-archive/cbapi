@@ -40,9 +40,10 @@ def main(argv):
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
 
     if not opts.teamid:
-        # Fidn the team id, if no teamid is given 
+        # Find the team id, if no teamid is given
         #
-        id = cb.team_get_id_by_name(opts.teamname)
+        team = cb.team_get_team_by_name(opts.teamname)
+        id = team['id']
         if id is None:
             print "-> No team found with team name: %s" % (opts.teamname)
             sys.exit(-1)
