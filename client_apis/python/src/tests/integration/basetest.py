@@ -1,5 +1,5 @@
 #
-# CARBON BLACK API TESTS - watchlist
+# CARBON BLACK API TESTS - basetest
 # Copyright, Bit9, Inc 2015
 #
 
@@ -25,6 +25,16 @@ class CbApiIntegrationTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        """Instantiate a CbApi object for integration tests.
+
+            Args:
+                cls: class object that is being setUp.
+            Returns:
+                None.
+            Raises:
+                TypeError: if SERVER_URL is not a valid URL or API_TOKEN is invalid
+
+        """
         # instantiate a global CbApi object
         # all unit tests will use this object
         if cls.SERVER_URL is None:
