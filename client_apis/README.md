@@ -1705,7 +1705,7 @@ A statistics JSON object has the following structure:
             + `TotalUncompressedSize`:
         + `SqlStoreStats`:
             + `FileSystemName`:
-            + `Tables: list of tables, each with structure as follows:
+            + `Tables`: list of tables, each with structure as follows:
                 + `TotalSize`:
                 + `Name`:
                 + `IndexSize`:
