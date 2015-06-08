@@ -1612,11 +1612,11 @@ Dashboard alliance info
 
 An alliance JSON object has the following structure:
 
-+ `alliance_client` : The alliance object which contains:
-    +`is_enabled` : whether or not the alliance client is enabled  
-    +`last_failure_code` : the code for the last time the alliance client failed  
-    +`is_connected` : whether or not the alliance client is connected  
-    +`last_failure_time` : the time of the last failure
++ `alliance_client` : The alliance object which contains:  
+    + `is_enabled` : whether or not the alliance client is enabled  
+    + `last_failure_code` : the code for the last time the alliance client failed  
+    + `is_connected` : whether or not the alliance client is connected  
+    + `last_failure_time` : the time of the last failure
 
 Example:
 ```
@@ -1641,9 +1641,9 @@ Dashboard hosts info
 
 A hosts JSON object has the following structure:
 
-+ `hosts` : an array of host objects with the following fields:
++ `hosts` : an array of host objects, each with the following fields:
     + `count`: 
-    + `puntual`:
+    + `punctual`:
     + `group_id`:
 
 Example:
