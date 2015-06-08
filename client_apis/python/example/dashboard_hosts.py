@@ -6,7 +6,7 @@ sys.path.append('../src/cbapi')
 import cbapi
 
 def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Enumerate the alliance_client info")
+    parser = optparse.OptionParser(usage="%prog [options]", description="Enumerate the dashboard hosts")
 
     # for each supported output type, add an option
     #
