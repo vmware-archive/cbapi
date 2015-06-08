@@ -1601,6 +1601,146 @@ GET /api/v1/banning/restrictions
         ]
 ```
 
+####/api/v1/dashboard/alliance
+Dashboard alliance info
+
+*Supports*: `GET` for `/api/v1/dashboard/alliance`
+
+#####Returns:
+
+`GET /api/v1/dashboard/alliance` returns a JSON object with the structure of the retrieved alliance 
+
+An alliance JSON object has the following structure:
+
++ `alliance_client` : The alliance object which contains:
+    +`is_enabled` : whether or not the alliance client is enabled
+    +`last_failure_code` : the code for the last time the alliance client failed
+    +`is_connected` : whether or not the alliance client is connected
+    +`last_failure_time` : the time of the last failure
+
+Example:
+```
+GET external.cloud.carbonblack.com/api/v1/dashboard/alliance
+
+    alliance_client: 
+        is_connected: false
+        is_enabled: true
+        last_failure_code: 600
+        last_failure_time: "2015-06-08 20:42:17.721631+00:00"
+
+```
+
+####/api/v1/dashboard/hosts
+Dashboard hosts info
+
+*Supports*: `GET` for `/api/v1/dashboard/hosts`
+
+#####Returns:
+
+`GET /api/v1/dashboard/hosts` returns a JSON object with the structure of the retrieved hosts
+
+A hosts JSON object has the following structure:
+
++ `hosts` : an array of host objects with the following fields:
+    + `count`: 
+    + `puntual`:
+    + `group_id`:
+
+Example:
+```
+GET external.cloud.carbonblack.com/api/v1/dashboard/hosts
+
+    hosts:[  
+        {
+            count: 135, 
+            punctual: false, 
+            group_id: 1
+        },
+        {
+            count: 1,
+            punctual: false, 
+            group_id: 2
+        }]
+```
+
+####/api/v1/dashboard/statistics
+Dashboard statistics info
+
+*Supports*: `GET` for `/api/v1/dashboard/statistics`
+
+#####Returns:
+
+`GET /api/v1/dashboard/statistics` returns a JSON object with the structure of the dashboard statistics
+
+A statistics JSON object has the following structure:
+
++ `storage` : a list of servers which the UI has data on, for example:
+    + `192.237.206.117`: Server with a list of different statistic types such as:
+        +`EventStoreStats`: a list of Event Store Stats with the following structure:
+            +`CoreIndexSize`:
+            +`FileSystemName`:
+            +`MaxNumberDocuments`:
+            +`NumberDocuments`:
+            +`NumberSements`:
+            +`ShardId`:
+        +`FileSystems`: a list of file systems with the following structure:
+            +`AvailableSize`:
+            +`MountPoint`:
+            +`Name`:
+            +`TotalSize`:
+            +`Type`:
+            +`UsedSize`:
+        +`ModuleInfoStoreStats`:
+            +`CoreIndexSize`:
+            +`FileSystemName`:
+            +`MaxNumberDocuments`:
+            +`NumberDocuments`:
+            +`NumberSements`:
+            +`ShardId`:
+        +`ModuleStoreStats`:
+            +`FileSystemName`:
+            +`ModuleOnDiskCount`:
+            +`RecordedModulesCount`:
+            +`TotalSizeOnDisk`:
+            +`TotalUncompressedSize`:
+        +`SqlStoreStats`:
+            +`FileSystemName`:
+            +`Tables: list of tables, each with structure as follows:
+                +`TotalSize`:
+                +`Name`:
+                +`IndexSize`:
+            +`TotalSize`:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
