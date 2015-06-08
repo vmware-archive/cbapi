@@ -1613,7 +1613,7 @@ Dashboard alliance info
 An alliance JSON object has the following structure:
 
 + `alliance_client` : The alliance object which contains:
-    ..*`is_enabled` : whether or not the alliance client is enabled
+⋅⋅*`is_enabled` : whether or not the alliance client is enabled
     --*`last_failure_code` : the code for the last time the alliance client failed
     +`is_connected` : whether or not the alliance client is connected
     +`last_failure_time` : the time of the last failure
