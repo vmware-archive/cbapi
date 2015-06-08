@@ -1676,40 +1676,40 @@ A statistics JSON object has the following structure:
 
 + `storage` : a list of servers which the UI has data on, for example:
     + `192.237.206.117`: Server with a list of different statistic types such as:
-        +`EventStoreStats`: a list of Event Store Stats with the following structure:
-            +`CoreIndexSize`:
-            +`FileSystemName`:
-            +`MaxNumberDocuments`:
-            +`NumberDocuments`:
-            +`NumberSements`:
-            +`ShardId`:
-        +`FileSystems`: a list of file systems with the following structure:
-            +`AvailableSize`:
-            +`MountPoint`:
-            +`Name`:
-            +`TotalSize`:
-            +`Type`:
-            +`UsedSize`:
-        +`ModuleInfoStoreStats`:
-            +`CoreIndexSize`:
-            +`FileSystemName`:
-            +`MaxNumberDocuments`:
-            +`NumberDocuments`:
-            +`NumberSements`:
-            +`ShardId`:
-        +`ModuleStoreStats`:
-            +`FileSystemName`:
-            +`ModuleOnDiskCount`:
-            +`RecordedModulesCount`:
-            +`TotalSizeOnDisk`:
-            +`TotalUncompressedSize`:
-        +`SqlStoreStats`:
-            +`FileSystemName`:
-            +`Tables: list of tables, each with structure as follows:
-                +`TotalSize`:
-                +`Name`:
-                +`IndexSize`:
-            +`TotalSize`:
+        + `EventStoreStats`: a list of Event Store Stats with the following structure:
+            + `CoreIndexSize`:
+            + `FileSystemName`:
+            + `MaxNumberDocuments`:
+            + `NumberDocuments`:
+            + `NumberSements`:
+            + `ShardId`:
+        + `FileSystems`: a list of file systems with the following structure:
+            + `AvailableSize`:
+            + `MountPoint`:
+            + `Name`:
+            + `TotalSize`:
+            + `Type`:
+            + `UsedSize`:
+        + `ModuleInfoStoreStats`:
+            + `CoreIndexSize`:
+            + `FileSystemName`:
+            + `MaxNumberDocuments`:
+            + `NumberDocuments`:
+            + `NumberSements`:
+            + `ShardId`:
+        + `ModuleStoreStats`:
+            + `FileSystemName`:
+            + `ModuleOnDiskCount`:
+            + `RecordedModulesCount`:
+            + `TotalSizeOnDisk`:
+            + `TotalUncompressedSize`:
+        + `SqlStoreStats`:
+            + `FileSystemName`:
+            + `Tables: list of tables, each with structure as follows:
+                + `TotalSize`:
+                + `Name`:
+                + `IndexSize`:
+            + `TotalSize`:
 
 
 
