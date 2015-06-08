@@ -6,7 +6,8 @@
 
 import json
 import requests
-
+import zipfile
+import shutil
 
 class CbApi(object):
     """ Python bindings for Carbon Black API 
@@ -215,6 +216,16 @@ class CbApi(object):
         r.raise_for_status()
         return r.json()
 
+    def binary_enum(self):
+        '''
+        Retrieves all the binary files stored in the server
+        '''
+        url = "%s/api/v1/binary" % (self.server,)
+
+        r = requests.get(url, headers=self.token_header,verify = self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
     def binary_summary(self, md5):
         """ get the metadata for a binary.  Requires the md5 of the binary.
 
@@ -224,16 +235,33 @@ class CbApi(object):
         r.raise_for_status()
         return r.json()
 
-    def binary(self, md5hash):
+    def binary_info(self, md5hash):
         '''
         download binary based on md5hash
         '''
 
         r = requests.get("%s/api/v1/binary/%s" % (self.server, md5hash),
-                         headers=self.token_header, verify=self.ssl_verify)
-
+                         headers=self.token_header, verify=self.ssl_verify, stream = True)
         r.raise_for_status()
-        return r._content
+
+        shutil.copy(r, "~/Downloads")
+
+
+    def binary_hits_enum(self, md5):
+        '''
+        Enumerates all binary threat_intel_hits
+        '''
+
+        r = requests.get("%s/api/v1/binary/%s/threat_intel_hits" % (self.server,md5),
+                         headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def binary_hits_add(self):
+        '''
+        Adds a binary threat_intel_hit to the Carbon Black server
+        '''
+
 
     def sensor(self, sensor_id):
         '''
@@ -1060,24 +1088,6 @@ class CbApi(object):
         r.raise_for_status()
         return r.json()
 
-    def binary_enum(self):
-        '''
-        Retrieves all the binary files stored in the server
-        '''
-        url = "%s/api/v1/binary" % (self.server,)
-
-        r = requests.get(url, headers=self.token_header,verify = self.ssl_verify)
-        r.raise_for_status()
-        return r.json()
-
-    def binary_info(self, md5):
-        '''
-        Retrieves a specific binary file from the Carbon Black server, specified by md5
-        '''
-        url = "%s/api/v1/binary/%s/summary" % (self.server, md5)
-
-        r = requests.get(url, headers=self.token_header,verify = self.ssl_verify)
-        r.raise_for_status()
 
     def site_enum(self):
         """
@@ -1139,6 +1149,39 @@ class CbApi(object):
         """
         url = "%s/api/site/%s" % (self.server, site_id)
         r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def dashboard_alliance(self):
+        '''
+        Enumerates the info for the alliance_client of the Carbon Black server
+        '''
+
+        url = "%s/api/v1/dashboard/alliance" % self.server
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def dashboard_hosts(self):
+        '''
+        Enumerates the hosts on the Carbon Black server
+        '''
+
+        url = "%s/api/v1/dashboard/hosts" % self.server
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def dashboard_statistics(self):
+        '''
+        Enumerates the statistics for the Carbon Black Server
+        '''
+
+        url = "%s/api/v1/dashboard/statistics" % self.server
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
         r.raise_for_status()
 
         return r.json()
