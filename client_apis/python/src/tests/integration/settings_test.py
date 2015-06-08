@@ -251,7 +251,7 @@ class CbApiSettingsTest(unittest.TestCase):
         with self.assertRaises(requests.HTTPError) as err:
             non_ga_cb.get_platform_server_config()
 
-        self.assertEqual(err.exception.response.status_code, 405)
+        self.assertEqual(err.exception.response.status_code, 403)
         return
 
 
