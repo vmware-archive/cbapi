@@ -1711,6 +1711,91 @@ A statistics JSON object has the following structure:
                 + `IndexSize`:
             + `TotalSize`:
 
+####/api/v1/detect/report/<feed_name>/unresolvedalertsbyseverity/(count)/(sort) and
+####/api/v1/detect/report/<feed_name>/unresolvedalertsbytime/(count)/(sort)
+Enumeration of unresolved alerts by severity score or by time. 
+
+*Supports* `GET` for `/api/v1/detect/report/<feed_name>/unresolvedalertsbyseverity/(count)/(sort)
+*Supports* `GET` for `/api/v1/detect/report/<feed_name>/unresolvedalertsbytime/(count)/(sort)
+
+#####Returns:
+
++ With no `count` and `sort` parameters, `GET /api/v1/detect/report/<feed_name>/unresolvedalertsbyseverity`  
+returns a JSON object with the first 10 unresolved alerts by severity in descending order
++ With a `count` parameter and no `sort` parameter  
+`GET /api/v1/detect/report/<feed_name>/unresolvedalertsbyseverity/count returns a JSON object with the   "count" number of unresolved alerts by severity in descending order.
++ With `count` and `sort` parameters, `GET /api/v1/detect/report/<feed_name>/unresolvedalertsbyseverity`  
+returns a JSON object with the "count" number of unresolved alerts by severity in order specified by   "sort" (either ascending or descending)  
+
++ With no `count` and `sort` parameters, `GET /api/v1/detect/report/<feed_name>/unresolvedalertsbytime`  
+returns a JSON object with the first 10 unresolved alerts by time in descending order
++ With a `count` parameter and no `sort` parameter  
+`GET /api/v1/detect/report/<feed_name>/unresolvedalertsbytime/count returns a JSON object with the   "count" number of unresolved alerts by severity in descending order.
++ With `count` and `sort` parameters, `GET /api/v1/detect/report/<feed_name>/unresolvedalertsbytime`  
+returns a JSON object with the "count" number of unresolved alerts by time in order specified by   "sort" (either ascending or descending)
+
+
+A JSON object of unresolved alerts has the following structure:
+
+a list of alerts, each with structure as follows:
+    + `alert_severity` : severity score of the alert
+    + `created_time` : Time of creation
+    + `feed_name` : Name of the feed
+    + `feed_rating` : rating of the feed
+    + `ioc_confidence` : Indicator of Compromise confidence score
+    + `md5` : md5 hash
+    + `os_type` : Operating Systems type
+    + `report_score` : Score for the report
+    + `sensor_criticality` : criticality score of the sensor
+    + `unique_id` : id of the unresolved alert
+
+Example:
+```
+GET external.carbonblack.com/api/v1/detect/report/VirusTotal/unresolvedalertsbytime/3/asc
+
+    [
+        {
+            alert_severity: 31.05
+            created_time: "2014-12-26T23:12:23.369Z"
+            feed_name: "virustotal"
+            feed_rating: 3
+            hostname: ""
+            ioc_confidence: 0.5
+            md5: "96B43A7BDDEEE7DF98983B886DE56DC7"
+            os_type: "windows"
+            report_score: 46
+            sensor_criticality: 3
+            unique_id: "99140c84-55b9-4eee-aa46-658baeeacb93"
+        },
+        {
+            alert_severity: 37.125
+            created_time: "2014-12-27T00:33:06.449Z"
+            feed_name: "virustotal"
+            feed_rating: 3
+            hostname: ""
+            ioc_confidence: 0.5
+            md5: "A487BAE084BBD75ECBDC5D9FEDE362BA"
+            os_type: "windows"
+            report_score: 55
+            sensor_criticality: 3
+            unique_id: "32097e17-46c0-4ca5-bdf0-85b608edd908"
+        },
+        {    
+            alert_severity: 44.55
+            created_time: "2014-12-27T00:42:06.909Z"
+            feed_name: "virustotal"
+            feed_rating: 3
+            hostname: ""
+            ioc_confidence: 0.5
+            md5: "E23DBA4B28EB7543D6D6ED5E06EEBCB6"
+            os_type: "windows"
+            report_score: 66
+            sensor_criticality: 3
+            unique_id: "a4356d81-457b-4825-8537-d662e3d04b4f"
+        }
+    ]
+
+
 
 
 

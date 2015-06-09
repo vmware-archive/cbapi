@@ -1705,11 +1705,26 @@ A statistics JSON object has the following structure:
             + `TotalUncompressedSize`:
         + `SqlStoreStats`:
             + `FileSystemName`:
-            + `Tables: list of tables, each with structure as follows:
+            + `Tables`: list of tables, each with structure as follows:
                 + `TotalSize`:
                 + `Name`:
                 + `IndexSize`:
             + `TotalSize`:
+
+####/api/v1/detect/report/<feed_name>/unresolvedalertsbyseverity/(count)/(sort)
+Enumeration of unresolved alerts by severity score.
+
+*Supports* `GET` for `/api/v1/detect/report/<feed_name>/unresolvedalertsbyseverity/(count)/(sort)
+
+#####Returns:
+
++ With no `count` and `sort` parameters, `GET /api/v1/detect/report/<feed_name>/unresolvedalertsbyseverity`  
+returns a JSON structure with the first 10 unresolved alerts by severity in descending order
++ With a `count` parameter and no `sort` parameter  
+`GET /api/v1/detect/report/<feed_name>/unresolvedalertsbyseverity/count returns a JSON structure with the   "count" number of unresolved alerts in descending order.
++ With `count` and `sort` parameters, `GET /api/v1/detect/report/<feed_name>/unresolvedalertsbyseverity`  
+returns a JSON structure with the "count" number of unresolved alerts in order specified by "sort" (either  
+ascending or descending)
 
 
 
