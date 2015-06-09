@@ -59,6 +59,11 @@ g_config['undoWatchlistCoalesce'] = True
 # print the JSON out in pretty (easily readable) format.
 g_config['prettyPrint']= True
 
+# retry count
+g_retry = 0
+
+# max retry count
+g_max_retry = 5
 #
 # what events are we going to capture on the event bus
 #
@@ -533,24 +538,42 @@ def processEventsFromBus(rabbit_mq_user, rabbit_mq_pass):
                                            5004,
                                            '/',
                                            credentials)
+    global g_retry
 
-    connection = pika.BlockingConnection(parameters)
-    channel = connection.channel()
-
-    queue_name = 'event_exporter_pid_%d' % os.getpid()
-
-    # make sure you use auto_delete so the queue isn't left filling
-    # with events when this program exists.
-    channel.queue_declare(queue=queue_name, auto_delete=True)
-
-    channel.queue_bind(exchange='api.events', queue=queue_name, routing_key='#')
-
-    channel.basic_consume(on_bus_msg, queue=queue_name)
-
-    sys.stderr.write("-> Subscribed to Pub/Sub bus (press Ctl-C to quit)\n")
+    connection = {}
 
     try:
+        connection = pika.BlockingConnection(parameters)
+
+        channel = connection.channel()
+
+        queue_name = 'event_exporter_pid_%d' % os.getpid()
+
+        # make sure you use auto_delete so the queue isn't left filling
+        # with events when this program exists.
+        channel.queue_declare(queue=queue_name, auto_delete=True)
+
+        channel.queue_bind(exchange='api.events', queue=queue_name, routing_key='#')
+
+        channel.basic_consume(on_bus_msg, queue=queue_name)
+
+        sys.stderr.write("-> Subscribed to Pub/Sub bus (press Ctl-C to quit)\n")
+
+        g_retry = 0
+
         channel.start_consuming()
+    except (pika.exceptions.AMQPConnectionError, pika.exceptions.ConnectionClosed) as e:
+        global g_max_retry
+
+        if g_retry < g_max_retry:
+            sys.stderr.write('Connection is closed or refused, retrying in %s seconds \n' % ((g_retry+1) * 5))
+            time.sleep(((g_retry+1) * 5))
+            g_retry += 1
+            return processEventsFromBus(rabbit_mq_user, rabbit_mq_pass)
+        if g_retry >= g_max_retry:
+            sys.stderr.write('Too many attempts to connect. Exiting now. \n')
+            return
+
     except KeyboardInterrupt:
         channel.stop_consuming()
 
