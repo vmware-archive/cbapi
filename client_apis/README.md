@@ -1722,6 +1722,7 @@ Enumeration of unresolved alerts by severity score or by time.
 
 + With no `count` and `sort` parameters, `GET /api/v1/detect/report/<feed_name>/unresolvedalertsbyseverity`  
 returns a JSON object with the first 10 unresolved alerts by severity in descending order  
+  
 + With a `count` parameter and no `sort` parameter  
 `GET /api/v1/detect/report/<feed_name>/unresolvedalertsbyseverity/count` returns a JSON object with the   "count" number of unresolved alerts by severity in descending order.
 + With `count` and `sort` parameters, `GET /api/v1/detect/report/<feed_name>/unresolvedalertsbyseverity`  
@@ -1731,6 +1732,7 @@ returns a JSON object with the "count" number of unresolved alerts by severity i
 returns a JSON object with the first 10 unresolved alerts by time in descending order
 + With a `count` parameter and no `sort` parameter  
 `GET /api/v1/detect/report/<feed_name>/unresolvedalertsbytime/count` returns a JSON object with the   "count" number of unresolved alerts by severity in descending order.  
+  
 + With `count` and `sort` parameters, `GET /api/v1/detect/report/<feed_name>/unresolvedalertsbytime`  
 returns a JSON object with the "count" number of unresolved alerts by time in order specified by   "sort" (either ascending or descending)
 
@@ -1739,16 +1741,16 @@ A JSON object of unresolved alerts has the following structure:
 
 a list of alerts, each with structure as follows:
 
-    + `alert_severity` : severity score of the alert
-    + `created_time` : Time of creation
-    + `feed_name` : Name of the feed
-    + `feed_rating` : rating of the feed
-    + `ioc_confidence` : Indicator of Compromise confidence score
-    + `md5` : md5 hash
-    + `os_type` : Operating Systems type
-    + `report_score` : Score for the report
-    + `sensor_criticality` : criticality score of the sensor
-    + `unique_id` : id of the unresolved alert
++ `alert_severity` : severity score of the alert
++ `created_time` : Time of creation
++ `feed_name` : Name of the feed
++ `feed_rating` : rating of the feed
++ `ioc_confidence` : Indicator of Compromise confidence score
++ `md5` : md5 hash
++ `os_type` : Operating Systems type
++ `report_score` : Score for the report
++ `sensor_criticality` : criticality score of the sensor
++ `unique_id` : id of the unresolved alert
 
 Example:
 ```
