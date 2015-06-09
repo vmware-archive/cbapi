@@ -1186,3 +1186,33 @@ class CbApi(object):
 
         return r.json()
 
+
+    def detect_feed_unresolvedalertsbyseverity(self, feed_name, count, sort):
+        '''
+        Enumerates "count" of unresolved alerts by severity on the Carbon Black Server, sorted in
+        either ascending or descending order given a feed name, count, and sorting order "sort"
+        count defaults to 10 and sort defaults to descending
+        '''
+
+        url = "%s/api/v1/detect/report/%s/unresolvedalertsbyseverity/%s/%s" % (self.server, feed_name, count, sort)
+        print url
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+
+    def detect_feed_unresolvedalertsbytime(self, feed_name, count, sort):
+        '''
+        Enumerates "count" of unresolved alerts by time on the Carbon Black Server, sorted in
+        either ascending or descending order given a feed name, count, and sorting order "sort"
+        count defaults to 10 and sort defaults to descending
+        '''
+
+        url = "%s/api/v1/detect/report/%s/unresolvedalertsbyseverity/%s/%s" % (self.server, feed_name, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+

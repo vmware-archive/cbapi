@@ -433,6 +433,7 @@ def build_blueprint(cfg, sensor_backend, xsrf):
     @auth_db.requires_auth(allow_auth_token=True)
     @use_cache(per_user=True, ttl=120)
     def module_tic_hits(md5):
+        print cfg.TicEnableMd5Lookups
         if cfg.TicEnableMd5Lookups:
             data = None
             sensor_groups = blueprint.api.solr2.module_queries.groups(md5)
