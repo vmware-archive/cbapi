@@ -1797,6 +1797,7 @@ GET external.carbonblack.com/api/v1/detect/report/VirusTotal/unresolvedalertsbyt
             unique_id: "a4356d81-457b-4825-8537-d662e3d04b4f"
         }
     ]
+```
 
 ####/api/v1/detect/report/<feed_name>/unresolvedalerttrend/(days)
 Enumerates unresolved alerts over the last "days" number of days.
@@ -1862,6 +1863,7 @@ counts: [
         ]
 end: "2015-06-11T00:00:00Z"
 start: "2015-05-11T00:00:00Z"
+```
 
 ####/api/v1/detect/report/adminsbyalertsresolved/(count)/(sort) and 
 ####/api/v1/detect/report/adminsbyresolvedtime/(count)/(sort) 
@@ -1879,8 +1881,19 @@ Enumerates admin in order of number of alerts they have resolved
 + With a count parameter and no sort parameter, `GET /api/v1/detect/report/adminsbyresolvedtime/count` returns a JSON object with the "count" number of admin sorted in descending order of resolved time
 + With both a count and sort parameters, `GET /api/v1/detect/report/adminsbyresolvedtime/count/sort returns a JSON object with the "count" number of admin sorted in "sort" order (Either 'asc' for ascending or 'desc' for descending
 
-A JSON object of admin users has the following structure:
-+ 
+A JSON object of admin users organized by alerts resolved has the following structure:
+
++ a list of admin, each with the following structure:
+    + `count`: Number of resolved alerts
+    + `name`: Name of admin
+    + `ratio`: 
+
+A JSON object of admin users organized by time resolving has the following structure:
+
++ a list of admin, each with the following structure:
+    + `average_hours`: Average hours spent resolving alerts
+    + `name`: Name of admin
+    + `ratio`:
 
 
 
