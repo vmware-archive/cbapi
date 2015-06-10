@@ -1888,14 +1888,14 @@ A JSON object of admin users organized by alerts resolved has the following stru
 + a list of admin, each with the following structure:
     + `count`: Number of resolved alerts
     + `name`: Name of admin
-    + `ratio`: 
+    + `ratio`: Ratio of alerts resolved
 
 A JSON object of admin users organized by time resolving has the following structure:
 
 + a list of admin, each with the following structure:
     + `average_hours`: Average hours spent resolving alerts
     + `name`: Name of admin
-    + `ratio`:
+    + `ratio`: Ratio of time spent on resolving alerts
 
 
 
