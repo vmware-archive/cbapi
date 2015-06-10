@@ -1195,7 +1195,6 @@ class CbApi(object):
         '''
 
         url = "%s/api/v1/detect/report/%s/unresolvedalertsbyseverity/%s/%s" % (self.server, feed_name, count, sort)
-        print url
         r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
         r.raise_for_status()
 
@@ -1248,6 +1247,147 @@ class CbApi(object):
         '''
 
         url = "%s/api/v1/detect/report/adminsbyresolvedtimecd/%s/%s" % (self.server, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_alertresolutionaverage(self, days):
+        '''
+        Enumerates resolution times for the last "days" number of days.
+        "days" defaults to 30 if not supplied
+        '''
+
+        url = "%s/api/v1/detect/report/alertresolutionaverage/%s" % (self.server, days)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_binarydwell(self, days):
+        '''
+        Enumerates the binary dwell for the last "day" number of days
+        '''
+
+        url = "%s/api/v1/detect/report/binarydwell/%s" % (self.server, days)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_currentalertstatus(self):
+        '''
+        Returns the current alert status from the Carbon Black Server
+        '''
+
+        url = "%s/api/v1/detect/report/currentalertstatus" % self.server
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_currentmonitoringstatus(self):
+        '''
+        Returns the current monitoring status from the Carbon Black Server
+        '''
+
+        url = "%s/api/v1/detect/report/currentmonitoringstatus" % self.server
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_hosthygiene(self, days):
+        '''
+        Returns the host hygiene from the Carbon Black Server
+        '''
+
+        url = "%s/api/v1/detect/report/hosthygiene/%s" % (self.server, days)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_unresolvedalertsbyseverity(self, count, sort):
+        '''
+        Enumerates "count" of unresolved alerts by severity on the Carbon Black Server, sorted in
+        either ascending or descending order given a count, and sorting order "sort"
+        count defaults to 10 and sort defaults to descending
+        '''
+
+        url = "%s/api/v1/detect/report/unresolvedalertsbyseverity/%s/%s" % (self.server, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_unresolvedalertsbytime(self, count, sort):
+        '''
+        Enumerates "count" of unresolved alerts by time on the Carbon Black Server, sorted in
+        either ascending or descending order given a count, and sorting order "sort"
+        count defaults to 10 and sort defaults to descending
+        '''
+
+        url = "%s/api/v1/detect/report/unresolvedalertsbyseverity/%s/%s" % (self.server, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_unresolvedalerttrend(self, days):
+        '''
+        Enumerates unresolved alert trend for the past "days" amount of days. "days" defaults to 30
+        '''
+
+        url = "%s/api/v1/detect/report/unresolvedalerttrend/%s" % (self.server, days)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_unresolvedhostsbyseverity(self, count, sort):
+        '''
+        Retrieves the unresolved hosts from the server. Retrieves "count" number of the hosts and
+        organizes them in "sort" order (asc or desc) by severity. "count" defaults to 10 and "sort" defaults to desc
+        '''
+
+        url = "%s/api/v1/detect/report/unresolvedhostsbyseverity/%s/%s" % (self.server, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_unresolvedhostsbytime(self, count, sort):
+        '''
+        Retrieves the unresolved hosts from the server. Retrieves "count" number of the hosts and
+        organizes them in "sort" order (asc or desc) by time. "count" defaults to 10 and "sort" defaults to desc
+        '''
+
+        url = "%s/api/v1/detect/report/unresolvedhostsbytime/%s/%s" % (self.server, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_unresolvedusersbyseverity(self, count, sort):
+        '''
+        Retrieves the unresolved users from the server. Retrieves "count" number of the users and
+        organizes them in "sort" order (asc or desc) by severity. "count" defaults to 10 and "sort" defaults to desc
+        '''
+
+        url = "%s/api/v1/detect/report/unresolvedusersbyseverity/%s/%s" % (self.server, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_unresolvedusersbytime(self, count, sort):
+        '''
+        Retrieves the unresolved users from the server. Retrieves "count" number of the users and
+        organizes them in "sort" order (asc or desc) by time. "count" defaults to 10 and "sort" defaults to desc
+        '''
+
+        url = "%s/api/v1/detect/report/unresolvedusersbytime/%s/%s" % (self.server, count, sort)
         r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
         r.raise_for_status()
 

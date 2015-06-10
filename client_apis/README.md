@@ -1897,7 +1897,180 @@ A JSON object of admin users organized by time resolving has the following struc
     + `name`: Name of admin
     + `ratio`: Ratio of time spent on resolving alerts
 
+####/api/v1/detect/report/alertresolutionaverage/(days)
+Enumerates resolution times over the last "days" number of days
 
+*Supports*: `GET` for `/api/v1/detect/report/alertresolutionaverage(days)
+
+#####Returns:
++ With no "days" parameter, `GET /api/v1/detect/report/alertresolutionaverage` returns a JSON object with the resolution data for each of the last 30 days.
++ With a "days" parameter, `GET /api/v1/detect/report/alertresolutionaverage/days` returns a JSON object with the resolution data for each of the last "days" number of days
+
+A JSON object with the resolution data has the following structure:
++ `resolution_time`: a list of the resolution data, each of which has the following structure:
+    + `date_offset`: Days away from present
+    + `total_resolutions`: Total resolutions for that day
+    + `average_in_seconds`: 
+    + `time_stamp`: Time stamp
+
+####/api/v1/detect/report/binarydwell/(days)
+Enumerates the binary dwell over the last "days" number of days
+
+*Supports*: `GET` for `/api/v1/detect/report/binarydwell/(days) 
+
+#####Returns:
++ With no "days" parameter, `GET /api/v1/detect/report/binarydwell` returns a JSON object with binary dwell info over the last 250 days.
++ With a "days" parameter, `GET /api/v1/detect/report/binarydwell` returns a JSON object with binary dwell info over the last "days" number of days.
+
+A JSON object with binary dwell info has the following structure:
++ `dwell`: a list of daily binary dwell info, each with the following structure:
+    + `30_day_avg`: average over 30 days
+    + `60_day_avg`: average over 60 days
+    + `90_day_avg`: average over 90 days
+    + `date_offset`: number of days away from present day
+    + `time_stamp`: time stamp 
++ `binaries`: list of binaries
+
+####/api/v1/detect/report/currentalertstatus
+Get the current alert status from the server
+
+*Supports*: `GET` for `/api/v1/detect/report/currentalertstatus`
+
+#####Returns:  
+`GET /api/v1/detect/report/currentalertstatus` returns a JSON object with the current alert status info
+
+A JSON object with the current alert status info has the following structure:
++ `unresolved`: information on the unresolved alerts in the following structure:
+    + `average_hours`: 
+    + `alerts`: number of alerts
+    + `hosts`: number of hosts
++ `resolved`:
+
+####/api/v1/detect/report/currentmonitoringstatus
+Get the current monitoring status
+
+*Supports*: `GET` for `/api/v1/detect/report/currentmonitoring`
+
+#####Returns:
+`GET /api/v1/detect/report/currentmonitoringstatus` returns a JSON object with the current monitoring status info.
+
+A JSON object with the current monitoring status info has the following structure:
++ `iocs`: number of indicators of compromise
++ `events_per_second`: Number of events happening per second
++ `hosts`: Number of hosts 
+
+####/api/v1/detect/report/hosthygiene/(days)
+Enumerate host hygiene over the past "days" number of days
+
+*Supports*: `GET` for `/api/v1/detect/report/hosthygiene/(days)`
+
+#####Returns:
++ With no "days" parameter, `GET /api/v1/detect/report/hosthygiene` returns a JSON object with the host hygiene data over the last 30 days.
++ With a "days" parameter, `GET /api/v1/detect/report/hosthygiene/days` returns a JSON object with the host hygiene data over the last "days" number of days/
+
+A JSON object with the host hygiene data has the following structure:
++ `hygiene`: a list of the host hygiene data over the last "days" number of days, each with the following structure:  
+    + `date_offset`: Number of days away from present day
+    + `total_hosts`: Number of total hosts
+    + `bad_hosts`: Number of bad hosts
+    + `ratio`: 
+    + `time_stamp`: time stamp
+
+####/api/v1/detect/report/unresolvedalertsbyseverity/(count)/(sort) and
+####/api/v1/detect/report/unresolvedalertsbytime/(count)/(sort)
+Enumeration of unresolved alerts by severity score or by time. 
+
+*Supports* `GET` for `/api/v1/detect/report/unresolvedalertsbyseverity/(count)/(sort)
+*Supports* `GET` for `/api/v1/detect/report/unresolvedalertsbytime/(count)/(sort)
+
+#####Returns:
+
++ With no `count` and `sort` parameters, `GET /api/v1/detect/report/unresolvedalertsbyseverity`  
+returns a JSON object with the first 10 unresolved alerts by severity in descending order  
+  
++ With a `count` parameter and no `sort` parameter  
+`GET /api/v1/detect/report/unresolvedalertsbyseverity/count` returns a JSON object with the   "count" number of unresolved alerts by severity in descending order.
++ With `count` and `sort` parameters, `GET /api/v1/detect/report/unresolvedalertsbyseverity`  
+returns a JSON object with the "count" number of unresolved alerts by severity in order specified by   "sort" (either ascending or descending)  
+
++ With no `count` or `sort` parameters, `GET /api/v1/detect/report/unresolvedalertsbytime`  
+returns a JSON object with the first 10 unresolved alerts by time in descending order
++ With a `count` parameter and no `sort` parameter  
+`GET /api/v1/detect/report/unresolvedalertsbytime/count` returns a JSON object with the   "count" number of unresolved alerts by severity in descending order.  
+  
++ With `count` and `sort` parameters, `GET /api/v1/detect/report/unresolvedalertsbytime`  
+returns a JSON object with the "count" number of unresolved alerts by time in order specified by   "sort" (either ascending or descending)
+
+
+A JSON object of unresolved alerts has the following structure:
+
+a list of alerts, each with structure as follows:
+
++ `alert_severity` : severity score of the alert
++ `created_time` : Time of creation
++ `feed_name` : Name of the feed
++ `feed_rating` : rating of the feed
++ `ioc_confidence` : Indicator of Compromise confidence score
++ `md5` : md5 hash
++ `os_type` : Operating Systems type
++ `report_score` : Score for the report
++ `sensor_criticality` : criticality score of the sensor
++ `unique_id` : id of the unresolved alert
+
+Example:
+```
+GET external.carbonblack.com/api/v1/detect/report/unresolvedalertsbytime/3/asc
+
+    [
+        {
+            alert_severity: 31.05
+            created_time: "2014-12-26T23:12:23.369Z"
+            feed_name: "virustotal"
+            feed_rating: 3
+            hostname: ""
+            ioc_confidence: 0.5
+            md5: "96B43A7BDDEEE7DF98983B886DE56DC7"
+            os_type: "windows"
+            report_score: 46
+            sensor_criticality: 3
+            unique_id: "99140c84-55b9-4eee-aa46-658baeeacb93"
+        },
+        {
+            alert_severity: 37.125
+            created_time: "2014-12-27T00:33:06.449Z"
+            feed_name: "virustotal"
+            feed_rating: 3
+            hostname: ""
+            ioc_confidence: 0.5
+            md5: "A487BAE084BBD75ECBDC5D9FEDE362BA"
+            os_type: "windows"
+            report_score: 55
+            sensor_criticality: 3
+            unique_id: "32097e17-46c0-4ca5-bdf0-85b608edd908"
+        },
+        {    
+            alert_severity: 44.55
+            created_time: "2014-12-27T00:42:06.909Z"
+            feed_name: "virustotal"
+            feed_rating: 3
+            hostname: ""
+            ioc_confidence: 0.5
+            md5: "E23DBA4B28EB7543D6D6ED5E06EEBCB6"
+            os_type: "windows"
+            report_score: 66
+            sensor_criticality: 3
+            unique_id: "a4356d81-457b-4825-8537-d662e3d04b4f"
+        }
+    ]
+```
+
+
+
+
+
+
+
+ 
 
 
 

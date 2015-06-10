@@ -1888,15 +1888,30 @@ A JSON object of admin users organized by alerts resolved has the following stru
 + a list of admin, each with the following structure:
     + `count`: Number of resolved alerts
     + `name`: Name of admin
-    + `ratio`: 
+    + `ratio`: Ratio of alerts resolved
 
 A JSON object of admin users organized by time resolving has the following structure:
 
 + a list of admin, each with the following structure:
     + `average_hours`: Average hours spent resolving alerts
     + `name`: Name of admin
-    + `ratio`:
+    + `ratio`: Ratio of time spent on resolving alerts
 
+####/api/v1/detect/report/alertresolutionaverage/(days)
+Enumerates resolution times over the last "days" number of days
+
+*Supports*: `GET` for `/api/v1/detect/report/alertresolutionaverage(days)
+
+#####Returns:
++ With no "days" parameter, `GET /api/v1/detect/report/alertresolutionaverage` returns a JSON object with the resolution data for each of the last 30 days.
++ With a "days" parameter, `GET /api/v1/detect/report/alertresolutionaverage/days` returns a JSON object with the resolution data for each of the last "days" number of days
+
+A JSON object with the resolution data has the following structure:
++ `resolution_time`: a list of the resolution data, each of which has the following structure:
+    + `date_offset`: Days away from present
+    + `total_resolutions`: Total resolutions for that day
+    + `average_in_seconds`: 
+    + `time_stamp`: Time stamp
 
 
 
