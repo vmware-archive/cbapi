@@ -1215,4 +1215,41 @@ class CbApi(object):
 
         return r.json()
 
+    def detect_feed_unresolvedalerttrend(self, feed_name, days):
+        '''
+        Enumerates unresolved alert trend for the given feed_name
+        for the past "days" amount of days. "days" defaults to 30
+        '''
+
+        url = "%s/api/v1/detect/report/%s/unresolvedalerttrend/%s" % (self.server, feed_name, days)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_adminsbyalertsresolved(self, count, sort):
+        '''
+        Enumerates "count" of admins by alerts resolved on the Carbon Black Server, sorted in
+        either ascending or descending order given a count, and sorting order "sort"
+        count defaults to 10 and sort defaults to descending
+        '''
+
+        url = "%s/api/v1/detect/report/adminsbyalertsresolved/%s/%s" % (self.server, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_adminsbyresolvedtime(self, count, sort):
+        '''
+        Enumerates "count" of admins by alerts resolved on the Carbon Black Server, sorted in
+        either ascending or descending order given a count, and sorting order "sort"
+        count defaults to 10 and sort defaults to descending
+        '''
+
+        url = "%s/api/v1/detect/report/adminsbyresolvedtimecd/%s/%s" % (self.server, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
 
