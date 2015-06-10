@@ -1813,8 +1813,8 @@ Enumerates unresolved alerts over the last "days" number of days.
 A JSON object with past days of unresolved alerts has the following structure:
 
 + `counts`: a list of the unresolved alerts over the last "days" number of days. Each has the following structure:    
-        + `name`:  
-        + `value`:
+    + `name`:  
+    + `value`:
 + `start`: The start time of the trend
 + `end`: The end time of the trend
 
