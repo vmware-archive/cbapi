@@ -1878,7 +1878,7 @@ Enumerates admin in order of number of alerts they have resolved
 + With both a count and sort parameters, `GET /api/v1/detect/report/adminsbyalertsresolve/count/sort returns a JSON object with the "count" number of admin sorted in "sort" order (Either 'asc' for ascending or 'desc' for descending)  
 
 + With no count parameter, `GET /api/v1/detect/report/adminsbyresolvedtime` returns a JSON object with maximum 10 enumerated admin sorted in descending order of resolved time.  
-+ With a count parameter and no sort parameter, `GET /api/v1/detect/report/adminsbyresolvedtime/count` returns a JSON object with the "count" number of admin sorted in descending order of resolved time
++ With a count parameter and no sort parameter, `GET /api/v1/detect/report/adminsbyresolvedtime/count` returns a JSON object with the "count" number of admin sorted in descending order of resolved time  
 + With both a count and sort parameters, `GET /api/v1/detect/report/adminsbyresolvedtime/count/sort returns a JSON object with the "count" number of admin sorted in "sort" order (Either 'asc' for ascending or 'desc' for descending
 
 A JSON object of admin users organized by alerts resolved has the following structure:

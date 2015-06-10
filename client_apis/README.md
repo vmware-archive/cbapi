@@ -1806,13 +1806,13 @@ Enumerates unresolved alerts over the last "days" number of days.
 
 #####Returns:
 
-+ With no "days" parameter, `GET` /api/v1/detect/report/<feed_name>/unresolvedalerttrend returns a JSON object with the last 30 days worth of unresolved alerts.  
++ With no "days" parameter, `GET /api/v1/detect/report/<feed_name>/unresolvedalerttrend` returns a JSON object with the last 30 days worth of unresolved alerts.  
 
-+ With a "days" parameter, `GET` /api/v1/detect/report/<feed_name>/unresolvedalerttrend/days returns a JSON object with the last "days" days worth of unresolved alerts.  
++ With a "days" parameter, `GET /api/v1/detect/report/<feed_name>/unresolvedalerttrend/days` returns a JSON object with the last "days" days worth of unresolved alerts.  
 
 A JSON object with past days of unresolved alerts has the following structure:
 
-+ `counts`: a list of the unresolved alerts over the last "days" number of days. Each has the following structure:
++ `counts`: a list of the unresolved alerts over the last "days" number of days. Each has the following structure:  
         + `name`: 
         + `value`:
 + `start`: The start time of the trend
@@ -1869,16 +1869,17 @@ start: "2015-05-11T00:00:00Z"
 ####/api/v1/detect/report/adminsbyresolvedtime/(count)/(sort) 
 Enumerates admin in order of number of alerts they have resolved
 
-*Supports*: `GET` for `api/v1/detect/report/adminsbyalertsresolved/(count)/(sort)
-*Supports*: `GET` for `api/v1/detect/report/adminsbyresolvedtime/(count)/(sort)
+*Supports*: `GET` for `api/v1/detect/report/adminsbyalertsresolved/(count)/(sort)`
+*Supports*: `GET` for `api/v1/detect/report/adminsbyresolvedtime/(count)/(sort)`
 
 #####Returns:
-+ With no count parameter, `GET /api/v1/detect/report/adminsbyalertsresolved` returns a JSON object with maximum 10 enumerated admin sorted in descending order of how many alerts they have resolved.  
++ With no count parameter, `GET /api/v1/detect/report/adminsbyalertsresolved` returns a JSON object with maximum 10 enumerated admin sorted in descending order of how many alerts they have resolved.
+  
 + With a count parameter and no sort parameter, `GET /api/v1/detect/report/adminsbyalertsresolved/count` returns a JSON object with the "count" number of admin sorted in descending order of how many alerts they have resolved.  
 + With both a count and sort parameters, `GET /api/v1/detect/report/adminsbyalertsresolve/count/sort returns a JSON object with the "count" number of admin sorted in "sort" order (Either 'asc' for ascending or 'desc' for descending)  
 
 + With no count parameter, `GET /api/v1/detect/report/adminsbyresolvedtime` returns a JSON object with maximum 10 enumerated admin sorted in descending order of resolved time.  
-+ With a count parameter and no sort parameter, `GET /api/v1/detect/report/adminsbyresolvedtime/count` returns a JSON object with the "count" number of admin sorted in descending order of resolved time  
++ With a count parameter and no sort parameter, `GET /api/v1/detect/report/adminsbyresolvedtime/count` returns a JSON object with the "count" number of admin sorted in descending order of resolved time.  
 + With both a count and sort parameters, `GET /api/v1/detect/report/adminsbyresolvedtime/count/sort returns a JSON object with the "count" number of admin sorted in "sort" order (Either 'asc' for ascending or 'desc' for descending
 
 A JSON object of admin users organized by alerts resolved has the following structure:
