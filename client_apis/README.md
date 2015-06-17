@@ -51,8 +51,7 @@ The following APIs are versioned.
 - [`/api/v1/watchlist`](#apiv1watchlist) - Watchlist enumeration, addition, modification, and deletion
 
 #### Feeds
-- [`/api/v1/feed/(id)`](#apiv1feed(id)) - Feed enumeration, addition, modification, and deletion
-- 
+- [`/api/v1/feed/(id)`](#apiv1feedid) - Feed enumeration, addition, modification, and deletion
 
 #### Users
 - [`/api/users`](#apiusers) - User enumeration
@@ -67,7 +66,7 @@ The following APIs are versioned.
 
 #### Alerts
 - [`/api/v1/alert`](#apiv1alert) - Alert search
-- [`/api/v1/alert/<alertid>`] - Alert update and resolution
+- [`/api/v1/alert/<alertid>`](#apiv1alertalertid) - Alert update and resolution
 
 #### Banning 
 - [`/api/v1/banning/blacklist`] (#apiv1banningblacklist) - Banned md5 hash enumeration and addition
