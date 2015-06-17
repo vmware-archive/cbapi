@@ -2063,9 +2063,144 @@ GET external.carbonblack.com/api/v1/detect/report/unresolvedalertsbytime/3/asc
         }
     ]
 ```
+####/api/v1/detect/report/unresolvedalerttrend/(days)
+Get trend of unresolved alerts 
 
+*Supports*: `GET` for `/api/v1/detect/report/unresolvedalerttrend/(days)`
 
+#####Returns:
 
++ With no "days" parameter, `GET /api/v1/detect/report/unresolvedalerttrend` returns a JSON object with the last 30 days worth of unresolved alerts.  
+
++ With a "days" parameter, `GET /api/v1/detect/report/unresolvedalerttrend/days` returns a JSON object with the last "days" days worth of unresolved alerts.  
+
+A JSON object with past days of unresolved alerts has the following structure:
+
++ `counts`: a list of the unresolved alerts over the last "days" number of days. Each has the following structure:    
+    + `name`: Name of the alert
+    + `value`: Value of the alert
++ `start`: The start time of the trend
++ `end`: The end time of the trend
+
+Example:
+```
+GET `api/v1/detect/report/unresolvedalerttrend
+
+counts: [
+          0:{
+                name: "2015-05-11T00:00:00Z", 
+                value: 453
+            },
+          1:{
+                name: "2015-05-12T00:00:00Z",
+                value: 450
+            },
+          2: {name: "2015-05-13T00:00:00Z", value: 452}
+          3: {name: "2015-05-14T00:00:00Z", value: 451}
+          4: {name: "2015-05-15T00:00:00Z", value: 444}
+          5: {name: "2015-05-16T00:00:00Z", value: 443}
+          6: {name: "2015-05-17T00:00:00Z", value: 441}
+          7: {name: "2015-05-18T00:00:00Z", value: 451}
+          8: {name: "2015-05-19T00:00:00Z", value: 447}
+          9: {name: "2015-05-20T00:00:00Z", value: 445}
+          10: {name: "2015-05-21T00:00:00Z", value: 444}
+          11: {name: "2015-05-22T00:00:00Z", value: 449}
+          12: {name: "2015-05-23T00:00:00Z", value: 444}
+          13: {name: "2015-05-24T00:00:00Z", value: 448}
+          14: {name: "2015-05-25T00:00:00Z", value: 447}
+          15: {name: "2015-05-26T00:00:00Z", value: 450}
+          16: {name: "2015-05-27T00:00:00Z", value: 453}
+          17: {name: "2015-05-28T00:00:00Z", value: 449}
+          18: {name: "2015-05-29T00:00:00Z", value: 449}
+          19: {name: "2015-05-30T00:00:00Z", value: 448}
+          20: {name: "2015-05-31T00:00:00Z", value: 443}
+          21: {name: "2015-06-01T00:00:00Z", value: 451}
+          22: {name: "2015-06-02T00:00:00Z", value: 452}
+          23: {name: "2015-06-03T00:00:00Z", value: 453}
+          24: {name: "2015-06-04T00:00:00Z", value: 448}
+          25: {name: "2015-06-05T00:00:00Z", value: 451}
+          26: {name: "2015-06-06T00:00:00Z", value: 463}
+          27: {name: "2015-06-07T00:00:00Z", value: 443}
+          28: {name: "2015-06-08T00:00:00Z", value: 452}
+          29: {name: "2015-06-09T00:00:00Z", value: 452}
+          30: {name: "2015-06-10T00:00:00Z", value: 445}
+        ]
+end: "2015-06-11T00:00:00Z"
+start: "2015-05-11T00:00:00Z"
+```
+####/api/v1/detect/report/unresolvedhostsbyseverity/(count)/(sort) and
+####/api/v1/detect/report/unresolvedhostsbytime/(count)/(sort)
+Enumeration of unresolved hosts by severity score or by time. 
+
+*Supports* `GET` for `/api/v1/detect/report/unresolvedhostsbyseverity/(count)/(sort)
+*Supports* `GET` for `/api/v1/detect/report/unresolvedhostsbytime/(count)/(sort)
+
+#####Returns:
+
++ With no `count` and `sort` parameters, `GET /api/v1/detect/report/unresolvedhostsbyseverity`  
+returns a JSON object with the first 10 unresolved hosts by severity in descending order  
+  
++ With a `count` parameter and no `sort` parameter  
+`GET /api/v1/detect/report/unresolvedhostsbyseverity/count` returns a JSON object with the   "count" number of unresolved hosts by severity in descending order.
++ With `count` and `sort` parameters, `GET /api/v1/detect/report/unresolvedhostsbyseverity`  
+returns a JSON object with the "count" number of unresolved hosts by severity in order specified by   "sort" (either ascending or descending)  
+
++ With no `count` or `sort` parameters, `GET /api/v1/detect/report/unresolvedhostsbytime`  
+returns a JSON object with the first 10 unresolved hosts by time in descending order
++ With a `count` parameter and no `sort` parameter  
+`GET /api/v1/detect/report/unresolvedhostsbytime/count` returns a JSON object with the   "count" number of unresolved hosts by severity in descending order.  
+  
++ With `count` and `sort` parameters, `GET /api/v1/detect/report/unresolvedhostsbytime`  
+returns a JSON object with the "count" number of unresolved hosts by time in order specified by   "sort" (either ascending or descending)
+
+A JSON object of unresolved hosts has the following structure:
+
+a list of hosts, each with structure as follows:
++ `average_hours`: average hours
++ `os_type`: Type of Operating System
++ `hostname`: Name of the host
+
+Example:
+```
+GET /api/v1/detect/report/unresolvedhostsbytime
+
+[
+    {
+        average_hours: 38.0774272779,
+        os_type: "windows",
+        hostname: ""
+    },
+    {
+        average_hours: 43.1798545668, 
+        os_type: "Windows", 
+        hostname: "constantine-hp"
+    },
+]
+```
+####/api/v1/detect/report/unresolvedusersbyseverity/(count)/(sort) and
+####/api/v1/detect/report/unresolvedusersbytime/(count)/(sort)
+Enumeration of unresolved users by severity score or by time. 
+
+*Supports* `GET` for `/api/v1/detect/report/unresolvedusersbyseverity/(count)/(sort)
+*Supports* `GET` for `/api/v1/detect/report/unresolvedusersbytime/(count)/(sort)
+
+#####Returns:
+
++ With no `count` and `sort` parameters, `GET /api/v1/detect/report/unresolvedusersbyseverity`  
+returns a JSON object with the first 10 unresolved users by severity in descending order  
+  
++ With a `count` parameter and no `sort` parameter  
+`GET /api/v1/detect/report/unresolvedusersbyseverity/count` returns a JSON object with the   "count" number of unresolved users by severity in descending order.
++ With `count` and `sort` parameters, `GET /api/v1/detect/report/unresolvedusersbyseverity`  
+returns a JSON object with the "count" number of unresolved users by severity in order specified by   "sort" (either ascending or descending)  
+
++ With no `count` or `sort` parameters, `GET /api/v1/detect/report/unresolvedusersbytime`  
+returns a JSON object with the first 10 unresolved users by time in descending order
++ With a `count` parameter and no `sort` parameter  
+`GET /api/v1/detect/report/unresolvedusersbytime/count` returns a JSON object with the   "count" number of unresolved users by severity in descending order.  
+  
++ With `count` and `sort` parameters, `GET /api/v1/detect/report/unresolvedusersbytime`  
+returns a JSON object with the "count" number of unresolved users by time in order specified by   "sort" (either ascending or descending)
 
 
 
