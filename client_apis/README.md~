@@ -52,9 +52,9 @@ The following APIs are versioned.
 
 #### Feeds
 - [`/api/v1/feed`](#apiv1feed) - Feed enumeration and addition
-- [`/api/v1/feed/id`](#apiv1feedid) - Feed modification and deletion
+- [`/api/v1/feed/<id>`](#apiv1feedid) - Feed modification and deletion
 - [`/api/v1/feed/id/action`](#apiv1feedidaction) - Feed action enumeration and addition
-- [`/api/v1/feed/id/action/action_id`](#apiv1feedactionactionid) - Feed action updating and deletion
+- [`/api/v1/feed/id/action/<action_id>`](#apiv1feedactionactionid) - Feed action updating and deletion
 
 #### Users
 - [`/api/users`](#apiusers) - User enumeration
@@ -1018,7 +1018,7 @@ A feed record has the following structure:
 
 ####/api/v1/feed/id/action/(action_id)
 *Supports `GET` and `POST` for `/api/v1/feed/id/action`  
-*Supports `PUT` and `DELETE` for `/api/v1/feed/id/action/action_id`
+*Supports `PUT` and `DELETE` for `/api/v1/feed/id/action/<action_id>`
 
 #####Returns
 

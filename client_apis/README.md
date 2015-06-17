@@ -1017,8 +1017,8 @@ A feed record has the following structure:
 - `use_proxy`: boolean indicator as to if the Carbon Black server should use a web proxy when retrieving the feed contents
 
 ####/api/v1/feed/id/action/(action_id)
-*Supports `GET` and `POST` for `/api/v1/feed/id/action`  
-*Supports `PUT` and `DELETE` for `/api/v1/feed/id/action/<action_id>`
+*Supports* `GET` and `POST` for `/api/v1/feed/id/action`  
+*Supports* `PUT` and `DELETE` for `/api/v1/feed/id/action/<action_id>`
 
 #####Returns
 
@@ -1053,6 +1053,7 @@ GET /api/v1/feed/6/action
         watchlist_id: null
     }
 ]
+```
 
 -----
 
