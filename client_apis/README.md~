@@ -2208,7 +2208,7 @@ returns a JSON object with the "count" number of unresolved users by time in ord
 ####/api/tagged_event/(id)
 Enumeration, addition, deletion, and updating of tagged_events associated with an investigation
 
-*Supports* `GET`, `PUT`, and `DELETE` for `/api/tagged_event/<id>`
+*Supports* `GET`, `PUT`, and `DELETE` for `/api/tagged_event/<id>`  
 *Supports* `POST` for `/api/tagged_event`
 
 #####Returns:
@@ -2230,7 +2230,7 @@ A JSON object of events has the following structure:
     + `segment_id`: id of the segment of the server this event is in
     + `start_date`: date to start monitoring for the event
     + `tagged_by_user_id`: id of the user to tag the event
-    + `unique_id: unique id of the event
+    + `unique_id`: unique id of the event
 
 Example:
 ```

@@ -51,7 +51,8 @@ The following APIs are versioned.
 - [`/api/v1/watchlist`](#apiv1watchlist) - Watchlist enumeration, addition, modification, and deletion
 
 #### Feeds
-- [`/api/v1/feed`](#apiv1feed) - Feed enumeration, addition, modification, and deletion
+- [`/api/v1/feed/(id)`](#apiv1feed(id)) - Feed enumeration, addition, modification, and deletion
+- 
 
 #### Users
 - [`/api/users`](#apiusers) - User enumeration
@@ -2253,6 +2254,7 @@ GET /api/tagged_event/1
 ]
 
 ####
+
 
 
 
