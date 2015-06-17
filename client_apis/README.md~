@@ -51,7 +51,10 @@ The following APIs are versioned.
 - [`/api/v1/watchlist`](#apiv1watchlist) - Watchlist enumeration, addition, modification, and deletion
 
 #### Feeds
-- [`/api/v1/feed/(id)`](#apiv1feedid) - Feed enumeration, addition, modification, and deletion
+- [`/api/v1/feed`](#apiv1feed) - Feed enumeration and addition
+- [`/api/v1/feed/id`](#apiv1feedid) - Feed modification and deletion
+- [`/api/v1/feed/id/action`](#apiv1feedidaction) - Feed action enumeration and addition
+- [`/api/v1/feed/id/action/action_id`](#apiv1feedactionactionid) - Feed action updating and deletion
 
 #### Users
 - [`/api/users`](#apiusers) - User enumeration
@@ -1012,6 +1015,44 @@ A feed record has the following structure:
 - `manually_added`: boolean indicator as to if the feed was added manually.  If logical false, this means the feed was provided by the Carbon Black Alliance
 - `order`: a numeric hint as to the display order in the Carbon Black web console
 - `use_proxy`: boolean indicator as to if the Carbon Black server should use a web proxy when retrieving the feed contents
+
+####/api/v1/feed/id/action/(action_id)
+*Supports `GET` and `POST` for `/api/v1/feed/id/action`  
+*Supports `PUT` and `DELETE` for `/api/v1/feed/id/action/action_id`
+
+#####Returns
+
+- With no "action_id" parameter, `GET /api/v1/feed/id/action` returns a JSON object with a list of all the actions enabled for this feed
+- With no "action_id" parameter, `POST /api/v1/feed/id/action` returns whether or not the posting effort was successful.
+- With an "action_id" parameter, `PUT /api/v1/feed/id/action/action_id` returns whether or not the updating effort was successful.
+- With an "action_id" parameter, `DELETE /api/v1/feed/id/action/action_id` returns whether or not the action was able to be deleted.
+
+a JSON object with a list of all the feed actions has the following structure:
++ a list of actions, each with the following structure:
+    + `action_data`: the action data including a list of email recipients
+    + `action_type`: the type of action, 0 for email, 1 for write to syslog, 3 for create alert 
+    + `group_id`: the id of the feed this action is enabled for
+    + `watchlist_id`: id of watchlist that employs this feed
+
+Example:
+```
+GET /api/v1/feed/6/action
+[
+    {
+        action_data: "{"email_recipients":[2]}"
+        action_type: 3
+        group_id: 6
+        id: 18
+        watchlist_id: null
+    },
+    {
+        action_data: "{"email_recipients":[2]}", 
+        action_type: 1
+        group_id: 6
+        id: 22
+        watchlist_id: null
+    }
+]
 
 -----
 
