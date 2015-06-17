@@ -21,12 +21,14 @@ def build_cli_parser():
                       help="Do not verify server SSL certificate.")
     parser.add_option("-i", "--id", action = "store", default = None, dest = "id",
                       help = "id of the investigation this event is for")
+    parser.add_option("-e", "--tagged_event_id", default = None, dest = "tagged_event_id",
+                      help = "id of the tagged_event to be deleted")
     return parser
 
 def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
-    if not opts.server_url or not opts.token or not opts.id:
+    if not opts.server_url or not opts.token or not opts.id or not opts.tagged_event_id:
       print "Missing required param; run with --help for usage"
       sys.exit(-1)
 
@@ -35,7 +37,7 @@ def main(argv):
 
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
 
-    event = cb.event_del(opts.id)
+    event = cb.event_del(opts.id, opts.tagged_event_id)
     print ""
     for key in event.keys():
         print "%-20s : %s" % (key, event[key])

@@ -9,7 +9,7 @@ sys.path.append('../src/cbapi')
 import cbapi
 
 def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Get the info of the tagged_events for a certain investigation")
+    parser = optparse.OptionParser(usage="%prog [options]", description="Enumerate the events for this investigation")
 
     # for each supported output type, add an option
     #
@@ -35,15 +35,17 @@ def main(argv):
 
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
 
-    events = cb.event_info(opts.id)
-    print events
-    print ""
+    events = cb.event_enum(opts.id)
     count = 1
     for event in events:
         print ""
         print "Event Number: %s" % count
         count = count + 1
         for field in event:
+            if field == "event_data":
+                for entry in event['event_data']:
+                    event_data = event['event_data']
+                    print "%-25s : %s" % (entry, event_data[entry])
                 print "%-20s : %s" % (field, event[field])
 
 

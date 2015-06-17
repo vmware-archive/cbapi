@@ -6,7 +6,6 @@
 
 import json
 import requests
-import zipfile
 import shutil
 
 class CbApi(object):
@@ -1518,7 +1517,7 @@ class CbApi(object):
 
         return r.json()
 
-    def event_info(self, investigation_id):
+    def event_enum(self, investigation_id):
         '''
         Enumerates the tagged_events for a certain investigation and gives their information
         :param id: the id of the investigation this tagged_event is for
@@ -1528,29 +1527,42 @@ class CbApi(object):
         r.raise_for_status()
         return r.json()
 
-    def event_update(self, id, new_description):
+    def event_update(self, id, tagged_event_id, new_description):
         '''
         Updates the description of an event on the server
         :param id: the updated event's investigation id
+        :param tagged_event_id the id of the specific tagged event to be updated
         :return: the updated event
         '''
 
-        #be able to target a single event
-        old_event_as_list = self.event_info(id)
-        old_event = old_event_as_list[0]
+        #use tagged_event_id to get the exact event out of all tagged events for this investigation
+        #
+        events = self.event_enum(id)
+        for event in events:
+            if int(event['id']) == int(tagged_event_id):
+                old_event = event
         old_event_data = old_event['event_data']
-        new_event_data = {\
-            'description' : new_description,\
-            }
 
-        request = {\
+        #add each of the existing fields from old_event_data into new_event_data,
+        #with the exception of description which is being updated
+        #
 
-           'start_date' : old_event['start_date'],\
-           'event_data' : {\
-                            # set every other event_data field to the old_event value
-                            'description' : new_description
-                          },\
-                  }
+        new_event_data = {}
+        for item in old_event_data:
+            if str(item) == 'description':
+                new_event_data.udpate({'description' : new_event_data})
+            else:
+                new_event_data.update({item : old_event_data[str(item)]})
+
+        #form request with existing fields of old_event, with the exception of
+        #event_data being replaced with new_event_data
+        #
+        request = {}
+        for item in old_event.keys():
+            if item == 'description':
+                new_event_data['description'] = new_description
+            else:
+                new_event_data[item] = old_event_data[item]
 
         url = "%s/api/tagged_event/%s" % (self.server, id)
 
@@ -1559,13 +1571,15 @@ class CbApi(object):
 
         return r.json()
 
-    def event_del(self, id):
+    def event_del(self, id, tagged_event_id):
         '''
         Deletes a tagged_event from the server
-        :param id: id of the event to be deleted
+        :param id: id of the investigation these events are associated with
+        :param tagged_event_id: the id of the specific event to be deleted
         :return: success or failure
         '''
-        # Way to deal with selecting boxes on the UI
+        # Way to deal with selecting boxes on the UI/ deleting the event with id "tagged_event_id"
+        #
         url = "%s/api/tagged_event/%s" % (self.server, id)
         r = requests.delete(url, headers = self.token_header, verify=self.ssl_verify)
         r.raise_for_status()
