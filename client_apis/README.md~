@@ -2205,6 +2205,61 @@ returns a JSON object with the "count" number of unresolved users by time in ord
 
 
 
+####/api/tagged_event/(id)
+Enumeration, addition, deletion, and updating of tagged_events associated with an investigation
+
+*Supports* `GET`, `PUT`, and `DELETE` for `/api/tagged_event/<id>`
+*Supports* `POST` for `/api/tagged_event`
+
+#####Returns:
+
++ With no "id" parameter, `POST /api/tagged_event` returns whether or not the posting attempt was successful
++ With an "id" parameter, `GET /api/tagged_event/id` returns a JSON object with the structure of the tagged_events of the investigation with id "id"
++ With an "id" parameter, `PUT /api/tagged_event/id` returns whether or not the updating attempt was successful
++ With an "id" parameter, `DELETE /api/tagged_event/id` returns whether or not the deleting attempt was successful
+
+A JSON object of events has the following structure:
++ a list of events, each with the following structure:
+    + `date_tagged`: the date the event was tagged
+    + `event_data`: the data for this tagged_event
+    + `event_id`: the event id
+    + `event_type`: type of the event
+    + `id`: the investigation id of the event
+    + `investigation_id`: the investigation id this event is associated with
+    + `process_id`: id of the process that this event is under
+    + `segment_id`: id of the segment of the server this event is in
+    + `start_date`: date to start monitoring for the event
+    + `tagged_by_user_id`: id of the user to tag the event
+    + `unique_id: unique id of the event
+
+Example:
+```
+GET /api/tagged_event/1
+
+[
+    {
+        date_tagged: "2015-06-12 11:53:30.175373-04:00"
+        event_data: "{"description": "Testing event addition"}"
+        event_id: null
+        event_type: null
+        id: 8
+        investigation_id: 1
+        process_id: null
+        segment_id: 0
+        start_date: "2015-06-03 20:00:00-04:00"
+        tagged_by_user_id: null
+        unique_id: null
+    }
+]
+
+####
+
+
+
+
+
+
+
  
 
 
