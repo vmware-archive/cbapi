@@ -156,6 +156,9 @@ class CbProcessEvent(CbBaseEvent):
         self.parent_md5hash = self.msg.parent_md5
         self.parent_path = self.msg.parent_path
         self.creationobserved = self.msg.creationobserved
+        self.username = None
+        if msg.HasField('username'):
+            self.username = self.msg.username
 
     def to_obj(self):
 
@@ -171,6 +174,8 @@ class CbProcessEvent(CbBaseEvent):
         dict['md5'] = self.md5hash.encode("hex").upper() 
         dict['command_line'] = self.commandline
         dict['sensor_id'] = self.sensorid
+        if (self.username is not None):
+            dict['username'] = self.username
 
         return dict
 
