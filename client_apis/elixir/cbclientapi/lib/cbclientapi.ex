@@ -1,7 +1,0 @@
-defmodule Cbclientapi do
-  
-
-
-
-
-end
