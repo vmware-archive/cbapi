@@ -20,6 +20,12 @@ setup(
     package_dir = {'': 'src'},
     zip_safe=False,
     platforms='any',
+    install_requires=[
+        'simplejson',
+        'requests',
+        'pika',
+        'protobuf'
+    ],
     classifiers=[
         'Environment :: Web Environment',
         'Intended Audience :: Developers',

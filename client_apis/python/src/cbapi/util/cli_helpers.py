@@ -29,7 +29,7 @@
 
 import optparse
 import sys
-from cbcommunity.util.extended_api import CbExtendedApi
+from extended_api import CbExtendedApi
 
 def build_cli_parser(description, args):
     """

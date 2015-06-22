@@ -28,8 +28,8 @@
 # last updated 2015-05-25 by Ben Johnson bjohnson@bit9.com
 #
 
-from cbcommunity.util.live_response_helpers import LiveResponseHelper
-from cbcommunity.util.messaging_helpers import QueuedCbSubscriber
+from live_response_helpers import LiveResponseHelper
+from messaging_helpers import QueuedCbSubscriber
 
 class MessageSubscriberAndLiveResponseActor(QueuedCbSubscriber):
     """
