@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 '''
 
@@ -29,6 +29,7 @@
 
 
 import os
+import re
 import sys
 import json
 import time
@@ -522,14 +523,14 @@ def on_bus_msg(channel, method_frame, header_frame, body):
         # we set multiple to true to ensure that we ack all previous messages
         channel.basic_ack(delivery_tag=method_frame.delivery_tag, multiple=True)
 
-def processEventsFromBus(rabbit_mq_user, rabbit_mq_pass):
+def processEventsFromBus(cb_hostname, rabbit_mq_user, rabbit_mq_pass):
 
     #import this here so the other functions (file, directory)
     # work without pika installed
     import pika
 
     credentials = pika.PlainCredentials(rabbit_mq_user, rabbit_mq_pass)
-    parameters = pika.ConnectionParameters('localhost',
+    parameters = pika.ConnectionParameters(cb_hostname,
                                            5004,
                                            '/',
                                            credentials)
@@ -626,6 +627,9 @@ if __name__ == '__main__':
     # cbapi info for host lookups
     if opts.url is not None:
         cbapi['url'] = opts.url
+        hostmatch = re.compile('https?://([^/]+)/?').match(opts.url)
+        if hostmatch:
+            cbhost = hostmatch.group(1)
     if opts.token is not None:
         cbapi['apitoken'] = opts.token
     if opts.ssl_verify is not None:
@@ -654,6 +658,9 @@ if __name__ == '__main__':
     if (pwd is None):
         pwd = getBusPasswordFromConfig()
 
-    processEventsFromBus(user, pwd)
+    if cbhost is None:
+        cbhost = 'localhost'
+
+    processEventsFromBus(cbhost, user, pwd)
 
 
