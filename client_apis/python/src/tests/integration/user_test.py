@@ -72,7 +72,7 @@ class CbApiUserTest(CbApiIntegrationTest):
     def test_get_global_admin_as_non_ga_admin(self):
         # list users and find a global admin
         users = self.cb.user_enum()
-        self.assertIsNoNone(users)
+        self.assertIsNotNone(users)
 
         ga_users = filter(lambda u: u['global_admin'] == True, users)
         self.assertGreater(len(users), 0)
@@ -108,18 +108,6 @@ class CbApiUserTest(CbApiIntegrationTest):
         user_add_params['username'] = "testuser " + TestDataGen.gen_uid_hex()
 
         # should not be able to create user with a space in the username
-        with self.assertRaises(requests.HTTPError) as cm:
-            self.cb.user_add_from_data(**user_add_params)
-
-        self.assertEqual(cm.exception.response.status_code, 400)
-
-    def test_create_user_bad_password_confirm(self):
-        user_data = TestDataGen.gen_user()
-
-        user_add_params = self._convert_user_data_to_user_add_params(user_data)
-        user_add_params['confirm_password'] = "wr0ngp@ssw0rd"
-
-        # should not be able to create user with bad password confirmation
         with self.assertRaises(requests.HTTPError) as cm:
             self.cb.user_add_from_data(**user_add_params)
 
@@ -293,7 +281,8 @@ class CbApiUserTest(CbApiIntegrationTest):
         self.assertIn('password', user_data);
 
         user_add_params = user_data.copy();
-        user_add_params['confirm_password'] = user_add_params['password'];
+        del user_add_params['teams']
+        user_add_params['team_ids'] = user_data['teams']
         return user_add_params;
 
     def _verify_retrieved_user(self, user):
