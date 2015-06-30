@@ -22,10 +22,10 @@ def build_cli_parser():
                       help="Do not verify server SSL certificate.")
     parser.add_option("-u", "--username", action="store", default=None, dest="username",
                       help="User Name")
-    #parser.add_option("-f", "--first_name", action = "store", default = None, dest = "first_name",
-                      #help = "First Name of the user")
-    #parser.add_option("-l", "--last_name", action = "store", default = None, dest = "last_name",
-                      #help = "Last Name of the user")    
+    parser.add_option("-f", "--first_name", action = "store", default = None, dest = "first_name",
+                      help = "First Name of the user")
+    parser.add_option("-l", "--last_name", action = "store", default = None, dest = "last_name",
+                      help = "Last Name of the user")
     
     return parser
 
@@ -48,15 +48,17 @@ def main(argv):
             print "-> No current user found with name: %s %s" % opts.first_name, opts.last_name   
     else:
         un = opts.username
-        if cb.user_info(un) is None:
+        does_exist = False
+        for user in cb.user_enum():
+            if un == user['username']:
+                does_exist = True
+
+        if not does_exist:
             print "-> No current user found with username: %s" % opts.username
-    
-    
-
-    # delete the user
-    cb.user_del(un)
-
-    print "-> User deleted [user = %s]" % un
+        else:
+            # delete the user
+            cb.user_del(un)
+            print "-> User deleted [user = %s]" % un
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

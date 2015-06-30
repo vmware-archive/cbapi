@@ -6,7 +6,7 @@ sys.path.append('../src/cbapi')
 import cbapi
 
 def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Retrieve info about one bainary file")
+    parser = optparse.OptionParser(usage="%prog [options]", description="Enumerate unresolved hosts by time")
 
     # for each supported output type, add an option
     #
@@ -16,27 +16,33 @@ def build_cli_parser():
                       help="API Token for Carbon Black server")
     parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
                       help="Do not verify server SSL certificate.")
-    parser.add_option("-m", "--md5hash", action="store", default=None, dest = "md5hash",
-                      help = "md5hash")
+    parser.add_option("-t", "--count", action="store", default=10, dest="count",
+                      help = "OPTIONAL - Number of alerts to print, defaults to 10")
+    parser.add_option("-s", "--sort", action="store", default = 'desc',
+                      help = "OPTIONAL - type either 'asc' for ascending order or 'desc' for descending order, defaults to desc")
+
     return parser
 
 def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
-    if not opts.server_url or not opts.token or not opts.md5hash:
+    if not opts.server_url or not opts.token:
         print "Missing required param; run with --help for usage"
         sys.exit(-1)
 
     # build a cbapi object
     #
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
+    unresolved_hosts = cb.detect_unresolvedhostsbytime(opts.count, opts.sort)
 
-    binary = cb.binary_info(opts.md5hash)
-    if binary is None:
-        print "No binary file found with md5hash: %s" % opts.md5hash
-
-    else:
-        print "binary file with md5 hash %s sent to ~/Downloads directory"
+    host_num = 1
+    for host in unresolved_hosts:
+        print ""
+        print "Host Number %s" % host_num
+        print "-"*50
+        host_num = host_num + 1
+        for key in host.keys():
+             print "%-22s : %s" % (key, host[key])
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

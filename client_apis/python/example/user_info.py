@@ -31,7 +31,7 @@ def build_cli_parser():
 
 def output_user_info(user):
     
-    print "%-20s %s" % (user['first_name'],user['last_name'])
+    print "%-20s %s" % (user['first_name'], user['last_name'])
     print "%s" % ('-' * 80,)
     print "%-20s : %s" % ("username", user['username'])
     print "%-20s : %s" % ("User First Name", user['first_name'])
@@ -70,12 +70,19 @@ def main(argv):
              username = user['username']
     else:
         username = opts.username
-        if cb.user_info(username) is None:
-            print "-> No configured user with name '%s' found!" % (opts.username)
-            return
-        print username
+        #Check if the username exists
+        does_exist = False
 
-    output_user_info(cb.user_info(username))
+        for user in cb.user_enum():
+            if username == user['username']:
+                does_exist = True
+
+        if does_exist:
+            user = cb.user_info(username)
+            output_user_info(user)
+        else:
+            print "-> No configured user with username '%s' found!" % (opts.username)
+            sys.exit(-1)
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

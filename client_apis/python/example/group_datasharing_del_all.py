@@ -2,11 +2,14 @@ __author__ = 'bwolfson'
 
 import sys
 import optparse
+
+# in the github repo, cbapi is not in the example directory
 sys.path.append('../src/cbapi')
+
 import cbapi
 
 def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Retrieve info about one bainary file")
+    parser = optparse.OptionParser(usage="%prog [options]", description="Delete all datasharing configurations for a sensor group")
 
     # for each supported output type, add an option
     #
@@ -16,27 +19,34 @@ def build_cli_parser():
                       help="API Token for Carbon Black server")
     parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
                       help="Do not verify server SSL certificate.")
-    parser.add_option("-m", "--md5hash", action="store", default=None, dest = "md5hash",
-                      help = "md5hash")
+    parser.add_option("-i", "--group_id", action="store", default=True, dest= "group_id",
+                      help = "id of sensor group whose datasharing configs to enumerate")
     return parser
 
 def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
-    if not opts.server_url or not opts.token or not opts.md5hash:
-        print "Missing required param; run with --help for usage"
-        sys.exit(-1)
+    if not opts.server_url or not opts.token or not opts.group_id:
+      print "Missing required param; run with --help for usage"
+      sys.exit(-1)
 
     # build a cbapi object
     #
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
 
-    binary = cb.binary_info(opts.md5hash)
-    if binary is None:
-        print "No binary file found with md5hash: %s" % opts.md5hash
+    #check if the given group_id truly corresponds to one of the existing sensor groups
+    does_exist = False
+    for group in cb.group_enum():
+        if int(opts.group_id) == int(group['id']):
+            does_exist = True
 
+    if does_exist:
+        config = cb.group_datasharing_del_all(opts.group_id)
+
+        for key in config.keys():
+            print "%-20s : %s" % (key, config[key])
     else:
-        print "binary file with md5 hash %s sent to ~/Downloads directory"
+        sys.exit(-1)
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

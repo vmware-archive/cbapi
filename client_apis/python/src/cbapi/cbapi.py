@@ -6,7 +6,7 @@
 
 import json
 import requests
-
+import shutil
 
 class CbApi(object):
     """ Python bindings for Carbon Black API 
@@ -342,6 +342,16 @@ class CbApi(object):
         r.raise_for_status()
         return r.json()
 
+    def binary_enum(self):
+        '''
+        Retrieves all the binary files stored in the server
+        '''
+        url = "%s/api/v1/binary" % (self.server,)
+
+        r = requests.get(url, headers=self.token_header,verify = self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
     def binary_summary(self, md5):
         """ get the metadata for a binary.  Requires the md5 of the binary.
 
@@ -351,16 +361,33 @@ class CbApi(object):
         r.raise_for_status()
         return r.json()
 
-    def binary(self, md5hash):
+    def binary_info(self, md5hash):
         '''
         download binary based on md5hash
         '''
 
         r = requests.get("%s/api/v1/binary/%s" % (self.server, md5hash),
-                         headers=self.token_header, verify=self.ssl_verify)
-
+                         headers=self.token_header, verify=self.ssl_verify, stream = True)
         r.raise_for_status()
-        return r._content
+
+        shutil.copy(r, "~/Downloads")
+
+
+    def binary_hits_enum(self, md5):
+        '''
+        Enumerates all binary threat_intel_hits
+        '''
+
+        r = requests.get("%s/api/v1/binary/%s/threat_intel_hits" % (self.server,md5),
+                         headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def binary_hits_add(self):
+        '''
+        Adds a binary threat_intel_hit to the Carbon Black server
+        '''
+
 
     def sensor(self, sensor_id):
         '''
@@ -762,6 +789,106 @@ class CbApi(object):
 
         return r.json()
 
+    def feed_report_stats(self, feed_id, report_id):
+        '''
+        Get feed report stats
+        '''
+
+        url = "%s/api/v1/feed/%s/report/%s/stats" % (self.server, feed_id, report_id)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def feed_action_enum(self,id):
+        '''
+        Gets the actions for a certain feed from the Carbon Black Server
+        :param id: the id of the feed
+        :return: the actions associated with that feed
+        '''
+
+        url = "%s/api/v1/feed/%s/action" % (self.server, id)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def feed_action_add(self, id, action_type_id, email_recipient_user_ids):
+        '''
+        enables one of the three pre-determined actions to be performed
+        upon hits for feeds: email, create alert, and write to syslog
+        :param id: the id of the feed
+        :param action_type_id: the id for the type of action
+        :param email_recipient_user_ids: ids of users who will be emailed upon a hit
+        :return: the added action
+        '''
+        url = "%s/api/v1/feed/%s/action" % (self.server, id)
+
+        request = {
+            "action_data": "{\"email_recipients\":[%s]}" % (",".join(str(user_id) for user_id in email_recipient_user_ids)),
+            "action_type": action_type_id,
+            "group_id": id, #feed id
+            "watchlist_id": None
+        }
+
+        r = requests.post(url, headers = self.token_header, data = json.dumps(request), verify = self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def feed_action_update(self, id , action_id, action_type_id):
+        '''
+        updates a feed action
+        :param id: the feed id
+        :param action_id: the action id
+        :param action_type_id: the action type id
+        :return: the updated feed
+        '''
+        url = "%s/api/v1/feed/%s/action/%s" % (self.server, id, action_id)
+
+        old_actions = self.feed_action_enum(id)
+        for action in old_actions:
+            if int(action['id']) == int(action_id):
+                curr_action = action
+
+        request = {
+            "action_data": curr_action['action_data'],
+            "action_type": action_type_id,
+            "group_id": curr_action['group_id'],
+            "id" : curr_action['id'],
+            "watchlist_id": curr_action['watchlist_id']
+        }
+
+        r = requests.put(url, headers = self.token_header, data = json.dumps(request), verify = self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def feed_action_del(self, id, action_id):
+        '''
+        Deletes a feed action
+        :param id: the id of the feed
+        :param action_id: the id of the action
+        :return: whether successful or not
+        '''
+        url =  "%s/api/v1/feed/%s/action/%s" % (self.server, id, action_id)
+        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def feed_requirements(self, id):
+        '''
+        Get feed requirements
+        '''
+
+        url = "%s/api/v1/feed/%s/requirements" % (self.server, id)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
     def user_enum(self):
         '''
         enumerate all users
@@ -797,7 +924,7 @@ class CbApi(object):
 
         return r.json()
 
-    def user_add_from_data(self, username, first_name, last_name, password, confirm_password, global_admin, teams, email):
+    def user_add_from_data(self, username, first_name, last_name, password, global_admin, team_ids, email):
         '''
         add a new user to the Carbon Black server
         '''
@@ -806,10 +933,9 @@ class CbApi(object):
                     'first_name' : first_name,\
                     'last_name' : last_name,\
                     'password' : password,\
-                    'confirm_password' : confirm_password,\
                     'global_admin' : global_admin,\
-                    'teams' : teams,\
-                    'email' : email,\
+                    'teams' : team_ids,\
+                    'email' : email
                   }
         url = "%s/api/user" % (self.server,)
 
@@ -1188,24 +1314,6 @@ class CbApi(object):
         r.raise_for_status()
         return r.json()
 
-    def binary_enum(self):
-        '''
-        Retrieves all the binary files stored in the server
-        '''
-        url = "%s/api/v1/binary" % (self.server,)
-
-        r = requests.get(url, headers=self.token_header,verify = self.ssl_verify)
-        r.raise_for_status()
-        return r.json()
-
-    def binary_info(self, md5):
-        '''
-        Retrieves a specific binary file from the Carbon Black server, specified by md5
-        '''
-        url = "%s/api/v1/binary/%s/summary" % (self.server, md5)
-
-        r = requests.get(url, headers=self.token_header,verify = self.ssl_verify)
-        r.raise_for_status()
 
     def site_enum(self):
         """
@@ -1270,4 +1378,450 @@ class CbApi(object):
         r.raise_for_status()
 
         return r.json()
+
+    def dashboard_alliance(self):
+        '''
+        Enumerates the info for the alliance_client of the Carbon Black server
+        '''
+
+        url = "%s/api/v1/dashboard/alliance" % self.server
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def dashboard_hosts(self):
+        '''
+        Enumerates the hosts on the Carbon Black server
+        '''
+
+        url = "%s/api/v1/dashboard/hosts" % self.server
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def dashboard_statistics(self):
+        '''
+        Enumerates the statistics for the Carbon Black Server
+        '''
+
+        url = "%s/api/v1/dashboard/statistics" % self.server
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+
+    def detect_feed_unresolvedalertsbyseverity(self, feed_name, count, sort):
+        '''
+        Enumerates "count" of unresolved alerts by severity on the Carbon Black Server, sorted in
+        either ascending or descending order given a feed name, count, and sorting order "sort"
+        count defaults to 10 and sort defaults to descending
+        '''
+
+        url = "%s/api/v1/detect/report/%s/unresolvedalertsbyseverity/%s/%s" % (self.server, feed_name, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+
+    def detect_feed_unresolvedalertsbytime(self, feed_name, count, sort):
+        '''
+        Enumerates "count" of unresolved alerts by time on the Carbon Black Server, sorted in
+        either ascending or descending order given a feed name, count, and sorting order "sort"
+        count defaults to 10 and sort defaults to descending
+        '''
+
+        url = "%s/api/v1/detect/report/%s/unresolvedalertsbyseverity/%s/%s" % (self.server, feed_name, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_feed_unresolvedalerttrend(self, feed_name, days):
+        '''
+        Enumerates unresolved alert trend for the given feed_name
+        for the past "days" amount of days. "days" defaults to 30
+        '''
+
+        url = "%s/api/v1/detect/report/%s/unresolvedalerttrend/%s" % (self.server, feed_name, days)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_adminsbyalertsresolved(self, count, sort):
+        '''
+        Enumerates "count" of admins by alerts resolved on the Carbon Black Server, sorted in
+        either ascending or descending order given a count, and sorting order "sort"
+        count defaults to 10 and sort defaults to descending
+        '''
+
+        url = "%s/api/v1/detect/report/adminsbyalertsresolved/%s/%s" % (self.server, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_adminsbyresolvedtime(self, count, sort):
+        '''
+        Enumerates "count" of admins by alerts resolved on the Carbon Black Server, sorted in
+        either ascending or descending order given a count, and sorting order "sort"
+        count defaults to 10 and sort defaults to descending
+        '''
+
+        url = "%s/api/v1/detect/report/adminsbyresolvedtimecd/%s/%s" % (self.server, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_alertresolutionaverage(self, days):
+        '''
+        Enumerates resolution times for the last "days" number of days.
+        "days" defaults to 30 if not supplied
+        '''
+
+        url = "%s/api/v1/detect/report/alertresolutionaverage/%s" % (self.server, days)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_binarydwell(self, days):
+        '''
+        Enumerates the binary dwell for the last "day" number of days
+        '''
+
+        url = "%s/api/v1/detect/report/binarydwell/%s" % (self.server, days)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_currentalertstatus(self):
+        '''
+        Returns the current alert status from the Carbon Black Server
+        '''
+
+        url = "%s/api/v1/detect/report/currentalertstatus" % self.server
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_currentmonitoringstatus(self):
+        '''
+        Returns the current monitoring status from the Carbon Black Server
+        '''
+
+        url = "%s/api/v1/detect/report/currentmonitoringstatus" % self.server
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_hosthygiene(self, days):
+        '''
+        Returns the host hygiene from the Carbon Black Server
+        '''
+
+        url = "%s/api/v1/detect/report/hosthygiene/%s" % (self.server, days)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_unresolvedalertsbyseverity(self, count, sort):
+        '''
+        Enumerates "count" of unresolved alerts by severity on the Carbon Black Server, sorted in
+        either ascending or descending order given a count, and sorting order "sort"
+        count defaults to 10 and sort defaults to descending
+        '''
+
+        url = "%s/api/v1/detect/report/unresolvedalertsbyseverity/%s/%s" % (self.server, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_unresolvedalertsbytime(self, count, sort):
+        '''
+        Enumerates "count" of unresolved alerts by time on the Carbon Black Server, sorted in
+        either ascending or descending order given a count, and sorting order "sort"
+        count defaults to 10 and sort defaults to descending
+        '''
+
+        url = "%s/api/v1/detect/report/unresolvedalertsbyseverity/%s/%s" % (self.server, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_unresolvedalerttrend(self, days):
+        '''
+        Enumerates unresolved alert trend for the past "days" amount of days. "days" defaults to 30
+        '''
+
+        url = "%s/api/v1/detect/report/unresolvedalerttrend/%s" % (self.server, days)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_unresolvedhostsbyseverity(self, count, sort):
+        '''
+        Retrieves the unresolved hosts from the server. Retrieves "count" number of the hosts and
+        organizes them in "sort" order (asc or desc) by severity. "count" defaults to 10 and "sort" defaults to desc
+        '''
+
+        url = "%s/api/v1/detect/report/unresolvedhostsbyseverity/%s/%s" % (self.server, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_unresolvedhostsbytime(self, count, sort):
+        '''
+        Retrieves the unresolved hosts from the server. Retrieves "count" number of the hosts and
+        organizes them in "sort" order (asc or desc) by time. "count" defaults to 10 and "sort" defaults to desc
+        '''
+
+        url = "%s/api/v1/detect/report/unresolvedhostsbytime/%s/%s" % (self.server, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_unresolvedusersbyseverity(self, count, sort):
+        '''
+        Retrieves the unresolved users from the server. Retrieves "count" number of the users and
+        organizes them in "sort" order (asc or desc) by severity. "count" defaults to 10 and "sort" defaults to desc
+        '''
+
+        url = "%s/api/v1/detect/report/unresolvedusersbyseverity/%s/%s" % (self.server, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_unresolvedusersbytime(self, count, sort):
+        '''
+        Retrieves the unresolved users from the server. Retrieves "count" number of the users and
+        organizes them in "sort" order (asc or desc) by time. "count" defaults to 10 and "sort" defaults to desc
+        '''
+
+        url = "%s/api/v1/detect/report/unresolvedusersbytime/%s/%s" % (self.server, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def event_add(self, investigation_id, description, start_date):
+        '''
+        Adds a tagged_event to an investigation on the server
+        :investigation_id: the id of the investigation to add the event to
+        :param description: description of the event
+        :param start_date: start date of the event
+        :return: the added event
+        '''
+        event_data = {\
+            'description' : description,\
+            }
+
+        request = {\
+           'investigation_id' : investigation_id,\
+           'event_data' : event_data,\
+           'start_date' : start_date,\
+                  }
+
+        url = "%s/api/tagged_event" % self.server
+
+        r = requests.post(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def event_enum(self, investigation_id):
+        '''
+        Enumerates the tagged_events for a certain investigation and gives their information
+        :param id: the id of the investigation this tagged_event is for
+        '''
+        url = "%s/api/tagged_event/%s" % (self.server, investigation_id)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def event_update(self, id, tagged_event_id, new_description):
+        '''
+        Updates the description of an event on the server
+        :param id: the updated event's investigation id
+        :param tagged_event_id the id of the specific tagged event to be updated
+        :return: the updated event
+        '''
+
+        #use tagged_event_id to get the exact event out of all tagged events for this investigation
+        #
+        events = self.event_enum(id)
+        for event in events:
+            if int(event['id']) == int(tagged_event_id):
+                old_event = event
+        old_event_data = old_event['event_data']
+
+        #add each of the existing fields from old_event_data into new_event_data,
+        #with the exception of description which is being updated
+        #
+
+        new_event_data = {}
+        for item in old_event_data:
+            if str(item) == 'description':
+                new_event_data.udpate({'description' : new_event_data})
+            else:
+                new_event_data.update({item : old_event_data[str(item)]})
+
+        #form request with existing fields of old_event, with the exception of
+        #event_data being replaced with new_event_data
+        #
+        request = {}
+        for item in old_event.keys():
+            if item == 'description':
+                new_event_data['description'] = new_description
+            else:
+                new_event_data[item] = old_event_data[item]
+
+        url = "%s/api/tagged_event/%s" % (self.server, id)
+
+        r = requests.put(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def event_del(self, id, tagged_event_id):
+        '''
+        Deletes a tagged_event from the server
+        :param id: id of the investigation these events are associated with
+        :param tagged_event_id: the id of the specific event to be deleted
+        :return: success or failure
+        '''
+        # Way to deal with selecting boxes on the UI/ deleting the event with id "tagged_event_id"
+        #
+        url = "%s/api/tagged_event/%s" % (self.server, id)
+        r = requests.delete(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+
+    def event_by_process_id(self, proc_id):
+        '''
+        Retrieves a tagged_event specified by its process_id
+        :param proc_id: the process_id of the event
+        :return: the tagged_event
+        '''
+
+        url = "%s/api/tagged_events/%s" % (self.server, proc_id)
+        r = requests.get(url, headers = self.token_header, verify = self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def get_builds(self):
+        '''
+        Gets the build versions from the Carbon Black server
+        '''
+        url = "%s/api/builds" % self.server
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def get_login_caps(self):
+        '''
+        Gets login-caps from Carbon Black server
+        '''
+        url = "%s/api/login-caps" % self.server
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def group_datasharing_enum(self, group_id):
+        '''
+        Enumerates the datasharing settings for the group with id "group_id"
+        from Carbon Black server
+        '''
+        url = "%s/api/v1/group/%s/datasharing" % (self.server, group_id)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    # this probably needs something like add_from_data, also look at line
+    # that Jeremiah sent you that updated the datasharing settings
+    def group_datasharing_add(self, group_id, who, what):
+        '''
+        Add a new datasharing configuration to a sensor group in the CB server
+        :param group_id: the sensor group id
+        :param what: the type of data being shared i.e. "binaries" or "hashes" etc.
+        :param who: What company the data is being shared with
+        :return: the added configuration
+        '''
+        request = {\
+            'group_id' : group_id,\
+            'who' : who,\
+            'what' : what,\
+                  }
+
+        url = "%s/api/v1/group/%s/datasharing" % (self.server, group_id)
+
+        r = requests.post(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def group_datasharing_del_all(self, group_id):
+        '''
+        Deletes all datasharing configurations for the group with id "group_id"
+        from the Carbon Black server
+        '''
+        url = "%s/api/v1/group/%s/datasharing" % (self.server, group_id)
+        r = requests.delete(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def group_datasharing_info(self, group_id, config_id):
+        '''
+        Retrieves a specific datasharing configuration of a sensor group
+        :param group_id: id of sensor group
+        :param config_id: id of specific datasharing configuration
+        :return: the datasharing info for one configuration of a group
+        '''
+        url = "%s/api/v1/group/%s/datasharing/%s" % (self.server,group_id,config_id)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def group_datasharing_del(self, group_id, config_id):
+        '''
+        Deletes a specific datasharing configuration of a sensor group from the
+        Carbon Black server
+        :param group_id: id of sensor group
+        :param config_id: id of specific datasharing configuration
+        :return: the deleted configuration
+        '''
+        url = "%s/api/v1/group/%s/datasharing/%s" % (self.server,group_id,config_id)
+        r = requests.delete(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+
+
+
+
+
 

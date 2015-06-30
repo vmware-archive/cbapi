@@ -51,7 +51,10 @@ The following APIs are versioned.
 - [`/api/v1/watchlist`](#apiv1watchlist) - Watchlist enumeration, addition, modification, and deletion
 
 #### Feeds
-- [`/api/v1/feed`](#apiv1feed) - Feed enumeration, addition, modification, and deletion
+- [`/api/v1/feed`](#apiv1feed) - Feed enumeration and addition
+- [`/api/v1/feed/<id>`](#apiv1feedid) - Feed modification and deletion
+- [`/api/v1/feed/id/action`](#apiv1feedidaction) - Feed action enumeration and addition
+- [`/api/v1/feed/id/action/<action_id>`](#apiv1feedactionactionid) - Feed action updating and deletion
 
 #### Users
 - [`/api/users`](#apiusers) - User enumeration
@@ -66,7 +69,7 @@ The following APIs are versioned.
 
 #### Alerts
 - [`/api/v1/alert`](#apiv1alert) - Alert search
-- [`/api/v1/alert/<alertid>`] - Alert update and resolution
+- [`/api/v1/alert/<alertid>`](#apiv1alertalertid) - Alert update and resolution
 
 #### Banning 
 - [`/api/v1/banning/blacklist`] (#apiv1banningblacklist) - Banned md5 hash enumeration and addition
@@ -1013,6 +1016,44 @@ A feed record has the following structure:
 - `order`: a numeric hint as to the display order in the Carbon Black web console
 - `use_proxy`: boolean indicator as to if the Carbon Black server should use a web proxy when retrieving the feed contents
 
+####/api/v1/feed/id/action/(action_id)
+*Supports `GET` and `POST` for `/api/v1/feed/id/action`  
+*Supports `PUT` and `DELETE` for `/api/v1/feed/id/action/<action_id>`
+
+#####Returns
+
+- With no "action_id" parameter, `GET /api/v1/feed/id/action` returns a JSON object with a list of all the actions enabled for this feed
+- With no "action_id" parameter, `POST /api/v1/feed/id/action` returns whether or not the posting effort was successful.
+- With an "action_id" parameter, `PUT /api/v1/feed/id/action/action_id` returns whether or not the updating effort was successful.
+- With an "action_id" parameter, `DELETE /api/v1/feed/id/action/action_id` returns whether or not the action was able to be deleted.
+
+a JSON object with a list of all the feed actions has the following structure:
++ a list of actions, each with the following structure:
+    + `action_data`: the action data including a list of email recipients
+    + `action_type`: the type of action, 0 for email, 1 for write to syslog, 3 for create alert 
+    + `group_id`: the id of the feed this action is enabled for
+    + `watchlist_id`: id of watchlist that employs this feed
+
+Example:
+```
+GET /api/v1/feed/6/action
+[
+    {
+        action_data: "{"email_recipients":[2]}"
+        action_type: 3
+        group_id: 6
+        id: 18
+        watchlist_id: null
+    },
+    {
+        action_data: "{"email_recipients":[2]}", 
+        action_type: 1
+        group_id: 6
+        id: 22
+        watchlist_id: null
+    }
+]
+
 -----
 
 ####  `/api/v1/sensor/(id)?hostname=(hostname)&ip=(ipaddr)`
@@ -1498,8 +1539,8 @@ A banned hash has the following structure:
 + `username`: the username of the current user
 + `audit` : modifications to the banned hash
 + `block_count` : number of times this hash has been blocked
-+ `user_id : id of the current user
-+ `timestamp : time of access
++ `user_id` : id of the current user
++ `timestamp` : time of access
 + `text` : The Notes section of the banned hash
 + `md5hash` : md5 hash of the file
 + `enabled` : Whether or not the CB server is scanning for this hash
@@ -1600,6 +1641,696 @@ GET /api/v1/banning/restrictions
             7: "%SystemRoot%\system32\lsass.exe"
         ]
 ```
+
+####/api/v1/dashboard/alliance
+Dashboard alliance info
+
+*Supports*: `GET` for `/api/v1/dashboard/alliance`
+
+#####Returns:
+
+`GET /api/v1/dashboard/alliance` returns a JSON object with the structure of the retrieved alliance 
+
+An alliance JSON object has the following structure:
+
++ `alliance_client` : The alliance object which contains:  
+    + `is_enabled` : whether or not the alliance client is enabled  
+    + `last_failure_code` : the code for the last time the alliance client failed  
+    + `is_connected` : whether or not the alliance client is connected  
+    + `last_failure_time` : the time of the last failure
+
+Example:
+```
+GET external.cloud.carbonblack.com/api/v1/dashboard/alliance
+
+    alliance_client: 
+        is_connected: false
+        is_enabled: true
+        last_failure_code: 600
+        last_failure_time: "2015-06-08 20:42:17.721631+00:00"
+
+```
+
+####/api/v1/dashboard/hosts
+Dashboard hosts info
+
+*Supports*: `GET` for `/api/v1/dashboard/hosts`
+
+#####Returns:
+
+`GET /api/v1/dashboard/hosts` returns a JSON object with the structure of the retrieved hosts
+
+A hosts JSON object has the following structure:
+
++ `hosts` : an array of host objects, each with the following fields:
+    + `count`: 
+    + `punctual`:
+    + `group_id`:
+
+Example:
+```
+GET external.cloud.carbonblack.com/api/v1/dashboard/hosts
+
+    hosts:[  
+        {
+            count: 135, 
+            punctual: false, 
+            group_id: 1
+        },
+        {
+            count: 1,
+            punctual: false, 
+            group_id: 2
+        }]
+```
+
+####/api/v1/dashboard/statistics
+Dashboard statistics info
+
+*Supports*: `GET` for `/api/v1/dashboard/statistics`
+
+#####Returns:
+
+`GET /api/v1/dashboard/statistics` returns a JSON object with the structure of the dashboard statistics
+
+A statistics JSON object has the following structure:
+
++ `storage` : a list of servers which the UI has data on, for example:
+    + `192.237.206.117`: Server with a list of different statistic types such as:
+        + `EventStoreStats`: a list of Event Store Stats with the following structure:
+            + `CoreIndexSize`:
+            + `FileSystemName`:
+            + `MaxNumberDocuments`:
+            + `NumberDocuments`:
+            + `NumberSements`:
+            + `ShardId`:
+        + `FileSystems`: a list of file systems with the following structure:
+            + `AvailableSize`:
+            + `MountPoint`:
+            + `Name`:
+            + `TotalSize`:
+            + `Type`:
+            + `UsedSize`:
+        + `ModuleInfoStoreStats`:
+            + `CoreIndexSize`:
+            + `FileSystemName`:
+            + `MaxNumberDocuments`:
+            + `NumberDocuments`:
+            + `NumberSements`:
+            + `ShardId`:
+        + `ModuleStoreStats`:
+            + `FileSystemName`:
+            + `ModuleOnDiskCount`:
+            + `RecordedModulesCount`:
+            + `TotalSizeOnDisk`:
+            + `TotalUncompressedSize`:
+        + `SqlStoreStats`:
+            + `FileSystemName`:
+            + `Tables`: list of tables, each with structure as follows:
+                + `TotalSize`:
+                + `Name`:
+                + `IndexSize`:
+            + `TotalSize`:
+
+####/api/v1/detect/report/<feed_name>/unresolvedalertsbyseverity/(count)/(sort) and
+####/api/v1/detect/report/<feed_name>/unresolvedalertsbytime/(count)/(sort)
+Enumeration of unresolved alerts by severity score or by time. 
+
+*Supports* `GET` for `/api/v1/detect/report/<feed_name>/unresolvedalertsbyseverity/(count)/(sort)
+*Supports* `GET` for `/api/v1/detect/report/<feed_name>/unresolvedalertsbytime/(count)/(sort)
+
+#####Returns:
+
++ With no `count` and `sort` parameters, `GET /api/v1/detect/report/<feed_name>/unresolvedalertsbyseverity`  
+returns a JSON object with the first 10 unresolved alerts by severity in descending order  
+  
++ With a `count` parameter and no `sort` parameter  
+`GET /api/v1/detect/report/<feed_name>/unresolvedalertsbyseverity/count` returns a JSON object with the   "count" number of unresolved alerts by severity in descending order.
++ With `count` and `sort` parameters, `GET /api/v1/detect/report/<feed_name>/unresolvedalertsbyseverity`  
+returns a JSON object with the "count" number of unresolved alerts by severity in order specified by   "sort" (either ascending or descending)  
+
++ With no `count` or `sort` parameters, `GET /api/v1/detect/report/<feed_name>/unresolvedalertsbytime`  
+returns a JSON object with the first 10 unresolved alerts by time in descending order
++ With a `count` parameter and no `sort` parameter  
+`GET /api/v1/detect/report/<feed_name>/unresolvedalertsbytime/count` returns a JSON object with the   "count" number of unresolved alerts by severity in descending order.  
+  
++ With `count` and `sort` parameters, `GET /api/v1/detect/report/<feed_name>/unresolvedalertsbytime`  
+returns a JSON object with the "count" number of unresolved alerts by time in order specified by   "sort" (either ascending or descending)
+
+
+A JSON object of unresolved alerts has the following structure:
+
+a list of alerts, each with structure as follows:
+
++ `alert_severity` : severity score of the alert
++ `created_time` : Time of creation
++ `feed_name` : Name of the feed
++ `feed_rating` : rating of the feed
++ `ioc_confidence` : Indicator of Compromise confidence score
++ `md5` : md5 hash
++ `os_type` : Operating Systems type
++ `report_score` : Score for the report
++ `sensor_criticality` : criticality score of the sensor
++ `unique_id` : id of the unresolved alert
+
+Example:
+```
+GET external.carbonblack.com/api/v1/detect/report/VirusTotal/unresolvedalertsbytime/3/asc
+
+    [
+        {
+            alert_severity: 31.05
+            created_time: "2014-12-26T23:12:23.369Z"
+            feed_name: "virustotal"
+            feed_rating: 3
+            hostname: ""
+            ioc_confidence: 0.5
+            md5: "96B43A7BDDEEE7DF98983B886DE56DC7"
+            os_type: "windows"
+            report_score: 46
+            sensor_criticality: 3
+            unique_id: "99140c84-55b9-4eee-aa46-658baeeacb93"
+        },
+        {
+            alert_severity: 37.125
+            created_time: "2014-12-27T00:33:06.449Z"
+            feed_name: "virustotal"
+            feed_rating: 3
+            hostname: ""
+            ioc_confidence: 0.5
+            md5: "A487BAE084BBD75ECBDC5D9FEDE362BA"
+            os_type: "windows"
+            report_score: 55
+            sensor_criticality: 3
+            unique_id: "32097e17-46c0-4ca5-bdf0-85b608edd908"
+        },
+        {    
+            alert_severity: 44.55
+            created_time: "2014-12-27T00:42:06.909Z"
+            feed_name: "virustotal"
+            feed_rating: 3
+            hostname: ""
+            ioc_confidence: 0.5
+            md5: "E23DBA4B28EB7543D6D6ED5E06EEBCB6"
+            os_type: "windows"
+            report_score: 66
+            sensor_criticality: 3
+            unique_id: "a4356d81-457b-4825-8537-d662e3d04b4f"
+        }
+    ]
+```
+
+####/api/v1/detect/report/<feed_name>/unresolvedalerttrend/(days)
+Enumerates unresolved alerts over the last "days" number of days.
+
+*Supports* `GET` for `/api/v1/detect/report/<feed_name>/unresolvedalerttrend/(days)`
+
+#####Returns:
+
++ With no "days" parameter, `GET /api/v1/detect/report/<feed_name>/unresolvedalerttrend` returns a JSON object with the last 30 days worth of unresolved alerts.  
+
++ With a "days" parameter, `GET /api/v1/detect/report/<feed_name>/unresolvedalerttrend/days` returns a JSON object with the last "days" days worth of unresolved alerts.  
+
+A JSON object with past days of unresolved alerts has the following structure:
+
++ `counts`: a list of the unresolved alerts over the last "days" number of days. Each has the following structure:    
+    + `name`: Name of the alert
+    + `value`: Value of the alert
++ `start`: The start time of the trend
++ `end`: The end time of the trend
+
+Example:
+```
+GET `api/v1/detect/report/VirusTotal/unresolvedalerttrend
+
+counts: [
+          0:{
+                name: "2015-05-11T00:00:00Z", 
+                value: 453
+            },
+          1:{
+                name: "2015-05-12T00:00:00Z",
+                value: 450
+            },
+          2: {name: "2015-05-13T00:00:00Z", value: 452}
+          3: {name: "2015-05-14T00:00:00Z", value: 451}
+          4: {name: "2015-05-15T00:00:00Z", value: 444}
+          5: {name: "2015-05-16T00:00:00Z", value: 443}
+          6: {name: "2015-05-17T00:00:00Z", value: 441}
+          7: {name: "2015-05-18T00:00:00Z", value: 451}
+          8: {name: "2015-05-19T00:00:00Z", value: 447}
+          9: {name: "2015-05-20T00:00:00Z", value: 445}
+          10: {name: "2015-05-21T00:00:00Z", value: 444}
+          11: {name: "2015-05-22T00:00:00Z", value: 449}
+          12: {name: "2015-05-23T00:00:00Z", value: 444}
+          13: {name: "2015-05-24T00:00:00Z", value: 448}
+          14: {name: "2015-05-25T00:00:00Z", value: 447}
+          15: {name: "2015-05-26T00:00:00Z", value: 450}
+          16: {name: "2015-05-27T00:00:00Z", value: 453}
+          17: {name: "2015-05-28T00:00:00Z", value: 449}
+          18: {name: "2015-05-29T00:00:00Z", value: 449}
+          19: {name: "2015-05-30T00:00:00Z", value: 448}
+          20: {name: "2015-05-31T00:00:00Z", value: 443}
+          21: {name: "2015-06-01T00:00:00Z", value: 451}
+          22: {name: "2015-06-02T00:00:00Z", value: 452}
+          23: {name: "2015-06-03T00:00:00Z", value: 453}
+          24: {name: "2015-06-04T00:00:00Z", value: 448}
+          25: {name: "2015-06-05T00:00:00Z", value: 451}
+          26: {name: "2015-06-06T00:00:00Z", value: 463}
+          27: {name: "2015-06-07T00:00:00Z", value: 443}
+          28: {name: "2015-06-08T00:00:00Z", value: 452}
+          29: {name: "2015-06-09T00:00:00Z", value: 452}
+          30: {name: "2015-06-10T00:00:00Z", value: 445}
+        ]
+end: "2015-06-11T00:00:00Z"
+start: "2015-05-11T00:00:00Z"
+```
+
+####/api/v1/detect/report/adminsbyalertsresolved/(count)/(sort) and 
+####/api/v1/detect/report/adminsbyresolvedtime/(count)/(sort) 
+Enumerates admin in order of number of alerts they have resolved or time spent resolving alerts
+
+*Supports*: `GET` for `api/v1/detect/report/adminsbyalertsresolved/(count)/(sort)`  
+*Supports*: `GET` for `api/v1/detect/report/adminsbyresolvedtime/(count)/(sort)`
+
+#####Returns:
++ With no count parameter, `GET /api/v1/detect/report/adminsbyalertsresolved` returns a JSON object with maximum 10 enumerated admin sorted in descending order of how many alerts they have resolved.
+  
++ With a count parameter and no sort parameter, `GET /api/v1/detect/report/adminsbyalertsresolved/count` returns a JSON object with the "count" number of admin sorted in descending order of how many alerts they have resolved.  
++ With both a count and sort parameters, `GET /api/v1/detect/report/adminsbyalertsresolve/count/sort returns a JSON object with the "count" number of admin sorted in "sort" order (Either 'asc' for ascending or 'desc' for descending)  
+
++ With no count parameter, `GET /api/v1/detect/report/adminsbyresolvedtime` returns a JSON object with maximum 10 enumerated admin sorted in descending order of resolved time.  
++ With a count parameter and no sort parameter, `GET /api/v1/detect/report/adminsbyresolvedtime/count` returns a JSON object with the "count" number of admin sorted in descending order of resolved time.
+  
++ With both a count and sort parameters, `GET /api/v1/detect/report/adminsbyresolvedtime/count/sort returns a JSON object with the "count" number of admin sorted in "sort" order (Either 'asc' for ascending or 'desc' for descending
+
+A JSON object of admin users organized by alerts resolved has the following structure:
+
++ a list of admin, each with the following structure:
+    + `count`: Number of resolved alerts
+    + `name`: Name of admin
+    + `ratio`: Ratio of alerts resolved
+
+A JSON object of admin users organized by time resolving has the following structure:
+
++ a list of admin, each with the following structure:
+    + `average_hours`: Average hours spent resolving alerts
+    + `name`: Name of admin
+    + `ratio`: Ratio of time spent on resolving alerts
+
+####/api/v1/detect/report/alertresolutionaverage/(days)
+Enumerates resolution times over the last "days" number of days
+
+*Supports*: `GET` for `/api/v1/detect/report/alertresolutionaverage(days)
+
+#####Returns:
++ With no "days" parameter, `GET /api/v1/detect/report/alertresolutionaverage` returns a JSON object with the resolution data for each of the last 30 days.
++ With a "days" parameter, `GET /api/v1/detect/report/alertresolutionaverage/days` returns a JSON object with the resolution data for each of the last "days" number of days
+
+A JSON object with the resolution data has the following structure:
++ `resolution_time`: a list of the resolution data, each of which has the following structure:
+    + `date_offset`: Days away from present
+    + `total_resolutions`: Total resolutions for that day
+    + `average_in_seconds`: 
+    + `time_stamp`: Time stamp
+
+####/api/v1/detect/report/binarydwell/(days)
+Enumerates the binary dwell over the last "days" number of days
+
+*Supports*: `GET` for `/api/v1/detect/report/binarydwell/(days) 
+
+#####Returns:
++ With no "days" parameter, `GET /api/v1/detect/report/binarydwell` returns a JSON object with binary dwell info over the last 250 days.
++ With a "days" parameter, `GET /api/v1/detect/report/binarydwell` returns a JSON object with binary dwell info over the last "days" number of days.
+
+A JSON object with binary dwell info has the following structure:
++ `dwell`: a list of daily binary dwell info, each with the following structure:
+    + `30_day_avg`: average over 30 days
+    + `60_day_avg`: average over 60 days
+    + `90_day_avg`: average over 90 days
+    + `date_offset`: number of days away from present day
+    + `time_stamp`: time stamp 
++ `binaries`: list of binaries
+
+####/api/v1/detect/report/currentalertstatus
+Get the current alert status from the server
+
+*Supports*: `GET` for `/api/v1/detect/report/currentalertstatus`
+
+#####Returns:  
+`GET /api/v1/detect/report/currentalertstatus` returns a JSON object with the current alert status info
+
+A JSON object with the current alert status info has the following structure:
++ `unresolved`: information on the unresolved alerts in the following structure:
+    + `average_hours`: 
+    + `alerts`: number of alerts
+    + `hosts`: number of hosts
++ `resolved`:
+
+####/api/v1/detect/report/currentmonitoringstatus
+Get the current monitoring status
+
+*Supports*: `GET` for `/api/v1/detect/report/currentmonitoring`
+
+#####Returns:
+`GET /api/v1/detect/report/currentmonitoringstatus` returns a JSON object with the current monitoring status info.
+
+A JSON object with the current monitoring status info has the following structure:
++ `iocs`: number of indicators of compromise
++ `events_per_second`: Number of events happening per second
++ `hosts`: Number of hosts 
+
+####/api/v1/detect/report/hosthygiene/(days)
+Enumerate host hygiene over the past "days" number of days
+
+*Supports*: `GET` for `/api/v1/detect/report/hosthygiene/(days)`
+
+#####Returns:
++ With no "days" parameter, `GET /api/v1/detect/report/hosthygiene` returns a JSON object with the host hygiene data over the last 30 days.
++ With a "days" parameter, `GET /api/v1/detect/report/hosthygiene/days` returns a JSON object with the host hygiene data over the last "days" number of days/
+
+A JSON object with the host hygiene data has the following structure:
++ `hygiene`: a list of the host hygiene data over the last "days" number of days, each with the following structure:  
+    + `date_offset`: Number of days away from present day
+    + `total_hosts`: Number of total hosts
+    + `bad_hosts`: Number of bad hosts
+    + `ratio`: 
+    + `time_stamp`: time stamp
+
+####/api/v1/detect/report/unresolvedalertsbyseverity/(count)/(sort) and
+####/api/v1/detect/report/unresolvedalertsbytime/(count)/(sort)
+Enumeration of unresolved alerts by severity score or by time. 
+
+*Supports* `GET` for `/api/v1/detect/report/unresolvedalertsbyseverity/(count)/(sort)
+*Supports* `GET` for `/api/v1/detect/report/unresolvedalertsbytime/(count)/(sort)
+
+#####Returns:
+
++ With no `count` and `sort` parameters, `GET /api/v1/detect/report/unresolvedalertsbyseverity`  
+returns a JSON object with the first 10 unresolved alerts by severity in descending order  
+  
++ With a `count` parameter and no `sort` parameter  
+`GET /api/v1/detect/report/unresolvedalertsbyseverity/count` returns a JSON object with the   "count" number of unresolved alerts by severity in descending order.
++ With `count` and `sort` parameters, `GET /api/v1/detect/report/unresolvedalertsbyseverity`  
+returns a JSON object with the "count" number of unresolved alerts by severity in order specified by   "sort" (either ascending or descending)  
+
++ With no `count` or `sort` parameters, `GET /api/v1/detect/report/unresolvedalertsbytime`  
+returns a JSON object with the first 10 unresolved alerts by time in descending order
++ With a `count` parameter and no `sort` parameter  
+`GET /api/v1/detect/report/unresolvedalertsbytime/count` returns a JSON object with the   "count" number of unresolved alerts by severity in descending order.  
+  
++ With `count` and `sort` parameters, `GET /api/v1/detect/report/unresolvedalertsbytime`  
+returns a JSON object with the "count" number of unresolved alerts by time in order specified by   "sort" (either ascending or descending)
+
+
+A JSON object of unresolved alerts has the following structure:
+
+a list of alerts, each with structure as follows:
+
++ `alert_severity` : severity score of the alert
++ `created_time` : Time of creation
++ `feed_name` : Name of the feed
++ `feed_rating` : rating of the feed
++ `ioc_confidence` : Indicator of Compromise confidence score
++ `md5` : md5 hash
++ `os_type` : Operating Systems type
++ `report_score` : Score for the report
++ `sensor_criticality` : criticality score of the sensor
++ `unique_id` : id of the unresolved alert
+
+Example:
+```
+GET external.carbonblack.com/api/v1/detect/report/unresolvedalertsbytime/3/asc
+
+    [
+        {
+            alert_severity: 31.05
+            created_time: "2014-12-26T23:12:23.369Z"
+            feed_name: "virustotal"
+            feed_rating: 3
+            hostname: ""
+            ioc_confidence: 0.5
+            md5: "96B43A7BDDEEE7DF98983B886DE56DC7"
+            os_type: "windows"
+            report_score: 46
+            sensor_criticality: 3
+            unique_id: "99140c84-55b9-4eee-aa46-658baeeacb93"
+        },
+        {
+            alert_severity: 37.125
+            created_time: "2014-12-27T00:33:06.449Z"
+            feed_name: "virustotal"
+            feed_rating: 3
+            hostname: ""
+            ioc_confidence: 0.5
+            md5: "A487BAE084BBD75ECBDC5D9FEDE362BA"
+            os_type: "windows"
+            report_score: 55
+            sensor_criticality: 3
+            unique_id: "32097e17-46c0-4ca5-bdf0-85b608edd908"
+        },
+        {    
+            alert_severity: 44.55
+            created_time: "2014-12-27T00:42:06.909Z"
+            feed_name: "virustotal"
+            feed_rating: 3
+            hostname: ""
+            ioc_confidence: 0.5
+            md5: "E23DBA4B28EB7543D6D6ED5E06EEBCB6"
+            os_type: "windows"
+            report_score: 66
+            sensor_criticality: 3
+            unique_id: "a4356d81-457b-4825-8537-d662e3d04b4f"
+        }
+    ]
+```
+####/api/v1/detect/report/unresolvedalerttrend/(days)
+Get trend of unresolved alerts 
+
+*Supports*: `GET` for `/api/v1/detect/report/unresolvedalerttrend/(days)`
+
+#####Returns:
+
++ With no "days" parameter, `GET /api/v1/detect/report/unresolvedalerttrend` returns a JSON object with the last 30 days worth of unresolved alerts.  
+
++ With a "days" parameter, `GET /api/v1/detect/report/unresolvedalerttrend/days` returns a JSON object with the last "days" days worth of unresolved alerts.  
+
+A JSON object with past days of unresolved alerts has the following structure:
+
++ `counts`: a list of the unresolved alerts over the last "days" number of days. Each has the following structure:    
+    + `name`: Name of the alert
+    + `value`: Value of the alert
++ `start`: The start time of the trend
++ `end`: The end time of the trend
+
+Example:
+```
+GET `api/v1/detect/report/unresolvedalerttrend
+
+counts: [
+          0:{
+                name: "2015-05-11T00:00:00Z", 
+                value: 453
+            },
+          1:{
+                name: "2015-05-12T00:00:00Z",
+                value: 450
+            },
+          2: {name: "2015-05-13T00:00:00Z", value: 452}
+          3: {name: "2015-05-14T00:00:00Z", value: 451}
+          4: {name: "2015-05-15T00:00:00Z", value: 444}
+          5: {name: "2015-05-16T00:00:00Z", value: 443}
+          6: {name: "2015-05-17T00:00:00Z", value: 441}
+          7: {name: "2015-05-18T00:00:00Z", value: 451}
+          8: {name: "2015-05-19T00:00:00Z", value: 447}
+          9: {name: "2015-05-20T00:00:00Z", value: 445}
+          10: {name: "2015-05-21T00:00:00Z", value: 444}
+          11: {name: "2015-05-22T00:00:00Z", value: 449}
+          12: {name: "2015-05-23T00:00:00Z", value: 444}
+          13: {name: "2015-05-24T00:00:00Z", value: 448}
+          14: {name: "2015-05-25T00:00:00Z", value: 447}
+          15: {name: "2015-05-26T00:00:00Z", value: 450}
+          16: {name: "2015-05-27T00:00:00Z", value: 453}
+          17: {name: "2015-05-28T00:00:00Z", value: 449}
+          18: {name: "2015-05-29T00:00:00Z", value: 449}
+          19: {name: "2015-05-30T00:00:00Z", value: 448}
+          20: {name: "2015-05-31T00:00:00Z", value: 443}
+          21: {name: "2015-06-01T00:00:00Z", value: 451}
+          22: {name: "2015-06-02T00:00:00Z", value: 452}
+          23: {name: "2015-06-03T00:00:00Z", value: 453}
+          24: {name: "2015-06-04T00:00:00Z", value: 448}
+          25: {name: "2015-06-05T00:00:00Z", value: 451}
+          26: {name: "2015-06-06T00:00:00Z", value: 463}
+          27: {name: "2015-06-07T00:00:00Z", value: 443}
+          28: {name: "2015-06-08T00:00:00Z", value: 452}
+          29: {name: "2015-06-09T00:00:00Z", value: 452}
+          30: {name: "2015-06-10T00:00:00Z", value: 445}
+        ]
+end: "2015-06-11T00:00:00Z"
+start: "2015-05-11T00:00:00Z"
+```
+####/api/v1/detect/report/unresolvedhostsbyseverity/(count)/(sort) and
+####/api/v1/detect/report/unresolvedhostsbytime/(count)/(sort)
+Enumeration of unresolved hosts by severity score or by time. 
+
+*Supports* `GET` for `/api/v1/detect/report/unresolvedhostsbyseverity/(count)/(sort)
+*Supports* `GET` for `/api/v1/detect/report/unresolvedhostsbytime/(count)/(sort)
+
+#####Returns:
+
++ With no `count` and `sort` parameters, `GET /api/v1/detect/report/unresolvedhostsbyseverity`  
+returns a JSON object with the first 10 unresolved hosts by severity in descending order  
+  
++ With a `count` parameter and no `sort` parameter  
+`GET /api/v1/detect/report/unresolvedhostsbyseverity/count` returns a JSON object with the   "count" number of unresolved hosts by severity in descending order.
++ With `count` and `sort` parameters, `GET /api/v1/detect/report/unresolvedhostsbyseverity`  
+returns a JSON object with the "count" number of unresolved hosts by severity in order specified by   "sort" (either ascending or descending)  
+
++ With no `count` or `sort` parameters, `GET /api/v1/detect/report/unresolvedhostsbytime`  
+returns a JSON object with the first 10 unresolved hosts by time in descending order
++ With a `count` parameter and no `sort` parameter  
+`GET /api/v1/detect/report/unresolvedhostsbytime/count` returns a JSON object with the   "count" number of unresolved hosts by severity in descending order.  
+  
++ With `count` and `sort` parameters, `GET /api/v1/detect/report/unresolvedhostsbytime`  
+returns a JSON object with the "count" number of unresolved hosts by time in order specified by   "sort" (either ascending or descending)
+
+A JSON object of unresolved hosts has the following structure:
+
+a list of hosts, each with structure as follows:
++ `average_hours`: average hours
++ `os_type`: Type of Operating System
++ `hostname`: Name of the host
+
+Example:
+```
+GET /api/v1/detect/report/unresolvedhostsbytime
+
+[
+    {
+        average_hours: 38.0774272779,
+        os_type: "windows",
+        hostname: ""
+    },
+    {
+        average_hours: 43.1798545668, 
+        os_type: "Windows", 
+        hostname: "constantine-hp"
+    },
+]
+```
+####/api/v1/detect/report/unresolvedusersbyseverity/(count)/(sort) and
+####/api/v1/detect/report/unresolvedusersbytime/(count)/(sort)
+Enumeration of unresolved users by severity score or by time. 
+
+*Supports* `GET` for `/api/v1/detect/report/unresolvedusersbyseverity/(count)/(sort)
+*Supports* `GET` for `/api/v1/detect/report/unresolvedusersbytime/(count)/(sort)
+
+#####Returns:
+
++ With no `count` and `sort` parameters, `GET /api/v1/detect/report/unresolvedusersbyseverity`  
+returns a JSON object with the first 10 unresolved users by severity in descending order  
+  
++ With a `count` parameter and no `sort` parameter  
+`GET /api/v1/detect/report/unresolvedusersbyseverity/count` returns a JSON object with the   "count" number of unresolved users by severity in descending order.
++ With `count` and `sort` parameters, `GET /api/v1/detect/report/unresolvedusersbyseverity`  
+returns a JSON object with the "count" number of unresolved users by severity in order specified by   "sort" (either ascending or descending)  
+
++ With no `count` or `sort` parameters, `GET /api/v1/detect/report/unresolvedusersbytime`  
+returns a JSON object with the first 10 unresolved users by time in descending order
++ With a `count` parameter and no `sort` parameter  
+`GET /api/v1/detect/report/unresolvedusersbytime/count` returns a JSON object with the   "count" number of unresolved users by severity in descending order.  
+  
++ With `count` and `sort` parameters, `GET /api/v1/detect/report/unresolvedusersbytime`  
+returns a JSON object with the "count" number of unresolved users by time in order specified by   "sort" (either ascending or descending)
+
+
+
+
+####/api/tagged_event/(id)
+Enumeration, addition, deletion, and updating of tagged_events associated with an investigation
+
+*Supports* `GET`, `PUT`, and `DELETE` for `/api/tagged_event/<id>`  
+*Supports* `POST` for `/api/tagged_event`
+
+#####Returns:
+
++ With no "id" parameter, `POST /api/tagged_event` returns whether or not the posting attempt was successful
++ With an "id" parameter, `GET /api/tagged_event/id` returns a JSON object with the structure of the tagged_events of the investigation with id "id"
++ With an "id" parameter, `PUT /api/tagged_event/id` returns whether or not the updating attempt was successful
++ With an "id" parameter, `DELETE /api/tagged_event/id` returns whether or not the deleting attempt was successful
+
+A JSON object of events has the following structure:
++ a list of events, each with the following structure:
+    + `date_tagged`: the date the event was tagged
+    + `event_data`: the data for this tagged_event
+    + `event_id`: the event id
+    + `event_type`: type of the event
+    + `id`: the investigation id of the event
+    + `investigation_id`: the investigation id this event is associated with
+    + `process_id`: id of the process that this event is under
+    + `segment_id`: id of the segment of the server this event is in
+    + `start_date`: date to start monitoring for the event
+    + `tagged_by_user_id`: id of the user to tag the event
+    + `unique_id`: unique id of the event
+
+Example:
+```
+GET /api/tagged_event/1
+
+[
+    {
+        date_tagged: "2015-06-12 11:53:30.175373-04:00"
+        event_data: "{"description": "Testing event addition"}"
+        event_id: null
+        event_type: null
+        id: 8
+        investigation_id: 1
+        process_id: null
+        segment_id: 0
+        start_date: "2015-06-03 20:00:00-04:00"
+        tagged_by_user_id: null
+        unique_id: null
+    }
+]
+
+####
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
