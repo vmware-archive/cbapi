@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 '''
 
@@ -23,15 +23,20 @@
  - stdout
  - a TCP or UPP socket
  - a file
+ - a s3 bucket (requires boto library)
 
 '''
 
 
 import os
+import re
 import sys
 import json
+import time
 import socket
 import struct
+import random
+import string
 import requests
 import optparse
 
@@ -120,31 +125,30 @@ CAPTURE_EVENTS = [
 
 class EventOutput(object):
 
-    DESTINATIONS = ['udp', 'tcp', 'file', 'stdout']
+    DESTINATIONS = ['udp', 'tcp', 'file', 'stdout', 's3']
 
-    def __init__(self, out_format, out_dest):
+    def __init__(self, out_dest):
 
         if out_dest not in EventOutput.DESTINATIONS:
             raise ValueError("output destination (%s) not a valid destination value" % out_dest)
 
-        self.oformat = out_format
         self.dest = out_dest
 
     def output(self, eventdata):
-        raise Exception("Not Implimented")
+        raise Exception("Not Implemented")
 
 class StdOutOutput(EventOutput):
 
-    def __init__(self, format):
-        super(StdOutOutput, self).__init__(format, 'stdout')
+    def __init__(self):
+        super(StdOutOutput, self).__init__('stdout')
 
     def output(self, eventdata):
         print eventdata
 
 class FileOutput(EventOutput):
 
-    def __init__(self, format, outfile):
-        super(FileOutput, self).__init__(format, 'file')
+    def __init__(self, outfile):
+        super(FileOutput, self).__init__('file')
 
         self.fout = open(outfile, 'a')
 
@@ -154,8 +158,8 @@ class FileOutput(EventOutput):
 
 class UdpOutput(EventOutput):
 
-    def __init__(self, format, host, port):
-        super(UdpOutput, self).__init__(format, 'udp')
+    def __init__(self, host, port):
+        super(UdpOutput, self).__init__('udp')
 
         self.ip = socket.gethostbyname(host)
         self.port = port
@@ -166,8 +170,8 @@ class UdpOutput(EventOutput):
 
 
 class TcpOutput(EventOutput):
-    def __init__(self, format, host, port):
-        super(TcpOutput, self).__init__(format, 'tcp')
+    def __init__(self, host, port):
+        super(TcpOutput, self).__init__('tcp')
 
         ip = socket.gethostbyname(host)
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -175,6 +179,35 @@ class TcpOutput(EventOutput):
 
     def output(self, eventdata):
         self.sock.send(eventdata + '\n')
+
+class S3Output(EventOutput):
+    def __init__(self, bucket):
+        super(S3Output, self).__init__('s3')
+    
+        # 
+        # import boto here so it's only required if s3 output is used
+        #
+        import boto
+
+        # 
+        # s3 creds must be defined either in an environment variable, boto config
+        # or EC2 instance metadata.
+        #
+        self.conn = boto.connect_s3()
+        self.bucket = self.conn.get_bucket(bucket)
+
+    def output(self, eventdata):
+        #
+        # name keys as timestamp-xxxx where xxx is random 4 lowercase chars
+        # this (a) keeps a useful and predictable sort order and (b) avoids name collisions
+        #
+        import boto
+        key_name = "%s-%s" % (time.time(), ''.join(random.sample(string.lowercase, 4)))
+        k = boto.s3.key.Key(bucket=self.bucket, name=key_name)
+
+        # ensure contents of s3 bucket are list of objects, even though this output path is 
+        # always only one object per call
+        k.set_contents_from_string("[%s]\n" % eventdata) 
 
 def lookup_host_details(sensor_id):
     """
@@ -342,6 +375,10 @@ def handle_event_pb(protobuf_bytes, routing_key):
     event_obj['event_type'] = event_obj['type']
     event_obj['type'] = routing_key
 
+    # and the server indetifier
+    if ('cb_server' in g_config):
+        event_obj['cb_server'] = g_config['cb_server']
+
     dumpEvent(event_obj)
 
 def get_proc_guid_from_id(id):
@@ -408,6 +445,14 @@ def handle_event_json(msg_body, routing_key):
         if g_config['stripHighlights'] and 'highlights' in jobj:
             del jobj['highlights']
 
+
+        #
+        # keep the timestamp field name consistently
+        #
+        if 'event_timestamp' in jobj:
+            jobj['timestamp'] = jobj['event_timestamp']
+            del jobj['event_timestamp']
+
         #
         # when it makes sense add sensor
         # information to the object.  This is dependent
@@ -420,7 +465,7 @@ def handle_event_json(msg_body, routing_key):
                 d.update[hinfo]
 
         else:
-            # rather than track the correct objecsts - just look
+            # rather than track the correct objects - just look
             # for a sensor id
             if ('sensor_id' in jobj):
                 hinfo = lookup_host_details(jobj['sensor_id'])
@@ -429,6 +474,16 @@ def handle_event_json(msg_body, routing_key):
         # fixup terminology on process id/guid so that "process_guid" always
         # refers to the process guid (minus segment)
         jobj = fixup_proc_guids(jobj)
+
+        #
+        # add the "cb_server" field to the json.  This is used
+        # to tie the event to a specific cluster/server in environments
+        # where multiple servers are deployed
+        # some of the watchlist events have a server_name field but that
+        # might reference a minion within a cluster or can sometimes be blank
+        #
+        if ('cb_server' in g_config):
+            jobj['cb_server'] = g_config['cb_server']
 
         dumpEvent(jobj)
 
@@ -468,14 +523,14 @@ def on_bus_msg(channel, method_frame, header_frame, body):
         # we set multiple to true to ensure that we ack all previous messages
         channel.basic_ack(delivery_tag=method_frame.delivery_tag, multiple=True)
 
-def processEventsFromBus(rabbit_mq_user, rabbit_mq_pass):
+def processEventsFromBus(cb_hostname, rabbit_mq_user, rabbit_mq_pass):
 
     #import this here so the other functions (file, directory)
     # work without pika installed
     import pika
 
     credentials = pika.PlainCredentials(rabbit_mq_user, rabbit_mq_pass)
-    parameters = pika.ConnectionParameters('localhost',
+    parameters = pika.ConnectionParameters(cb_hostname,
                                            5004,
                                            '/',
                                            credentials)
@@ -535,6 +590,9 @@ def build_cli_parser():
     group = optparse.OptionGroup(parser, "General Configuration")
     group.add_option("-P", "--pretty", action="store_true", default=False, dest="pretty",
                      help="Output JSON in pretty print format (easy to read) (default is False)")
+    group.add_option("-S", "--server-name", action='store', default=None, dest='server_name',
+                     help='Add a server name "cb_server" to the JSON output.  This helps for multiple-server deployments.')
+    parser.add_option_group(group)
 
 
     #
@@ -542,14 +600,14 @@ def build_cli_parser():
     #
     group = optparse.OptionGroup(parser, "Output source options",
                                  "Output options for events that control both the formatting and destination")
-    group.add_option("-f", "--format", action="store", default="json", dest="format",
-                      help="Output format; must be one of [json|table|csv]; default is table")
     group.add_option("-o", "--out-file", action="store", default=None, dest="outfile",
                       help="Write the formatted events to a log file (default is writting to stdout)")
     group.add_option('-t', '--tcp-out', action='store', default=None, dest='tcpout',
                      help='Write the formatted events to a tcp host and port (format is HOST:IP)')
     group.add_option('-U', '--udp-out', action='store', default=None, dest='udpout',
                      help='Write the formatted events to a udp host and port (format is HOST:IP)')
+    group.add_option('-s', '--s3-out', action='store', default=None, dest='s3out',
+                     help='Write the formatted events to this S3 bucket')
     parser.add_option_group(group)
     return parser
 
@@ -563,9 +621,15 @@ if __name__ == '__main__':
 
     g_config['prettyPrint'] = opts.pretty
 
+    if opts.server_name is not None:
+        g_config['cb_server'] = opts.server_name
+
     # cbapi info for host lookups
     if opts.url is not None:
         cbapi['url'] = opts.url
+        hostmatch = re.compile('https?://([^/]+)/?').match(opts.url)
+        if hostmatch:
+            cbhost = hostmatch.group(1)
     if opts.token is not None:
         cbapi['apitoken'] = opts.token
     if opts.ssl_verify is not None:
@@ -573,15 +637,17 @@ if __name__ == '__main__':
 
     # output processing
     if (opts.outfile):
-        g_output = FileOutput(opts.format, opts.outfile)
+        g_output = FileOutput( opts.outfile)
     elif (opts.tcpout):
         (host, port) = opts.tcpout.split(':')
-        g_output = TcpOutput(opts.format, host, int(port))
+        g_output = TcpOutput(host, int(port))
     elif (opts.udpout):
         (host, port) = opts.udpout.split(':')
-        g_output = UdpOutput(opts.format, host, int(port))
+        g_output = UdpOutput(host, int(port))
+    elif (opts.s3out):
+        g_output = S3Output(opts.s3out)
     else:
-        g_output = StdOutOutput(opts.format)
+        g_output = StdOutOutput()
 
     user = opts.user
     pwd = opts.pwd
@@ -592,6 +658,9 @@ if __name__ == '__main__':
     if (pwd is None):
         pwd = getBusPasswordFromConfig()
 
-    processEventsFromBus(user, pwd)
+    if cbhost is None:
+        cbhost = 'localhost'
+
+    processEventsFromBus(cbhost, user, pwd)
 
 
