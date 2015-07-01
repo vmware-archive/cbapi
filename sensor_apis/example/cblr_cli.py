@@ -604,7 +604,8 @@ class CblrCli(cmd.Cmd):
         # look up supported commands
         ret = {}
         for c in sessioninfo['supported_commands']:
-            ret[API_CMD_TO_CLI_CMD[c]] = 1
+            if (c in API_CMD_TO_CLI_CMD):
+                ret[API_CMD_TO_CLI_CMD[c]] = 1
 
         print "  Supported Commands: %s" % ' '.join(ret.keys())
         print "  Working Directory: %s" % self.cwd
