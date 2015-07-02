@@ -1,16 +1,18 @@
+__author__ = 'bwolfson'
+
 import sys
+import time
 import struct
 import socket
+import optparse
+#added pprint to output everything
 import pprint
-import optparse 
-
-# in the github repo, cbapi is not in the example directory
 sys.path.append('../src/cbapi')
 
-import cbapi 
+import cbapi
 
 def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Delete an existing feed")
+    parser = optparse.OptionParser(usage="%prog [options]", description="Export alerts.")
 
     # for each supported output type, add an option
     #
@@ -20,37 +22,20 @@ def build_cli_parser():
                       help="API Token for Carbon Black server")
     parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
                       help="Do not verify server SSL certificate.")
-    parser.add_option("-f", "--feedname", action="store", default=None, dest="feedname",
-                      help="Feed Name")
-    parser.add_option("-i", "--id", action="store", default=None, dest="feedid",
-                      help="Feed Id")
     return parser
 
 def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
-    if not opts.server_url or not opts.token or (not opts.feedname and not opts.feedid):
+    if not opts.server_url or not opts.token:
         print "Missing required param; run with --help for usage"
-        print "One of -f or -i must be specified"
         sys.exit(-1)
 
     # build a cbapi object
     #
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
-
-    if not opts.feedid:
-      id = cb.feed_get_id_by_name(opts.feedname)
-      if id is None:
-        print "-> No configured feed with name '%s' found!" % (opts.feedname) 
-        return
-    else:
-      id = opts.feedid
-
-    # delete the feed
-    #
-    cb.feed_del(id)
-
-    print "-> Feed deleted [id=%s]" % (id,)
-
+    alerts = cb.alert_enum()
+    for alert in alerts:
+        print
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

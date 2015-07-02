@@ -5,8 +5,8 @@
 #
 
 import json
-import urllib
 import requests
+import shutil
 
 class CbApi(object):
     """ Python bindings for Carbon Black API 
@@ -20,7 +20,7 @@ class CbApi(object):
         proc_detail = cb.process(proc['id'])
         print proc_detail['process']['start'], proc_detail['process']['hostname'], proc_detail['process']['path']
     """
-    def __init__(self, server, ssl_verify=True, token=None):
+    def __init__(self, server, ssl_verify=True, token=None, client_validation_enabled=True):
         """ Requires:
                 server -    URL to the Carbon Black server.  Usually the same as 
                             the web GUI.
@@ -38,6 +38,7 @@ class CbApi(object):
         self.ssl_verify = ssl_verify
         self.token = token
         self.token_header = {'X-Auth-Token': self.token}
+        self.client_validation_enabled = client_validation_enabled
 
     def info(self):
         """ Provide high-level information about the Carbon Black Enterprise Server.
@@ -68,6 +69,122 @@ class CbApi(object):
                 verify=self.ssl_verify)
         r.raise_for_status()
 
+    def concurrent_license_info(self, start_date, end_date):
+        """
+        Get the concurrent license info for a given date range
+        :param start_date: the start date
+        :param end_date: the end date
+        """
+        url = "{}/api/concurrent_license_info/{:%Y%m%d}/{:%Y%m%d}".format(self.server, start_date, end_date)
+        r = requests.get(url=url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def communication_settings(self):
+        """
+        Get the current communication settings
+        """
+        url = "%s/api/communication_settings" % self.server
+        r = requests.get(url=url,  headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def communication_settings_modify(
+        self,
+        settings=None,
+        enabled=None,
+        statistics=None,
+        community_participation=None,
+        mail_server_type=None,
+        smtp_connection_type=None,
+        smtp_server=None,
+        smtp_port=None,
+        smtp_username=None,
+        smtp_password=None
+    ):
+        """
+        Update communication settings. Settings can be updated individually or as a part of one settings dictionary
+        :param settings: the full communication settings dictionary
+        :param enabled: is Alliance communication enabled
+        :param statistics: are performance statistics enabled
+        :param community_participation: support the Alliance Threat Intelligence Community
+        :param mail_server_type: one of ("own", "cb", or "none"). "own" requires smtp_* arguments to be populated
+        :param smtp_connection_type: one of ("tls", "ssl", or "insecure")
+        :param smtp_server: the name of the user's own mail server
+        :param smtp_port: the port of the user's own mail server
+        :param smtp_username: the username for the user's own mail server
+        :param smtp_password: the password for the user's own mail server
+        """
+
+        request = settings or {}
+
+        if enabled is not None:
+            request["enabled"] = enabled
+
+        if statistics is not None:
+            request["statistics"] = statistics
+
+        if community_participation is not None:
+            request["community_participation"] = community_participation
+
+        if mail_server_type is not None:
+            request["mail_server_type"] = mail_server_type
+
+        if smtp_connection_type is not None:
+            request["smtp_connection_type"] = smtp_connection_type
+
+        if smtp_server is not None:
+            request["smtp_server"] = smtp_server
+
+        if smtp_port is not None:
+            request["smtp_port"] = smtp_port
+
+        if smtp_username is not None:
+            request["smtp_username"] = smtp_username
+
+        if smtp_password is not None:
+            request["smtp_password"] = smtp_password
+
+        if self.client_validation_enabled:
+            for key in ["enabled", "statistics", "community_participation"]:
+                if key in request and request[key] is None:
+                    raise ValueError("%s cannot be None" % key)
+
+            if "mail_server_type" in request:
+                if request["mail_server_type"] not in ["cb", "own", "none", ""]:  # "none" and "" both mean disabled
+                    raise ValueError("Invalid mail_server_type: %s" % request["mail_server_type"])
+
+                if request["mail_server_type"] == "own":
+                    for key in ["smtp_connection_type", "smtp_server", "smtp_port", "smtp_username", "smtp_pasword"]:
+                        if key in request and request[key] is None:
+                            raise ValueError("%s is required when mail_server_type is \"own\"" % key)
+
+                    if request["smtp_connection_type"] not in ["tls", "ssl", "insecure"]:
+                        raise ValueError("Invalid smtp_connection_type: %s" % request["smtp_connection_type"])
+
+        url = "%s/api/communication_settings" % self.server
+        r = requests.post(url=url,  headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def check_for_new_feeds(self):
+        """
+        Check for new alliance feeds
+        """
+        url = "%s/api/internal/alliance" % self.server
+        r = requests.post(url=url,  headers=self.token_header, data=json.dumps({}), verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def alliance_status(self):
+        """
+        Get the alliance status
+        """
+        url = "%s/api/v1/alliance_status" % self.server
+        r = requests.get(url=url,  headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
     def get_platform_server_config(self):
         """ Get Bit9 Platform Server configuration
             This includes server address and authentication information
@@ -96,7 +213,18 @@ class CbApi(object):
         """
         r = requests.post("%s/api/v1/settings/global/platformserver" % (self.server,), \
                                                                         headers=self.token_header, \
-                                                                        data = json.dumps(platform_server_config))
+                                                                        data = json.dumps(platform_server_config), \
+                                                                        verify=self.ssl_verify)
+
+    def test_platform_server_config(self):
+        """
+        Tests the current Bit9 Platform Server configuration
+        This includes the server address, username, and password
+
+        Must authenticate as a global administrator to have the rights to set this config
+        """
+        url = "%s/api/v1/settings/global/platformserver/test" % self.server
+        r = requests.get(url=url, headers=self.token_header)
         r.raise_for_status()
 
     def process_search(self, query_string, start=0, rows=10, sort="last_update desc"):
@@ -214,6 +342,16 @@ class CbApi(object):
         r.raise_for_status()
         return r.json()
 
+    def binary_enum(self):
+        '''
+        Retrieves all the binary files stored in the server
+        '''
+        url = "%s/api/v1/binary" % (self.server,)
+
+        r = requests.get(url, headers=self.token_header,verify = self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
     def binary_summary(self, md5):
         """ get the metadata for a binary.  Requires the md5 of the binary.
 
@@ -223,16 +361,33 @@ class CbApi(object):
         r.raise_for_status()
         return r.json()
 
-    def binary(self, md5hash):
+    def binary_info(self, md5hash):
         '''
         download binary based on md5hash
         '''
 
         r = requests.get("%s/api/v1/binary/%s" % (self.server, md5hash),
-                         headers=self.token_header, verify=self.ssl_verify)
-
+                         headers=self.token_header, verify=self.ssl_verify, stream = True)
         r.raise_for_status()
-        return r._content
+
+        shutil.copy(r, "~/Downloads")
+
+
+    def binary_hits_enum(self, md5):
+        '''
+        Enumerates all binary threat_intel_hits
+        '''
+
+        r = requests.get("%s/api/v1/binary/%s/threat_intel_hits" % (self.server,md5),
+                         headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def binary_hits_add(self):
+        '''
+        Adds a binary threat_intel_hit to the Carbon Black server
+        '''
+
 
     def sensor(self, sensor_id):
         '''
@@ -280,10 +435,11 @@ class CbApi(object):
                     'Linux':      '/api/v1/group/%s/installer/linux' % (group_id,),\
                   }
 
-        # verify that the type parameter is a known value
-        #
-        if not mapping.has_key(type):
-            raise ValueError("Unrecognized type '%s'; should be one of 'WindowsEXE', 'WindowsMSI', 'OSX', or 'Linux'" % (type,))
+        if self.client_validation_enabled:
+            # verify that the type parameter is a known value
+            #
+            if not mapping.has_key(type):
+                raise ValueError("Unrecognized type '%s'; should be one of 'WindowsEXE', 'WindowsMSI', 'OSX', or 'Linux'" % (type,))
 
         # build the fully-qualified URL
         #
@@ -306,6 +462,46 @@ class CbApi(object):
 
         return r.json()
 
+    def sensor_force_sync(self, sensor_id, group_id, event_log_flush_time):
+        '''
+        Force a single sensor to sync via the API
+        :param sensor_id: the sensor id
+        :param group_id: the id of the group this sensor belongs to
+        :param event_log_flush_time:
+        :return:
+        '''
+
+        url = "%s/api/v1/sensor/%s" % (self.server, sensor_id)
+        request = {\
+            "event_log_flush_time": event_log_flush_time,\
+            "group_id": group_id,\
+        }
+
+        r = requests.put(url, headers=self.token_header, verify=self.ssl_verify, data = json.dumps(request))
+        r.raise_for_status()
+
+    def server_enum(self):
+        """
+        Get all server nodes in the environment
+        """
+        url = "%s/api/server" % self.server
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def server_modify(self, server_id, server):
+        """
+        Update a server
+        :param server_id: The ID of the server to update
+        :param server: The modified server object
+        """
+        url = "%s/api/server/%s" % (self.server, server_id)
+
+        r = requests.put(url, headers=self.token_header, data=json.dumps(server), verify=self.ssl_verify)
+        r.raise_for_status()
+        return
+
     def watchlist(self, id=None):
         '''
         get all watchlists or a single watchlist
@@ -319,25 +515,28 @@ class CbApi(object):
         r.raise_for_status()
         return r.json()
 
-    def watchlist_add(self, type, name, search_query, id=None, readonly=False, basic_query_validation=True):
+    def watchlist_add(self, type, name, search_query, id=None, readonly=False):
         '''
         adds a new watchlist
         '''
 
         # as directed by the caller, provide basic feed validation
-        if basic_query_validation:
+        if "cb.urlver" not in search_query:
+            search_query = "cb.urlver=1&" + search_query
+
+        if self.client_validation_enabled:
+            if type not in ["modules", "events"]:
+                raise ValueError("Unexpected type. Should be one of (\"modules\", \"events\")")
+
             if not "q=" in search_query:
                 raise ValueError("watchlist queries must be of the form: cb.urlver=1&q=<query>")
-            if "cb.urlver" not in search_query:
-                search_query = "cb.urlver=1&" + search_query 
 
             for kvpair in search_query.split('&'):
-                print kvpair
                 if len(kvpair.split('=')) != 2:
                     continue
                 if kvpair.split('=')[0] != 'q':
                     continue
-                
+
                 # the query itself must be percent-encoded
                 # verify there are only non-reserved characters present
                 # no logic to detect unescaped '%' characters
@@ -353,7 +552,7 @@ class CbApi(object):
                   }
 
         if id is not None:
-          request['id'] = id
+            request['id'] = id
         
         url = "%s/api/v1/watchlist" % (self.server,)
 
@@ -386,6 +585,121 @@ class CbApi(object):
 
         return r.json()
 
+    def watchlist_action_get(self, watchlist_id):
+        """
+        gets actions for a watchlist
+        :param watchlist_id: the ID of the watchlist
+        :return: an array of actions associated with the watchlist
+        """
+
+        url = "%s/api/v1/watchlist/%s/action" % (self.server, watchlist_id)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def watchlist_action_add(self, watchlist_id, action_type_id, email_recipient_user_ids=[]):
+        """
+        add an action to a watchlist
+        :param watchlist_id: the ID of the watchlist
+        :param action_type_id: the ID of the action type
+        :param email_recipient_user_id: the ID of the user who will receive email
+        :return: a dictionary with the new action ID in "action_id"
+        """
+
+        request = {
+            "action_data": "{\"email_recipients\":[%s]}" % (",".join(str(user_id) for user_id in email_recipient_user_ids)),
+            "action_type": action_type_id,
+            "group_id": watchlist_id,
+            "watchlist_id": watchlist_id
+        }
+
+        url = "%s/api/v1/watchlist/%s/action" % (self.server, watchlist_id)
+
+        r = requests.post(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def watchlist_action_modify(self, watchlist_id, action_id, action):
+        """
+        modify an action for a watchlist
+        :param watchlist_id: the ID of the watchlist
+        :param action_id: the ID of the action on the watchlist
+        :param action: a dictionary representing the modified action
+        :return: a dictionary with the request status in "result"
+        """
+
+        url = "%s/api/v1/watchlist/%s/action/%s" % (self.server, watchlist_id, action_id)
+
+        r = requests.put(url, headers=self.token_header, data=json.dumps(action), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def watchlist_action_del(self, watchlist_id, action_id):
+        """
+        delete an action for a watchlist
+        :param watchlist_id: the ID of the watchlist
+        :param action_id: the ID of the action on the watchlist
+        :return: a dictionary with the request status in "result"
+        """
+
+        url = "%s/api/v1/watchlist/%s/action/%s" % (self.server, watchlist_id, action_id)
+
+        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def feed_enum(self):
+        '''
+        enumerate all configured feeds
+        '''
+
+        url = "%s/api/v1/feed" % (self.server,)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def feed_info(self, id):
+        '''
+        retrieve information about an existing feed, as specified by id
+
+        note: the endpoint /api/v1/feed/<id> is not supported as of CB server 5.0
+        '''
+        url = "%s/api/v1/feed/%s" % (self.server, id)
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def feed_modify(self, id, feed):
+        '''
+        updates a feed
+        '''
+        url = "%s/api/v1/feed/%s" % (self.server, id)
+
+        r = requests.put(url, headers=self.token_header, data=json.dumps(feed), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def feed_del(self, id):
+        '''
+        delete a feed, as specified by id
+        '''
+
+        url = "%s/api/v1/feed/%s" % (self.server, id)
+
+        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+
     def feed_add_from_url(self, feed_url, enabled, validate_server_cert, use_proxy):
         '''
         add a new feed to the Carbon Black server, as specified by URL
@@ -398,7 +712,7 @@ class CbApi(object):
                   }
 
         url = "%s/api/v1/feed" % (self.server,)
-        
+
         r = requests.post(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
         r.raise_for_status()
 
@@ -417,55 +731,10 @@ class CbApi(object):
         #
         return None
 
-    def feed_enum(self):
-        '''
-        enumerate all configured feeds
-        '''
-
-        url = "%s/api/v1/feed" % (self.server,)
-
-        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
-        r.raise_for_status()
-
-        return r.json()
-
-    def feed_info(self, id):
-        '''
-        retrieve information about an existing feed, as specified by id 
-        
-        note: the endpoint /api/v1/feed/<id> is not supported as of CB server 5.0
-        '''
-        feeds = self.feed_enum()
-        for feed in feeds:
-          if str(feed['id']) == str(id):
-              return feed 
-
-    def feed_del(self, id):
-        '''
-        delete a feed, as specified by id
-        '''
-        url = "%s/api/v1/feed/%s" % (self.server, id)
-
-        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
-        r.raise_for_status()
-
-        return r.json()
-        
-    def feed_modify(self, id, feed):
-        '''
-        updates a watchlist
-        '''
-        url = "%s/api/v1/feed/%s" % (self.server, id)
-
-        r = requests.put(url, headers=self.token_header, data=json.dumps(feed), verify=self.ssl_verify)
-        r.raise_for_status()
-
-        return r.json()
-
     def feed_synchronize(self, name, full_sync=True):
         '''
         force the synchronization of a feed
-        
+
         this triggers the CB server to refresh the feed.  it does not result in immediate
         tagging of any existing process or binary documents that match the feed.  it does result
         in any new incoming data from sensors being tagged on ingress.
@@ -520,6 +789,375 @@ class CbApi(object):
 
         return r.json()
 
+    def feed_report_stats(self, feed_id, report_id):
+        '''
+        Get feed report stats
+        '''
+
+        url = "%s/api/v1/feed/%s/report/%s/stats" % (self.server, feed_id, report_id)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def feed_action_enum(self,id):
+        '''
+        Gets the actions for a certain feed from the Carbon Black Server
+        :param id: the id of the feed
+        :return: the actions associated with that feed
+        '''
+
+        url = "%s/api/v1/feed/%s/action" % (self.server, id)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def feed_action_add(self, id, action_type_id, email_recipient_user_ids):
+        '''
+        enables one of the three pre-determined actions to be performed
+        upon hits for feeds: email, create alert, and write to syslog
+        :param id: the id of the feed
+        :param action_type_id: the id for the type of action
+        :param email_recipient_user_ids: ids of users who will be emailed upon a hit
+        :return: the added action
+        '''
+        url = "%s/api/v1/feed/%s/action" % (self.server, id)
+
+        request = {
+            "action_data": "{\"email_recipients\":[%s]}" % (",".join(str(user_id) for user_id in email_recipient_user_ids)),
+            "action_type": action_type_id,
+            "group_id": id, #feed id
+            "watchlist_id": None
+        }
+
+        r = requests.post(url, headers = self.token_header, data = json.dumps(request), verify = self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def feed_action_update(self, id , action_id, action_type_id):
+        '''
+        updates a feed action
+        :param id: the feed id
+        :param action_id: the action id
+        :param action_type_id: the action type id
+        :return: the updated feed
+        '''
+        url = "%s/api/v1/feed/%s/action/%s" % (self.server, id, action_id)
+
+        old_actions = self.feed_action_enum(id)
+        for action in old_actions:
+            if int(action['id']) == int(action_id):
+                curr_action = action
+
+        request = {
+            "action_data": curr_action['action_data'],
+            "action_type": action_type_id,
+            "group_id": curr_action['group_id'],
+            "id" : curr_action['id'],
+            "watchlist_id": curr_action['watchlist_id']
+        }
+
+        r = requests.put(url, headers = self.token_header, data = json.dumps(request), verify = self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def feed_action_del(self, id, action_id):
+        '''
+        Deletes a feed action
+        :param id: the id of the feed
+        :param action_id: the id of the action
+        :return: whether successful or not
+        '''
+        url =  "%s/api/v1/feed/%s/action/%s" % (self.server, id, action_id)
+        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def feed_requirements(self, id):
+        '''
+        Get feed requirements
+        '''
+
+        url = "%s/api/v1/feed/%s/requirements" % (self.server, id)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def user_enum(self):
+        '''
+        enumerate all users
+        '''
+
+        url = "%s/api/users" % (self.server,)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def user_info(self, username):
+        '''
+        retrieve information about an existing user, as specified by username
+        '''
+
+        url = "%s/api/user/%s" % (self.server, username)
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def user_del(self, username):
+        '''
+        deletes a user, as specified by username
+        '''
+
+        url = "%s/api/user/%s" % (self.server, username)
+
+        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def user_add_from_data(self, username, first_name, last_name, password, global_admin, team_ids, email):
+        '''
+        add a new user to the Carbon Black server
+        '''
+        request = {\
+                    'username' : username,\
+                    'first_name' : first_name,\
+                    'last_name' : last_name,\
+                    'password' : password,\
+                    'global_admin' : global_admin,\
+                    'teams' : team_ids,\
+                    'email' : email
+                  }
+        url = "%s/api/user" % (self.server,)
+
+        r = requests.post(url, headers=self.token_header, data = json.dumps(request), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def user_get_user_by_name(self, first_name, last_name):
+        '''
+        helper function to find the username given a user's first and last name
+        '''
+
+        for user in self.user_enum():
+            if user['first_name'].lower() == first_name.lower() and user['last_name'].lower() == last_name.lower():
+                return user
+
+        # did not find it
+        #
+        return None
+
+    def user_activity(self):
+        '''
+        retrieve all user activity from server
+        '''
+
+        url = "%s/api/useractivity" % (self.server,)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def team_enum(self):
+        '''
+        enumerate all teams
+        '''
+        
+        url = "%s/api/teams" % (self.server,)
+        
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()   
+        
+        return r.json()
+
+    def team_info(self, id):
+        '''
+        retrieve information about an existing team, specified by id
+        '''
+
+        url = "%s/api/team/%s" % (self.server, id)
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def team_del(self, id):
+        '''
+        deletes a team, as specified by id
+        '''
+
+        url = "%s/api/team/%s" % (self.server, id)
+
+        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def team_add_from_data(self, team_name,groups):
+
+        '''
+        Adds a new team
+        '''
+
+        request = {\
+            'group_access' : groups, \
+            'name' : team_name, \
+        }
+
+        url = "%s/api/team" % (self.server,)
+
+
+        r = requests.post(url, headers=self.token_header, data = json.dumps(request), verify=self.ssl_verify)
+
+        r.raise_for_status()
+
+
+        return r.json()
+
+    def team_get_team_by_name(self, name):
+        '''
+        retrieve an existing team, specified by name
+        '''
+
+
+        teams = self.team_enum()
+        for team in teams:
+            if team['name'] == name:
+                return team
+
+        #did not find it
+        return None
+
+
+    def team_modify(self, id, team):
+        """
+        Updates a team
+        :param id: The ID of the team to modify
+        :param team: The modified team object
+        :return: a JSON object indicating a successful result
+        """
+
+        url = "%s/api/team/%s" % (self.server, id)
+
+        r = requests.put(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    
+    def group_enum(self):
+        '''
+        enumerate all sensor groups
+        '''
+        
+        url = "%s/api/group" % (self.server,)
+        
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        
+        return r.json()
+
+    def group_info(self, id):
+        '''
+        retrieve information about an existing group, specified by id
+        '''
+
+        url = "%s/api/group/%s" % (self.server, id)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        group_list = r.json() #returns a list of length one with the group data
+
+        if not group_list:
+            return None
+        else:
+            return group_list[0] #return the only element in the list of length one
+
+    def group_del(self, id):
+        '''
+        deletes a group, as specified by id
+        '''
+
+        url = "%s/api/group/%s" % (self.server, id)
+
+        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def group_add_from_data(self, alert_criticality, banning_enabled, collect_cross_procs, collect_emet_events,
+                            collect_filemods, collect_filewritemd5s, collect_moduleinfo, collect_moduleloads,
+                            collect_netconns, collect_nonbinary_filewrites, collect_processes, collect_regmods,
+                            collect_storefiles, collect_usercontext, datastore_server, max_licenses, name,
+                            quota_eventlog_bytes, quota_eventlog_percent, quota_storefile_bytes, quota_storefile_percent,
+                            sensor_exe_name, sensor_version, sensorbackend_server, site_id, tamper_level,
+                            team_access, vdi_enabled):
+        '''
+        adds a new group to the server
+        '''
+
+        request = {\
+            'alert_criticality' : alert_criticality, \
+            'banning_enabled' : banning_enabled, \
+            'collect_cross_procs' : collect_cross_procs, \
+            'collect_emet_events' : collect_emet_events, \
+            'collect_filemods' : collect_filemods, \
+            'collect_filewritemd5s' : collect_filewritemd5s, \
+            'collect_moduleinfo' : collect_moduleinfo, \
+            'collect_moduleloads' : collect_moduleloads, \
+            'collect_netconns' : collect_netconns, \
+            'collect_nonbinary_filewrites' : collect_nonbinary_filewrites, \
+            'collect_processes' : collect_processes, \
+            'collect_regmods' : collect_regmods, \
+            'collect_storefiles' : collect_storefiles, \
+            'collect_usercontext' : collect_usercontext, \
+            'datastore_server' :datastore_server, \
+            'max_licenses' : max_licenses, \
+            'name' : name, \
+            'quota_eventlog_bytes' : quota_eventlog_bytes, \
+            'quota_eventlog_percent' : quota_eventlog_percent, \
+            'quota_storefile_bytes': quota_storefile_bytes, \
+            'quota_storefile_percent' : quota_storefile_percent, \
+            'sensor_exe_name' : sensor_exe_name, \
+            'sensor_version' : sensor_version, \
+            'sensorbackend_server' : sensorbackend_server, \
+            'site_id' : site_id, \
+            'tamper_level' : tamper_level, \
+            'team_access' : team_access, \
+            'vdi_enabled' : vdi_enabled, \
+        }
+
+        url = "%s/api/group" % (self.server,)
+
+
+        r = requests.post(url, headers=self.token_header, data = json.dumps(request), verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def group_get_group_by_name(self,name):
+        '''
+        retrieve an existing group, specified by group name
+        '''
+
+        groups = self.group_enum()
+        for group in groups:
+            if group['name'] == name:
+                return group
+
+        return None
+
     def alert_search(self, query_string, sort="created_time desc", rows=10, start=0):
         """ Search for processes.  Arguments: 
 
@@ -559,3 +1197,631 @@ class CbApi(object):
                           data=json.dumps(alert), verify=self.ssl_verify)
         r.raise_for_status()
         return r.json()
+
+
+    def alert_add(self, query_string, rows, start, sort, facets):
+        '''
+        adds a new alert to the Carbon Black server
+        '''
+
+        request = {\
+            'query_string' : query_string,\
+            'rows' : rows,\
+            'start' : start,\
+            'sort' : sort,\
+            'facets' : facets,\
+        }
+
+        url = "%s/api/v1/alert" % (self.server,)
+
+        r = requests.post(url, headers=self.token_header, data = json.dumps(request), verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def banning_enum(self):
+        '''
+        Enumerates all banned hashes
+        '''
+
+        url = "%s/api/v1/banning/blacklist" % (self.server,)
+
+        r = requests.get(url, headers=self.token_header,verify = self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def banning_info(self, md5):
+        '''
+        Retrieves the information of one banned hash, specified by md5hash
+        '''
+
+        url = "%s/api/v1/banning/blacklist/%s" % (self.server, md5)
+
+        r = requests.get(url,headers=self.token_header,verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def banning_update(self,md5, text):
+        '''
+        updates the Notes field of a banned hash
+        '''
+        url = "%s/api/v1/banning/blacklist/%s" % (self.server, md5)
+
+        r = requests.get(url, headers=self.token_header, verify = self.ssl_verify)
+        r.raise_for_status()
+
+        banned_hash = r.json()
+
+        request = {\
+            'username' : banned_hash['username'],\
+            'audit' : banned_hash['audit'],\
+            'block_count' : banned_hash['block_count'],\
+            'user_id' : banned_hash['user_id'],\
+            'timestamp' : banned_hash['timestamp'],\
+            'text' : text,\
+            'md5hash' : banned_hash['md5hash'],\
+            'enabled' : banned_hash['enabled'],\
+            'last_block_time' : banned_hash['last_block_time'],\
+            'last_block_sensor_id' :banned_hash['last_block_sensor_id'],\
+            'last_block_hostname' : banned_hash['last_block_hostname'],\
+
+            }
+
+        s = requests.put(url,headers=self.token_header,data = json.dumps(request),verify=self.ssl_verify)
+        s.raise_for_status()
+        return s.json()
+
+    def banning_add(self, md5):
+        '''
+        adds a new banned hash to the Carbon Black server or enables a pre-existing one
+        '''
+        url = "%s/api/v1/banning/blacklist" % (self.server,)
+
+        request = {\
+            'md5hash' : md5,\
+            }
+
+        r = requests.post(url,headers=self.token_header, data = json.dumps(request), verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def disable_ban(self, md5):
+        '''
+        disables a current banned hash on the server
+        '''
+        url = "%s/api/v1/banning/blacklist/%s" % (self.server, md5)
+
+        r = requests.delete(url,headers=self.token_header,verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def banning_restrictions(self):
+        '''
+        retrieves the restrictions for banning from the server
+        '''
+        url = "%s/api/v1/banning/restrictions" % (self.server,)
+
+        r = requests.get(url,headers=self.token_header,verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def banning_whitelist(self):
+        '''
+        retrieves the whitelist for banning from the server
+        '''
+        url = "%s/api/v1/banning/whitelist" % (self.server,)
+
+        r = requests.get(url,headers=self.token_header,verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+
+    def site_enum(self):
+        """
+        Get all sites
+        """
+
+        url = "%s/api/site" % self.server
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def site_info(self, site_id):
+        """
+        Get info for a site
+        :param site_id: the ID of the site
+        """
+        url = "%s/api/site/%s" % (self.server, site_id)
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def site_add(self, name, group_ids=[]):
+        """
+        Get info for a site
+        :param site: the site object to add
+        """
+
+        site = {
+            "name": name
+        }
+
+        for group_id in group_ids:
+            site["group_%s" % group_id] = group_id
+
+        url = "%s/api/site" % self.server
+        r = requests.post(url, headers=self.token_header, data=json.dumps(site), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def site_modify(self, site_id, site):
+        """
+        Get info for a site
+        :param site: the site object to add
+        """
+        url = "%s/api/site/%s" % (self.server, site_id)
+        r = requests.post(url, headers=self.token_header, data=json.dumps(site), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def site_del(self, site_id):
+        """
+        Get info for a site
+        :param site: the site object to add
+        """
+        url = "%s/api/site/%s" % (self.server, site_id)
+        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def dashboard_alliance(self):
+        '''
+        Enumerates the info for the alliance_client of the Carbon Black server
+        '''
+
+        url = "%s/api/v1/dashboard/alliance" % self.server
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def dashboard_hosts(self):
+        '''
+        Enumerates the hosts on the Carbon Black server
+        '''
+
+        url = "%s/api/v1/dashboard/hosts" % self.server
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def dashboard_statistics(self):
+        '''
+        Enumerates the statistics for the Carbon Black Server
+        '''
+
+        url = "%s/api/v1/dashboard/statistics" % self.server
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+
+    def detect_feed_unresolvedalertsbyseverity(self, feed_name, count, sort):
+        '''
+        Enumerates "count" of unresolved alerts by severity on the Carbon Black Server, sorted in
+        either ascending or descending order given a feed name, count, and sorting order "sort"
+        count defaults to 10 and sort defaults to descending
+        '''
+
+        url = "%s/api/v1/detect/report/%s/unresolvedalertsbyseverity/%s/%s" % (self.server, feed_name, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+
+    def detect_feed_unresolvedalertsbytime(self, feed_name, count, sort):
+        '''
+        Enumerates "count" of unresolved alerts by time on the Carbon Black Server, sorted in
+        either ascending or descending order given a feed name, count, and sorting order "sort"
+        count defaults to 10 and sort defaults to descending
+        '''
+
+        url = "%s/api/v1/detect/report/%s/unresolvedalertsbyseverity/%s/%s" % (self.server, feed_name, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_feed_unresolvedalerttrend(self, feed_name, days):
+        '''
+        Enumerates unresolved alert trend for the given feed_name
+        for the past "days" amount of days. "days" defaults to 30
+        '''
+
+        url = "%s/api/v1/detect/report/%s/unresolvedalerttrend/%s" % (self.server, feed_name, days)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_adminsbyalertsresolved(self, count, sort):
+        '''
+        Enumerates "count" of admins by alerts resolved on the Carbon Black Server, sorted in
+        either ascending or descending order given a count, and sorting order "sort"
+        count defaults to 10 and sort defaults to descending
+        '''
+
+        url = "%s/api/v1/detect/report/adminsbyalertsresolved/%s/%s" % (self.server, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_adminsbyresolvedtime(self, count, sort):
+        '''
+        Enumerates "count" of admins by alerts resolved on the Carbon Black Server, sorted in
+        either ascending or descending order given a count, and sorting order "sort"
+        count defaults to 10 and sort defaults to descending
+        '''
+
+        url = "%s/api/v1/detect/report/adminsbyresolvedtimecd/%s/%s" % (self.server, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_alertresolutionaverage(self, days):
+        '''
+        Enumerates resolution times for the last "days" number of days.
+        "days" defaults to 30 if not supplied
+        '''
+
+        url = "%s/api/v1/detect/report/alertresolutionaverage/%s" % (self.server, days)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_binarydwell(self, days):
+        '''
+        Enumerates the binary dwell for the last "day" number of days
+        '''
+
+        url = "%s/api/v1/detect/report/binarydwell/%s" % (self.server, days)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_currentalertstatus(self):
+        '''
+        Returns the current alert status from the Carbon Black Server
+        '''
+
+        url = "%s/api/v1/detect/report/currentalertstatus" % self.server
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_currentmonitoringstatus(self):
+        '''
+        Returns the current monitoring status from the Carbon Black Server
+        '''
+
+        url = "%s/api/v1/detect/report/currentmonitoringstatus" % self.server
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_hosthygiene(self, days):
+        '''
+        Returns the host hygiene from the Carbon Black Server
+        '''
+
+        url = "%s/api/v1/detect/report/hosthygiene/%s" % (self.server, days)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_unresolvedalertsbyseverity(self, count, sort):
+        '''
+        Enumerates "count" of unresolved alerts by severity on the Carbon Black Server, sorted in
+        either ascending or descending order given a count, and sorting order "sort"
+        count defaults to 10 and sort defaults to descending
+        '''
+
+        url = "%s/api/v1/detect/report/unresolvedalertsbyseverity/%s/%s" % (self.server, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_unresolvedalertsbytime(self, count, sort):
+        '''
+        Enumerates "count" of unresolved alerts by time on the Carbon Black Server, sorted in
+        either ascending or descending order given a count, and sorting order "sort"
+        count defaults to 10 and sort defaults to descending
+        '''
+
+        url = "%s/api/v1/detect/report/unresolvedalertsbyseverity/%s/%s" % (self.server, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_unresolvedalerttrend(self, days):
+        '''
+        Enumerates unresolved alert trend for the past "days" amount of days. "days" defaults to 30
+        '''
+
+        url = "%s/api/v1/detect/report/unresolvedalerttrend/%s" % (self.server, days)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_unresolvedhostsbyseverity(self, count, sort):
+        '''
+        Retrieves the unresolved hosts from the server. Retrieves "count" number of the hosts and
+        organizes them in "sort" order (asc or desc) by severity. "count" defaults to 10 and "sort" defaults to desc
+        '''
+
+        url = "%s/api/v1/detect/report/unresolvedhostsbyseverity/%s/%s" % (self.server, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_unresolvedhostsbytime(self, count, sort):
+        '''
+        Retrieves the unresolved hosts from the server. Retrieves "count" number of the hosts and
+        organizes them in "sort" order (asc or desc) by time. "count" defaults to 10 and "sort" defaults to desc
+        '''
+
+        url = "%s/api/v1/detect/report/unresolvedhostsbytime/%s/%s" % (self.server, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_unresolvedusersbyseverity(self, count, sort):
+        '''
+        Retrieves the unresolved users from the server. Retrieves "count" number of the users and
+        organizes them in "sort" order (asc or desc) by severity. "count" defaults to 10 and "sort" defaults to desc
+        '''
+
+        url = "%s/api/v1/detect/report/unresolvedusersbyseverity/%s/%s" % (self.server, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def detect_unresolvedusersbytime(self, count, sort):
+        '''
+        Retrieves the unresolved users from the server. Retrieves "count" number of the users and
+        organizes them in "sort" order (asc or desc) by time. "count" defaults to 10 and "sort" defaults to desc
+        '''
+
+        url = "%s/api/v1/detect/report/unresolvedusersbytime/%s/%s" % (self.server, count, sort)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def event_add(self, investigation_id, description, start_date):
+        '''
+        Adds a tagged_event to an investigation on the server
+        :investigation_id: the id of the investigation to add the event to
+        :param description: description of the event
+        :param start_date: start date of the event
+        :return: the added event
+        '''
+        event_data = {\
+            'description' : description,\
+            }
+
+        request = {\
+           'investigation_id' : investigation_id,\
+           'event_data' : event_data,\
+           'start_date' : start_date,\
+                  }
+
+        url = "%s/api/tagged_event" % self.server
+
+        r = requests.post(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def event_enum(self, investigation_id):
+        '''
+        Enumerates the tagged_events for a certain investigation and gives their information
+        :param id: the id of the investigation this tagged_event is for
+        '''
+        url = "%s/api/tagged_event/%s" % (self.server, investigation_id)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def event_update(self, id, tagged_event_id, new_description):
+        '''
+        Updates the description of an event on the server
+        :param id: the updated event's investigation id
+        :param tagged_event_id the id of the specific tagged event to be updated
+        :return: the updated event
+        '''
+
+        #use tagged_event_id to get the exact event out of all tagged events for this investigation
+        #
+        events = self.event_enum(id)
+        for event in events:
+            if int(event['id']) == int(tagged_event_id):
+                old_event = event
+        old_event_data = old_event['event_data']
+
+        #add each of the existing fields from old_event_data into new_event_data,
+        #with the exception of description which is being updated
+        #
+
+        new_event_data = {}
+        for item in old_event_data:
+            if str(item) == 'description':
+                new_event_data.udpate({'description' : new_event_data})
+            else:
+                new_event_data.update({item : old_event_data[str(item)]})
+
+        #form request with existing fields of old_event, with the exception of
+        #event_data being replaced with new_event_data
+        #
+        request = {}
+        for item in old_event.keys():
+            if item == 'description':
+                new_event_data['description'] = new_description
+            else:
+                new_event_data[item] = old_event_data[item]
+
+        url = "%s/api/tagged_event/%s" % (self.server, id)
+
+        r = requests.put(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def event_del(self, id, tagged_event_id):
+        '''
+        Deletes a tagged_event from the server
+        :param id: id of the investigation these events are associated with
+        :param tagged_event_id: the id of the specific event to be deleted
+        :return: success or failure
+        '''
+        # Way to deal with selecting boxes on the UI/ deleting the event with id "tagged_event_id"
+        #
+        url = "%s/api/tagged_event/%s" % (self.server, id)
+        r = requests.delete(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+
+    def event_by_process_id(self, proc_id):
+        '''
+        Retrieves a tagged_event specified by its process_id
+        :param proc_id: the process_id of the event
+        :return: the tagged_event
+        '''
+
+        url = "%s/api/tagged_events/%s" % (self.server, proc_id)
+        r = requests.get(url, headers = self.token_header, verify = self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def get_builds(self):
+        '''
+        Gets the build versions from the Carbon Black server
+        '''
+        url = "%s/api/builds" % self.server
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def get_login_caps(self):
+        '''
+        Gets login-caps from Carbon Black server
+        '''
+        url = "%s/api/login-caps" % self.server
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def group_datasharing_enum(self, group_id):
+        '''
+        Enumerates the datasharing settings for the group with id "group_id"
+        from Carbon Black server
+        '''
+        url = "%s/api/v1/group/%s/datasharing" % (self.server, group_id)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    # this probably needs something like add_from_data, also look at line
+    # that Jeremiah sent you that updated the datasharing settings
+    def group_datasharing_add(self, group_id, who, what):
+        '''
+        Add a new datasharing configuration to a sensor group in the CB server
+        :param group_id: the sensor group id
+        :param what: the type of data being shared i.e. "binaries" or "hashes" etc.
+        :param who: What company the data is being shared with
+        :return: the added configuration
+        '''
+        request = {\
+            'group_id' : group_id,\
+            'who' : who,\
+            'what' : what,\
+                  }
+
+        url = "%s/api/v1/group/%s/datasharing" % (self.server, group_id)
+
+        r = requests.post(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def group_datasharing_del_all(self, group_id):
+        '''
+        Deletes all datasharing configurations for the group with id "group_id"
+        from the Carbon Black server
+        '''
+        url = "%s/api/v1/group/%s/datasharing" % (self.server, group_id)
+        r = requests.delete(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def group_datasharing_info(self, group_id, config_id):
+        '''
+        Retrieves a specific datasharing configuration of a sensor group
+        :param group_id: id of sensor group
+        :param config_id: id of specific datasharing configuration
+        :return: the datasharing info for one configuration of a group
+        '''
+        url = "%s/api/v1/group/%s/datasharing/%s" % (self.server,group_id,config_id)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def group_datasharing_del(self, group_id, config_id):
+        '''
+        Deletes a specific datasharing configuration of a sensor group from the
+        Carbon Black server
+        :param group_id: id of sensor group
+        :param config_id: id of specific datasharing configuration
+        :return: the deleted configuration
+        '''
+        url = "%s/api/v1/group/%s/datasharing/%s" % (self.server,group_id,config_id)
+        r = requests.delete(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+
+
+
+
+
+

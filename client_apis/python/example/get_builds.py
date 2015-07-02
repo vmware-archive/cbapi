@@ -1,16 +1,15 @@
+__author__ = 'bwolfson'
+
 import sys
-import struct
-import socket
-import pprint
-import optparse 
+import optparse
 
 # in the github repo, cbapi is not in the example directory
 sys.path.append('../src/cbapi')
 
-import cbapi 
+import cbapi
 
 def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Enumerate all configured feeds")
+    parser = optparse.OptionParser(usage="%prog [options]", description="Display build versions from server")
 
     # for each supported output type, add an option
     #
@@ -33,19 +32,11 @@ def main(argv):
     #
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
 
-    # enumerate configured feeds
-    #
-    feeds = cb.feed_enum()
-
-    # output a banner
-    #
-    print "%-3s  %-25s   %-8s   %s" % ("Id", "Name", "Enabled", "Url")
-    print "%s+%s+%s+%s" % ("-"*3, "-"*27, "-"*10, "-"*31)
-
-    # output a row about each feed
-    #
-    for feed in feeds:
-        print "%-3s| %-25s | %-8s | %s" % (feed['id'], feed['name'], feed['enabled'], feed['feed_url'])
+    builds = cb.get_builds()
+    for build in builds:
+        print ""
+        for key in build.keys():
+            print "%-20s : %s" % (key, build[key])
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

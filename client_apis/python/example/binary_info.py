@@ -1,16 +1,12 @@
+__author__ = 'bwolfson'
+
 import sys
-import struct
-import socket
-import pprint
-import optparse 
-
-# in the github repo, cbapi is not in the example directory
+import optparse
 sys.path.append('../src/cbapi')
-
-import cbapi 
+import cbapi
 
 def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Enumerate all configured feeds")
+    parser = optparse.OptionParser(usage="%prog [options]", description="Retrieve info about one bainary file")
 
     # for each supported output type, add an option
     #
@@ -20,32 +16,27 @@ def build_cli_parser():
                       help="API Token for Carbon Black server")
     parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
                       help="Do not verify server SSL certificate.")
+    parser.add_option("-m", "--md5hash", action="store", default=None, dest = "md5hash",
+                      help = "md5hash")
     return parser
 
 def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
-    if not opts.server_url or not opts.token:
-      print "Missing required param; run with --help for usage"
-      sys.exit(-1)
+    if not opts.server_url or not opts.token or not opts.md5hash:
+        print "Missing required param; run with --help for usage"
+        sys.exit(-1)
 
     # build a cbapi object
     #
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
 
-    # enumerate configured feeds
-    #
-    feeds = cb.feed_enum()
+    binary = cb.binary_info(opts.md5hash)
+    if binary is None:
+        print "No binary file found with md5hash: %s" % opts.md5hash
 
-    # output a banner
-    #
-    print "%-3s  %-25s   %-8s   %s" % ("Id", "Name", "Enabled", "Url")
-    print "%s+%s+%s+%s" % ("-"*3, "-"*27, "-"*10, "-"*31)
-
-    # output a row about each feed
-    #
-    for feed in feeds:
-        print "%-3s| %-25s | %-8s | %s" % (feed['id'], feed['name'], feed['enabled'], feed['feed_url'])
+    else:
+        print "binary file with md5 hash %s sent to ~/Downloads directory"
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

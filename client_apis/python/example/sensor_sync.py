@@ -2,15 +2,15 @@ import sys
 import struct
 import socket
 import pprint
-import optparse 
+import optparse
 
 # in the github repo, cbapi is not in the example directory
 sys.path.append('../src/cbapi')
 
-import cbapi 
+import cbapi
 
 def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Delete an existing feed")
+    parser = optparse.OptionParser(usage="%prog [options]", description="Force a single sensor to sync via the API")
 
     # for each supported output type, add an option
     #
@@ -20,37 +20,31 @@ def build_cli_parser():
                       help="API Token for Carbon Black server")
     parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
                       help="Do not verify server SSL certificate.")
-    parser.add_option("-f", "--feedname", action="store", default=None, dest="feedname",
-                      help="Feed Name")
-    parser.add_option("-i", "--id", action="store", default=None, dest="feedid",
-                      help="Feed Id")
+    parser.add_option("-i", "--sensorid", action="store", default=None, dest="sensorid",
+                      help="sensor id")
+
     return parser
 
 def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
-    if not opts.server_url or not opts.token or (not opts.feedname and not opts.feedid):
+    if not opts.server_url or not opts.token or not opts.sensorid:
         print "Missing required param; run with --help for usage"
-        print "One of -f or -i must be specified"
+        print "Must specify the sensor id"
         sys.exit(-1)
 
     # build a cbapi object
     #
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
 
-    if not opts.feedid:
-      id = cb.feed_get_id_by_name(opts.feedname)
-      if id is None:
-        print "-> No configured feed with name '%s' found!" % (opts.feedname) 
-        return
+    if cb.sensor(opts.sensorid) is None:
+        print "-> No configured sensor found with id %s" % opts.sensorid
     else:
-      id = opts.feedid
-
-    # delete the feed
-    #
-    cb.feed_del(id)
-
-    print "-> Feed deleted [id=%s]" % (id,)
+        sensor = cb.sensor(opts.sensorid)
+        sensor_id = opts.sensorid
+        group_id = sensor['group_id']
+        event_log_flush_time = sensor['event_log_flush_time']
+        cb.sensor_force_sync(sensor_id, group_id, event_log_flush_time)
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

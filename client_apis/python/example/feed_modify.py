@@ -1,16 +1,15 @@
+__author__ = 'bwolfson'
+
 import sys
-import struct
-import socket
-import pprint
-import optparse 
+import optparse
 
 # in the github repo, cbapi is not in the example directory
 sys.path.append('../src/cbapi')
 
-import cbapi 
+import cbapi
 
 def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Delete an existing feed")
+    parser = optparse.OptionParser(usage="%prog [options]", description="Modify an existing feed")
 
     # for each supported output type, add an option
     #
@@ -41,16 +40,14 @@ def main(argv):
     if not opts.feedid:
       id = cb.feed_get_id_by_name(opts.feedname)
       if id is None:
-        print "-> No configured feed with name '%s' found!" % (opts.feedname) 
+        print "-> No configured feed with name '%s' found!" % (opts.feedname)
         return
     else:
       id = opts.feedid
+      old_feed = cb.feed_info(id)
 
-    # delete the feed
-    #
-    cb.feed_del(id)
+      #create a new updated feed based on user input
 
-    print "-> Feed deleted [id=%s]" % (id,)
-
+    # create
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

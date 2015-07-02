@@ -1,16 +1,15 @@
+__author__ = 'bwolfson'
+
 import sys
-import struct
-import socket
-import pprint
-import optparse 
+import optparse
 
 # in the github repo, cbapi is not in the example directory
 sys.path.append('../src/cbapi')
 
-import cbapi 
+import cbapi
 
 def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Enumerate all configured feeds")
+    parser = optparse.OptionParser(usage="%prog [options]", description="Delete all datasharing configurations for a sensor group")
 
     # for each supported output type, add an option
     #
@@ -20,12 +19,14 @@ def build_cli_parser():
                       help="API Token for Carbon Black server")
     parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
                       help="Do not verify server SSL certificate.")
+    parser.add_option("-i", "--group_id", action="store", default=True, dest= "group_id",
+                      help = "id of sensor group whose datasharing configs to enumerate")
     return parser
 
 def main(argv):
     parser = build_cli_parser()
     opts, args = parser.parse_args(argv)
-    if not opts.server_url or not opts.token:
+    if not opts.server_url or not opts.token or not opts.group_id:
       print "Missing required param; run with --help for usage"
       sys.exit(-1)
 
@@ -33,19 +34,19 @@ def main(argv):
     #
     cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
 
-    # enumerate configured feeds
-    #
-    feeds = cb.feed_enum()
+    #check if the given group_id truly corresponds to one of the existing sensor groups
+    does_exist = False
+    for group in cb.group_enum():
+        if int(opts.group_id) == int(group['id']):
+            does_exist = True
 
-    # output a banner
-    #
-    print "%-3s  %-25s   %-8s   %s" % ("Id", "Name", "Enabled", "Url")
-    print "%s+%s+%s+%s" % ("-"*3, "-"*27, "-"*10, "-"*31)
+    if does_exist:
+        config = cb.group_datasharing_del_all(opts.group_id)
 
-    # output a row about each feed
-    #
-    for feed in feeds:
-        print "%-3s| %-25s | %-8s | %s" % (feed['id'], feed['name'], feed['enabled'], feed['feed_url'])
+        for key in config.keys():
+            print "%-20s : %s" % (key, config[key])
+    else:
+        sys.exit(-1)
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
