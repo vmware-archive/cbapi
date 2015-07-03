@@ -23,8 +23,14 @@
 # SOFTWARE.
 #
 # -----------------------------------------------------------------------------
-# last updated 2015-03-07 by Ben Johnson bjohnson@bit9.com
+#  <Short Description>
 #
+#  <Long Description>
+#
+#  last updated 2015-06-28 by Ben Johnson bjohnson@bit9.com
+#
+
+# in the github repo, cbapi is not in the example directory
 
 from cbapi.util.cli_helpers import main_helper
 

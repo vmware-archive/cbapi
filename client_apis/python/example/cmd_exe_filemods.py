@@ -23,11 +23,15 @@
 # SOFTWARE.
 #
 # -----------------------------------------------------------------------------
-# last updated 2015-03-07 by Ben Johnson bjohnson@bit9.com
+#  <Short Description>
+#
+#  <Long Description>
+#
+#  last updated 2015-06-28 by Ben Johnson bjohnson@bit9.com
 #
 
-from cbapi.util.cli_helpers import main_helper
 
+from cbapi.util.cli_helpers import main_helper
 
 def main(cb, args):
     for (proc, events) in cb.process_search_and_events_iter(r"process_name:cmd.exe (filemod:*.exe or filemod:*.dll)"):
