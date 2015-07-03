@@ -23,7 +23,11 @@
 # SOFTWARE.
 #
 # -----------------------------------------------------------------------------
-# last updated 2015-05-25 by Ben Johnson bjohnson@bit9.com
+#  <Short Description>
+#
+#  <Long Description>
+#
+#  last updated 2015-06-28 by Ben Johnson bjohnson@bit9.com
 #
 
 from cbapi.util.cli_helpers import main_helper

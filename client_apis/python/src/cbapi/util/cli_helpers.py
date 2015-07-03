@@ -59,9 +59,9 @@ def main_helper(description, main, custom_required=None, custom_optional=None):
     """
 
     default_required = [
-                ("-u", "--url", "store", None, "server_url",
+                ("-c", "--cburl", "store", None, "server_url",
                  "CB server's URL.  e.g., http://127.0.0.1 "),
-                ("-t", "--token", "store", None, "token",
+                ("-a", "--apitoken", "store", None, "token",
                  "API Token for Carbon Black server")]
 
     default_optional = [("-n", "--no-ssl-verify", "store_false", True,
