@@ -30,40 +30,21 @@
 #  last updated 2015-06-28 by Ben Johnson bjohnson@bit9.com
 #
 
-import optparse
-import cbapi 
+from cbapi.util.cli_helpers import main_helper
 
-def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Display current license status of the Carbon Black Server")
+def main(cb, args):
 
-    # for each supported output type, add an option
-    #
-    parser.add_option("-c", "--cburl", action="store", default=None, dest="server_url",
-                      help="CB server's URL.  e.g., http://127.0.0.1 ")
-    parser.add_option("-a", "--apitoken", action="store", default=None, dest="token",
-                      help="API Token for Carbon Black server")
-    parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
-                      help="Do not verify server SSL certificate.")
-    return parser
+    print "UI Logins (CoreServicesUIAgent)"
 
-def output_info(server, info):
-    print server
-    print "-" * 80
-    for key in info.keys():
-      print "%-30s : %s" % (key, info[key])
+    for proc in cb.process_search_iter('process_name:CoreServicesUIAgent', start=0, rows=200):
+        print "%s,%s,%s" % (proc.get('start'), proc.get('hostname'), proc.get('username'))
+    print
 
-def main(argv):
-    parser = build_cli_parser()
-    opts, args = parser.parse_args(argv)
-    if not opts.server_url or not opts.token:
-      print "Missing required param; run with --help for usage"
-      sys.exit(-1)
+    print "SSH Sessions (sshd -> bash)"
 
-    # build a cbapi object
-    #
-    cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
-
-    output_info(opts.server_url, cb.license_status())
+    for proc in cb.process_search_iter('parent_name:sshd process_name:bash', start=0, rows=200):
+        print "%s,%s,%s" % (proc.get('start'), proc.get('hostname'), proc.get('username'))
+    print
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+    main_helper("Search for OSX logins via particular processes.", main)

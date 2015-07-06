@@ -23,32 +23,5 @@
 # SOFTWARE.
 #
 # -----------------------------------------------------------------------------
-#  <Short Description>
+# last updated 2015-03-07 by Ben Johnson bjohnson@bit9.com
 #
-#  <Long Description>
-#
-#  last updated 2015-06-28 by Ben Johnson bjohnson@bit9.com
-#
-
-import pprint
-from cbapi.util.cli_helpers import main_helper
-
-def main(cb, args):
-
-    # perform a single process search
-    #
-    processes = cb.process_search(args.get('query'))
-    
-    print "%-20s : %s" % ('Displayed Results', len(processes['results']))
-    print "%-20s : %s" % ('Total Results', processes['total_results'])
-    print "%-20s : %sms" % ('QTime', int(1000*processes['elapsed']))
-    print '\n'
-
-    # for each result 
-    for process in processes['results']:
-        pprint.pprint(process)
-        print '\n'
-
-if __name__ == "__main__":
-    required_arg = ("-q", "--query", "store", None, "query", "Process search query")
-    main_helper("Generic process search", main, custom_required=[required_arg])

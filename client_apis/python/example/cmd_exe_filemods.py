@@ -30,40 +30,32 @@
 #  last updated 2015-06-28 by Ben Johnson bjohnson@bit9.com
 #
 
-import optparse
-import cbapi 
 
-def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Display current license status of the Carbon Black Server")
+from cbapi.util.cli_helpers import main_helper
 
-    # for each supported output type, add an option
-    #
-    parser.add_option("-c", "--cburl", action="store", default=None, dest="server_url",
-                      help="CB server's URL.  e.g., http://127.0.0.1 ")
-    parser.add_option("-a", "--apitoken", action="store", default=None, dest="token",
-                      help="API Token for Carbon Black server")
-    parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
-                      help="Do not verify server SSL certificate.")
-    return parser
+def main(cb, args):
+    for (proc, events) in cb.process_search_and_events_iter(r"process_name:cmd.exe (filemod:*.exe or filemod:*.dll)"):
+        filemods = events.get('process', {}).get('filemod_complete', [])
+        for filemod in filemods:
 
-def output_info(server, info):
-    print server
-    print "-" * 80
-    for key in info.keys():
-      print "%-30s : %s" % (key, info[key])
+            print filemod
+            # TODO -- figure out fields
+            action, timestamp, filepath, md5, junk1, junk2 = filemod.split('|')
 
-def main(argv):
-    parser = build_cli_parser()
-    opts, args = parser.parse_args(argv)
-    if not opts.server_url or not opts.token:
-      print "Missing required param; run with --help for usage"
-      sys.exit(-1)
+            filepath = filepath.lower()
+            if not filepath.endswith(".exe") or not filepath.endswith(".dll"):
+                continue
 
-    # build a cbapi object
-    #
-    cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
+            if action == "1":
+                action = "CREATE"
+            elif action == "2":
+                action = "MODIFY"
+            elif action == "4":
+                action = "DELETE"
+            elif action == "8":
+                action = "EXECUTABLE_WRITE"
 
-    output_info(opts.server_url, cb.license_status())
+            print "%s,%s,%s,%s,%s,%s" % (timestamp, proc['hostname'], proc['username'], proc['path'], filepath, action)
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+    main_helper("Search for cmd.exe writing to exe and dll filepaths", main)

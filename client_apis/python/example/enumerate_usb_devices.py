@@ -30,40 +30,26 @@
 #  last updated 2015-06-28 by Ben Johnson bjohnson@bit9.com
 #
 
-import optparse
-import cbapi 
+from cbapi.util.cli_helpers import main_helper
 
-def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Display current license status of the Carbon Black Server")
+def main(cb, args):
+    start = args.get('start')
 
-    # for each supported output type, add an option
-    #
-    parser.add_option("-c", "--cburl", action="store", default=None, dest="server_url",
-                      help="CB server's URL.  e.g., http://127.0.0.1 ")
-    parser.add_option("-a", "--apitoken", action="store", default=None, dest="token",
-                      help="API Token for Carbon Black server")
-    parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
-                      help="Do not verify server SSL certificate.")
-    return parser
+    for (proc, events) in \
+        cb.process_search_and_events_iter(
+               'start:%s regmod:registry\\machine\\system\\currentcontrolset\\control\\deviceclasses\\{53f56307-b6bf-11d0-94f2-00a0c91efb8b}\\*' % start):
 
-def output_info(server, info):
-    print server
-    print "-" * 80
-    for key in info.keys():
-      print "%-30s : %s" % (key, info[key])
-
-def main(argv):
-    parser = build_cli_parser()
-    opts, args = parser.parse_args(argv)
-    if not opts.server_url or not opts.token:
-      print "Missing required param; run with --help for usage"
-      sys.exit(-1)
-
-    # build a cbapi object
-    #
-    cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
-
-    output_info(opts.server_url, cb.license_status())
+        for event in events.get('regmod_complete', []):
+                fields = event.split('|')
+                regpath = fields[2]
+                if "{53f56307-b6bf-11d0-94f2-00a0c91efb8b}" in regpath:
+                    pieces = regpath.split("usbstor#disk&")
+                    if len(pieces) < 2:
+                        print "WARN::::", pieces
+                    else:
+                        device_info = pieces[1] #.split('{53f56307-b6bf-11d0-94f2-00a0c91efb8b}')[0]
+                        print device_info
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+    required_arg = ("-s", "--start", "store", None, "start", "Process start time to query for, example, -2h for any processes started in past 2 hours")
+    main_helper("Search for usb device usages", main, custom_required=[required_arg])

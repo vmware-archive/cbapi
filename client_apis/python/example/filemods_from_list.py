@@ -30,40 +30,29 @@
 #  last updated 2015-06-28 by Ben Johnson bjohnson@bit9.com
 #
 
-import optparse
-import cbapi 
+# in the github repo, cbapi is not in the example directory
 
-def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Display current license status of the Carbon Black Server")
+from cbapi.util.cli_helpers import main_helper
 
-    # for each supported output type, add an option
-    #
-    parser.add_option("-c", "--cburl", action="store", default=None, dest="server_url",
-                      help="CB server's URL.  e.g., http://127.0.0.1 ")
-    parser.add_option("-a", "--apitoken", action="store", default=None, dest="token",
-                      help="API Token for Carbon Black server")
-    parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
-                      help="Do not verify server SSL certificate.")
-    return parser
+def main(cb, args):
 
-def output_info(server, info):
-    print server
-    print "-" * 80
-    for key in info.keys():
-      print "%-30s : %s" % (key, info[key])
+    input_file = args.get('inputfile')
 
-def main(argv):
-    parser = build_cli_parser()
-    opts, args = parser.parse_args(argv)
-    if not opts.server_url or not opts.token:
-      print "Missing required param; run with --help for usage"
-      sys.exit(-1)
+    f = file(input_file, "rb")
+    lines = f.read().split("\r")
 
-    # build a cbapi object
-    #
-    cb = cbapi.CbApi(opts.server_url, token=opts.token, ssl_verify=opts.ssl_verify)
+    for line in lines:
+        filepath = line.strip()
+        if len(filepath) == 0:
+            continue
 
-    output_info(opts.server_url, cb.license_status())
+        for (proc, events) in cb.process_search_and_events_iter("filemod:%s" % filepath):
+            hostname = proc.get('hostname')
+            for filemod in events.get('filemod_complete', []):
+                print filemod
+
+            print "%s, %s, %s" % (hostname, proc.get('path'), filepath)
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+    required_arg = ("-i", "--inputfile", "store", None, "inputfile", "List of filemod paths to search for")
+    main_helper("Search for processes modifying particular filepaths", main, custom_required=[required_arg])

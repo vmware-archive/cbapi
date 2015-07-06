@@ -217,7 +217,7 @@ def processEventLogDir(directory, outputformat, remove):
             except Exception, e:
                 pass
 
-            processEventLogFile(os.path.join(root, filename), outputformat, remove, hostinfo)
+            processEventLogFile(os.path.join(root, filename), outputformat, remove, hostinfo, sensor_id)
 
 def getEventLogDirFromCfg():
     """
@@ -239,7 +239,7 @@ def getBusPasswordFromConfig():
         if line.strip().startswith('RabbitMQPassword'):
             return line.split('=')[1].strip()
 
-def processEventLogFile(filename, outputformat, remove, hostinfo):
+def processEventLogFile(filename, outputformat, remove, hostinfo, sensorid):
     """
     read an entire event log file from disk, break it into its
     component protobuf events, re-package each protobuf event as
@@ -269,7 +269,7 @@ def processEventLogFile(filename, outputformat, remove, hostinfo):
             # get the event as a native python object (dictionary)
             # this means de-protobuf-ing
             #
-            event_as_obj = protobuf_to_obj(event)
+            event_as_obj = protobuf_to_obj(event, sensorid)
            
             event_as_obj.update(hostinfo)
  
