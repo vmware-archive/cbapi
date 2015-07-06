@@ -26,7 +26,7 @@ argument:
 In order to perform any queries via the API, you will need to get the API token for your Cb user. This can be acquired by
 logging into your Cb server, clicking the "Profile info" link under the pulldown on the top right corner of the Cb interface, and selecting "API token".
 
-The direct URL to view that page is https://<cb-server>/#/account/token.
+The direct URL to view that page is https://{cb-server}/#/account/token.
 
 ### Set up the API and perform a query
 
