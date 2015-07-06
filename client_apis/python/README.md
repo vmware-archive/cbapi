@@ -10,6 +10,18 @@ https://www.bit9.com/solutions/carbon-black/
 * pika, for communicating with the Cb RabbitMQ message bus
 * Google protobuf
 
+## Getting Started
+
+To try out the API without installing it into your Python site-packages directory (for example, to just run the
+example scripts in the `examples` directory), then install it in "develop" mode by running `setup.py` with the
+`develop` argument:
+
+    python setup.py develop
+
+You can also install it into a virtualenv or the site-wide packages directory by running `setup.py` with the `install`
+argument:
+
+    python setup.py install
 
 ## Example scripts
 
