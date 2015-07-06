@@ -23,11 +23,14 @@ argument:
 
     python setup.py install
 
-## Example scripts
+In order to perform any queries via the API, you will need to get the API token for your Cb user. This can be acquired by
+logging into your Cb server, clicking the "Profile info" link under the pulldown on the top right corner of the Cb interface, and selecting "API token".
 
-See the `examples/` directory for many examples on how to use the Python Cb API bindings.
+The direct URL to view that page is https://<cb-server>/#/account/token.
 
 ### Set up the API and perform a query
+
+Once you have your API token (see above), you're ready to perform your first query. Paste your token into the CbApi constructor in the code block below:
 
 ```python
     import cbapi
@@ -46,3 +49,8 @@ queries on the Cb server:
 * `binary_search` : prepares a binary search query. Also uses the [Query syntax](https://github.com/carbonblack/cbapi/raw/master/client_apis/docs/query_overview.pdf).
 * `binary_summary` : get metadata about a binary by MD5sum
 * `process_events` : get process events by Cb process ID
+
+## Example scripts
+
+See the `examples/` directory for many examples on how to use the Python Cb API bindings.
+
