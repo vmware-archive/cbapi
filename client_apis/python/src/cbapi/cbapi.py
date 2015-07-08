@@ -686,7 +686,6 @@ class CbApi(object):
                 - facets - a dictionary of the facet results for this saerch
         """
 
-<<<<<<< HEAD
         # setup the object to be used as the JSON object sent as a payload
         # to the endpoint
         params = {
