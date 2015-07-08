@@ -432,9 +432,6 @@ class CbApi(object):
         url = "%s/api/user" % (self.server,)
        
         r = requests.post(url, headers=self.token_header, data = json.dumps(request), verify=self.ssl_verify)
-        a = requests.get(url)
-        print a.data['teams']
-        
         r.raise_for_status()
         
         return r.json()        
