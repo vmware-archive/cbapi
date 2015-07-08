@@ -715,7 +715,107 @@ class CbApi(object):
         '''
 
         url = "%s/api/v1/feed/%s/report/%s" % (self.server, feedid, reportid,)
- 
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def feed_report_stats(self, feed_id, report_id):
+        '''
+        Get feed report stats
+        '''
+
+        url = "%s/api/v1/feed/%s/report/%s/stats" % (self.server, feed_id, report_id)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def feed_action_enum(self,id):
+        '''
+        Gets the actions for a certain feed from the Carbon Black Server
+        :param id: the id of the feed
+        :return: the actions associated with that feed
+        '''
+
+        url = "%s/api/v1/feed/%s/action" % (self.server, id)
+
+        r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def feed_action_add(self, id, action_type_id, email_recipient_user_ids):
+        '''
+        enables one of the three pre-determined actions to be performed
+        upon hits for feeds: email, create alert, and write to syslog
+        :param id: the id of the feed
+        :param action_type_id: the id for the type of action
+        :param email_recipient_user_ids: ids of users who will be emailed upon a hit
+        :return: the added action
+        '''
+        url = "%s/api/v1/feed/%s/action" % (self.server, id)
+
+        request = {
+            "action_data": "{\"email_recipients\":[%s]}" % (",".join(str(user_id) for user_id in email_recipient_user_ids)),
+            "action_type": action_type_id,
+            "group_id": id, #feed id
+            "watchlist_id": None
+        }
+
+        r = requests.post(url, headers = self.token_header, data = json.dumps(request), verify = self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def feed_action_update(self, id , action_id, action_type_id):
+        '''
+        updates a feed action
+        :param id: the feed id
+        :param action_id: the action id
+        :param action_type_id: the action type id
+        :return: the updated feed
+        '''
+        url = "%s/api/v1/feed/%s/action/%s" % (self.server, id, action_id)
+
+        old_actions = self.feed_action_enum(id)
+        for action in old_actions:
+            if int(action['id']) == int(action_id):
+                curr_action = action
+
+        request = {
+            "action_data": curr_action['action_data'],
+            "action_type": action_type_id,
+            "group_id": curr_action['group_id'],
+            "id" : curr_action['id'],
+            "watchlist_id": curr_action['watchlist_id']
+        }
+
+        r = requests.put(url, headers = self.token_header, data = json.dumps(request), verify = self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def feed_action_del(self, id, action_id):
+        '''
+        Deletes a feed action
+        :param id: the id of the feed
+        :param action_id: the id of the action
+        :return: whether successful or not
+        '''
+        url =  "%s/api/v1/feed/%s/action/%s" % (self.server, id, action_id)
+        r = requests.delete(url, headers=self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def feed_requirements(self, id):
+        '''
+        Get feed requirements
+        '''
+
+        url = "%s/api/v1/feed/%s/requirements" % (self.server, id)
+
         r = requests.get(url, headers=self.token_header, verify=self.ssl_verify)
         r.raise_for_status()
 
@@ -934,4 +1034,195 @@ class CbApi(object):
                         timeout=120)
         r.raise_for_status()
         return r.status_code == 200
+
+    def event_add(self, investigation_id, description, start_date):
+        '''
+        Adds a tagged_event to an investigation on the server
+        :investigation_id: the id of the investigation to add the event to
+        :param description: description of the event
+        :param start_date: start date of the event
+        :return: the added event
+        '''
+        event_data = {\
+            'description' : description,\
+            }
+
+        request = {\
+           'investigation_id' : investigation_id,\
+           'event_data' : event_data,\
+           'start_date' : start_date,\
+                  }
+
+        url = "%s/api/tagged_event" % self.server
+
+        r = requests.post(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def event_info(self, investigation_id):
+        '''
+        Enumerates the tagged_events for a certain investigation and gives their information
+        :param id: the id of the investigation this tagged_event is for
+        '''
+        url = "%s/api/tagged_event/%s" % (self.server, investigation_id)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+        return r.json()
+
+    def event_update(self, id, new_description):
+        '''
+        Updates the description of an event on the server
+        :param id: the updated event's investigation id
+        :return: the updated event
+        '''
+
+        #be able to target a single event
+        old_event_as_list = self.event_info(id)
+        old_event = old_event_as_list[0]
+        old_event_data = old_event['event_data']
+        new_event_data = {\
+            'description' : new_description,\
+            }
+
+        request = {\
+
+           'start_date' : old_event['start_date'],\
+           'event_data' : {\
+                            # set every other event_data field to the old_event value
+                            'description' : new_description
+                          },\
+                  }
+
+        url = "%s/api/tagged_event/%s" % (self.server, id)
+
+        r = requests.put(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def event_del(self, id):
+        '''
+        Deletes a tagged_event from the server
+        :param id: id of the event to be deleted
+        :return: success or failure
+        '''
+        # Way to deal with selecting boxes on the UI
+        url = "%s/api/tagged_event/%s" % (self.server, id)
+        r = requests.delete(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+
+    def event_by_process_id(self, proc_id):
+        '''
+        Retrieves a tagged_event specified by its process_id
+        :param proc_id: the process_id of the event
+        :return: the tagged_event
+        '''
+
+        url = "%s/api/tagged_events/%s" % (self.server, proc_id)
+        r = requests.get(url, headers = self.token_header, verify = self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def get_builds(self):
+        '''
+        Gets the build versions from the Carbon Black server
+        '''
+        url = "%s/api/builds" % self.server
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def get_login_caps(self):
+        '''
+        Gets login-caps from Carbon Black server
+        '''
+        url = "%s/api/login-caps" % self.server
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def group_datasharing_enum(self, group_id):
+        '''
+        Enumerates the datasharing settings for the group with id "group_id"
+        from Carbon Black server
+        '''
+        url = "%s/api/v1/group/%s/datasharing" % (self.server, group_id)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    # this probably needs something like add_from_data, also look at line
+    # that Jeremiah sent you that updated the datasharing settings
+    def group_datasharing_add(self, group_id, who, what):
+        '''
+        Add a new datasharing configuration to a sensor group in the CB server
+        :param group_id: the sensor group id
+        :param what: the type of data being shared i.e. "binaries" or "hashes" etc.
+        :param who: What company the data is being shared with
+        :return: the added configuration
+        '''
+        request = {\
+            'group_id' : group_id,\
+            'who' : who,\
+            'what' : what,\
+                  }
+
+        url = "%s/api/v1/group/%s/datasharing" % (self.server, group_id)
+
+        r = requests.post(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def group_datasharing_del_all(self, group_id):
+        '''
+        Deletes all datasharing configurations for the group with id "group_id"
+        from the Carbon Black server
+        '''
+        url = "%s/api/v1/group/%s/datasharing" % (self.server, group_id)
+        r = requests.delete(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def group_datasharing_info(self, group_id, config_id):
+        '''
+        Retrieves a specific datasharing configuration of a sensor group
+        :param group_id: id of sensor group
+        :param config_id: id of specific datasharing configuration
+        :return: the datasharing info for one configuration of a group
+        '''
+        url = "%s/api/v1/group/%s/datasharing/%s" % (self.server,group_id,config_id)
+        r = requests.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+    def group_datasharing_del(self, group_id, config_id):
+        '''
+        Deletes a specific datasharing configuration of a sensor group from the
+        Carbon Black server
+        :param group_id: id of sensor group
+        :param config_id: id of specific datasharing configuration
+        :return: the deleted configuration
+        '''
+        url = "%s/api/v1/group/%s/datasharing/%s" % (self.server,group_id,config_id)
+        r = requests.delete(url, headers = self.token_header, verify=self.ssl_verify)
+        r.raise_for_status()
+
+        return r.json()
+
+
+
+
+
+
 
