@@ -620,6 +620,7 @@ if __name__ == '__main__':
     opts, args = parser.parse_args(sys.argv)
 
     g_config['prettyPrint'] = opts.pretty
+    cbhost = None
 
     if opts.server_name is not None:
         g_config['cb_server'] = opts.server_name
