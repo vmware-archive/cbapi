@@ -29,7 +29,7 @@
 
 import optparse
 import sys
-from extended_api import CbExtendedApi
+from cbapi import CbApi
 
 def build_cli_parser(description, args):
     """
@@ -92,5 +92,5 @@ def main_helper(description, main, custom_required=None, custom_optional=None):
         name = opt[4]
         args[name] = getattr(opts, name)
 
-    cb = CbExtendedApi(opts.server_url, ssl_verify=opts.ssl_verify, token=opts.token)
+    cb = CbApi(opts.server_url, ssl_verify=opts.ssl_verify, token=opts.token)
     main(cb, args)
