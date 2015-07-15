@@ -11,7 +11,7 @@ sys.path.append('../src/cbapi')
 import cbapi
 
 def build_cli_parser():
-    parser = optparse.OptionParser(usage="%prog [options]", description="Display information about a user")
+    parser = optparse.OptionParser(usage="%prog [options]", description="Add an alert for a process hit")
 
     # for each supported output type, add an option
     #
