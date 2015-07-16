@@ -8,6 +8,9 @@ import json
 import time
 import requests
 
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
 
 class CbApi(object):
     """ Python bindings for Carbon Black API 
@@ -397,16 +400,27 @@ class CbApi(object):
 
         return r.json()
 
-    def feed_add_from_url(self, feed_url, enabled, validate_server_cert, use_proxy):
+    def feed_add_from_url(self, feed_url, enabled=True, validate_server_cert=False, use_proxy=False,
+                          feed_username=None, feed_password=None, ssl_client_crt=None, ssl_client_key=None):
         '''
         add a new feed to the Carbon Black server, as specified by URL
         '''
-        request = {\
-                      'use_proxy': use_proxy,\
-                      'validate_server_cert': validate_server_cert,\
-                      'feed_url': feed_url,\
-                      'enabled': enabled,\
+        request = {
+                      'use_proxy': use_proxy,
+                      'validate_server_cert': validate_server_cert,
+                      'feed_url': feed_url,
+                      'enabled': enabled,
                   }
+
+        if feed_username:
+            request['username'] = feed_username
+        if feed_password:
+            request['password'] = feed_password
+
+        if ssl_client_crt:
+            request['ssl_client_crt'] = ssl_client_crt
+        if ssl_client_key:
+            request['ssl_client_key'] = ssl_client_key
 
         url = "%s/api/v1/feed" % (self.server,)
         
@@ -952,7 +966,7 @@ class CbApi(object):
     def live_response_session_create(self, sensor_id):
         target_session = None
         for session in self.live_response_session_list():
-            if session.get('sensor_id') == sensor_id and session.get('status') != "close":
+            if session.get('sensor_id') == sensor_id and session.get('status') == "active":
                 target_session = session
                 break
 

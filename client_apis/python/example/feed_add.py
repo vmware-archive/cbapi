@@ -52,6 +52,14 @@ def build_cli_parser():
                       help="Carbon Black server will use configured web proxy to download feed from feed url")
     parser.add_option("-e", "--enabled", action="store_true", default=False, dest="enabled",
                       help="Enable the feed for immediate matching")
+    parser.add_option("-k", "--ssl-client-key", action="store", default=None, dest="ssl_client_key",
+                      help="Filename of SSL client private key required to access feed in unencrypted PEM format")
+    parser.add_option("-C", "--ssl-client-crt", action="store", default=None, dest="ssl_client_crt",
+                      help="Filename of SSL client certificate required to access feed in unencrypted PEM format")
+    parser.add_option("-U", "--username", action="store", default=None, dest="feed_username",
+                      help="HTTP Basic Authentication username required to access feed")
+    parser.add_option("-P", "--password", action="store", default=None, dest="feed_password",
+                      help="HTTP Basic Authentication password required to access feed")
     return parser
 
 def main(argv):
@@ -68,7 +76,17 @@ def main(argv):
     # add the feed.  The feed metadata (name, icon, etc.) will be pulled from
     # the feed itself  
     #
-    results = cb.feed_add_from_url(opts.feed_url, opts.enabled, opts.validate_server_cert, opts.use_proxy)
+
+    ssl_client_crt = None
+    ssl_client_key = None
+
+    if opts.ssl_client_crt:
+        ssl_client_crt = open(opts.ssl_client_crt,'r').read().strip()
+    if opts.ssl_client_key:
+        ssl_client_key = open(opts.ssl_client_key,'r').read().strip()
+
+    results = cb.feed_add_from_url(opts.feed_url, opts.enabled, opts.validate_server_cert, opts.use_proxy,
+                                   opts.feed_username, opts.feed_password, ssl_client_crt, ssl_client_key)
 
     print
     print "-> Feed added [id=%s]" % (results['id'])
