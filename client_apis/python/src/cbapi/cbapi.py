@@ -8,9 +8,11 @@ import json
 import time
 import requests
 
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-
+try:
+    from requests.packages.urllib3.exceptions import InsecureRequestWarning
+    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+except:
+    pass
 
 class CbApi(object):
     """ Python bindings for Carbon Black API 
