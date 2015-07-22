@@ -122,7 +122,7 @@ class CbApi(object):
                 - total_results - the total number of matches
                 - elapsed - how long this search took
                 - terms - a list of strings describing how the query was parsed
-                - facets - a dictionary of the facet results for this saerch
+                - facets - a dictionary of the facet results for this search
         """
 
         # setup the object to be used as the JSON object sent as a payload
@@ -150,7 +150,7 @@ class CbApi(object):
 
     def process_summary(self, id, segment, children_count=15):
         """ get the detailed metadata for a process.  Requires the 'id' field from a process
-            search result, as well as a segement, also found from a process search result.
+            search result, as well as a segment, also found from a process search result.
             The results will be limited to children_count children metadata structures.
 
             Returns a python dictionary with the following primary fields:
