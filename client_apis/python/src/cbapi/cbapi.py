@@ -184,7 +184,7 @@ class CbApi(object):
         r.raise_for_status() 
         return r.content
 
-    def binary_search(self, query_string, start=0, rows=10, sort="server_added_timestamp desc"):
+    def binary_search(self, query_string, start=0, rows=10, sort="server_added_timestamp desc", facet_enable=True):
         """ Search for binaries.  Arguments: 
 
 
@@ -197,6 +197,7 @@ class CbApi(object):
             rows -              Defaulted to 10. Will retrieve this many rows. 
             sort -              Default to server_added_timestamp desc.  Must include a field and a sort
                                 order; results will be sorted by this param.
+            facet_enable -      Enable facets on the result set. Defaults to enable facets (True)
 
             Returns a python dictionary with the following primary fields:
                 - results - a list of dictionaries describing each matching binary
@@ -205,12 +206,16 @@ class CbApi(object):
                 - terms - a list of strings describing how the query was parsed
                 - facets - a dictionary of the facet results for this saerch
         """
+        if facet_enable:
+            facet_param = ['true', 'true']
+        else:
+            facet_param = ['false', 'false']
 
         # setup the object to be used as the JSON object sent as a payload
         # to the endpoint
         params = {
             'sort': sort,
-            'facet': ['true', 'true'],
+            'facet': facet_param,
             'rows': rows,
             'cb.urlver': ['1'],
             'start': start}
@@ -881,7 +886,7 @@ class CbApi(object):
         r.raise_for_status()
         return r.json()
 
-    def binary_search_iter(self, query_string, start=0, rows=10, sort="server_added_timestamp desc"):
+    def binary_search_iter(self, query_string, start=0, rows=10, **kwargs):
         """
         A generator for doing a binary search so you can say for results in binary_search_iter
         so that you can keep iterating through all the results.
@@ -893,7 +898,7 @@ class CbApi(object):
         """
         our_start = start
         while True:
-            resp = self.binary_search(query_string, our_start, rows, sort)
+            resp = self.binary_search(query_string, start=our_start, rows=rows, **kwargs)
             results = resp.get('results')
             for binary in results:
                 yield binary
@@ -901,7 +906,7 @@ class CbApi(object):
             if len(results) < rows:
                 break
 
-    def process_search_iter(self, query_string, start=0, rows=10, sort="last_update desc"):
+    def process_search_iter(self, query_string, start=0, rows=10, **kwargs):
         """
         A generator for doing a process search so you can say for results in process_search_iter
         so that you can keep going through all the results.
@@ -915,7 +920,7 @@ class CbApi(object):
         """
         our_start = start
         while True:
-            resp = self.process_search(query_string, our_start, rows, sort)
+            resp = self.process_search(query_string, start=our_start, rows=rows, **kwargs)
             results = resp.get('results')
             for proc in results:
                 yield proc
