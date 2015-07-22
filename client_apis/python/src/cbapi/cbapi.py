@@ -105,7 +105,7 @@ class CbApi(object):
                                                                         data = json.dumps(platform_server_config))
         r.raise_for_status()
 
-    def process_search(self, query_string, start=0, rows=10, sort="last_update desc"):
+    def process_search(self, query_string, start=0, rows=10, sort="last_update desc", facet_enable=True):
         """ Search for processes.  Arguments: 
 
             query_string -      The Cb query string; this is the same string used in the 
@@ -116,6 +116,7 @@ class CbApi(object):
             rows -              Defaulted to 10. Will retrieve this many rows. 
             sort -              Default to last_update desc.  Must include a field and a sort
                                 order; results will be sorted by this param.
+            facet_enable -      Enable facets on the result set. Defaults to enable facets (True)
 
             Returns a python dictionary with the following primary fields:
                 - results - a list of dictionaries describing each matching process
@@ -127,9 +128,15 @@ class CbApi(object):
 
         # setup the object to be used as the JSON object sent as a payload
         # to the endpoint
+
+        if facet_enable:
+            facet_param = ['true', 'true']
+        else:
+            facet_param = ['false', 'false']
+
         params = {
             'sort': sort,
-            'facet': ['true', 'true'],
+            'facet': facet_param,
             'rows': rows,
             'cb.urlver': ['1'],
             'start': start}
