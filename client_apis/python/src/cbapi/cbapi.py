@@ -1067,6 +1067,18 @@ class CbApi(object):
         r.raise_for_status()
         return r.status_code == 200
 
+    def move_sensor_to_group(self, sensor_id, new_group_id):
+        data = self.sensor(sensor_id)
+        data["group_id"] = new_group_id
+
+        r = self.session.put("%s/api/v1/sensor/%s" % (self.server, sensor_id),
+                        data=json.dumps(data),
+                        headers=self.token_header,
+                        verify=self.ssl_verify,
+                        timeout=120)
+        r.raise_for_status()
+        return r.status_code == 200
+
     def event_add(self, investigation_id, description, start_date):
         '''
         Adds a tagged_event to an investigation on the server
