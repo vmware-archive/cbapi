@@ -1035,16 +1035,14 @@ class CbApi(object):
 
         headers = {'X-Auth-Token': self.token}
 
-        result = requests.post(url,
+        r = requests.post(url,
                                headers=headers,
                                files=fpost,
                                verify=False,
                                timeout=120)
-        if result.status_code != 200:
-            print "[-] Error on POST"
-        print "[+] POST successful!"
-        result.raise_for_status()
-        ret = json.loads(result.content)
+
+        r.raise_for_status()
+        ret = json.loads(r.content)
         fileid = ret["id"]
         return fileid
 
