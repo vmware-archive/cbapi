@@ -846,7 +846,7 @@ class CbApi(object):
 
         return r.json()
 
-    def alert_search(self, query_string, sort="created_time desc", rows=10, start=0):
+    def alert_search(self, query_string, sort="created_time desc", rows=10, start=0, facet_enable=True):
         """ Search for processes.  Arguments: 
 
             query_string -      The Alert query string; this is the same string used in the 
@@ -865,9 +865,15 @@ class CbApi(object):
                 - terms - a list of strings describing how the query was parsed
                 - facets - a dictionary of the facet results for this saerch
         """
+
+        if facet_enable:
+            facet_param = ['true', 'true']
+        else:
+            facet_param = ['false', 'false']
+
         params = {
             'sort': sort,
-            'facet': ['true', 'true'],
+            'facet': facet_param,
             'rows': rows,
             'cb.urlver': ['1'],
             'start': start}
