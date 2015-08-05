@@ -36,3 +36,6 @@ nosetests.xml
 
 # IDE exclusions
 .idea
+
+# Mac OS X
+.DS_Store
