@@ -140,3 +140,12 @@ class LiveResponseHelper(threading.Thread):
         """
         self.ready_event.wait()
         return self.__post_and_wait("create process", procpath)
+
+
+    def get_registry_value(self, registry_path):
+        """
+        Retrieve the data from a registry value.
+        """
+        self.ready_event.wait()
+        ret = self.__post_and_wait("reg query value", registry_path)
+        return ret.get('value', None)
