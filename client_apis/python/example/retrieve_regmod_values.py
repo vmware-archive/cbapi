@@ -36,11 +36,13 @@
 #
 #  TODO: More error handling, more performance improvements
 #
-#  last updated 2015-07-30 by Ben Johnson bjohnson@bit9.com
+#  last updated 2015-08-11 by Ben Johnson bjohnson@bit9.com (dev-support@bit9.com)
 #
 
 import re
+import Queue
 import sys
+from threading import Thread
 import time
 import traceback
 from cbapi.util.cli_helpers import main_helper
@@ -63,6 +65,17 @@ class RegistryModWatcherAndValueGrabber(MessageSubscriberAndLiveResponseActor):
                                                        username,
                                                        password,
                                                        "ingress.event.regmod")
+
+        # Threading so that message queue arrives do not block waiting for live response
+        self.queue = Queue.Queue()
+        self.go = True
+        self.worker_thread = Thread(target=self._worker_thread_loop)
+        self.worker_thread.start()
+
+    def on_stop(self):
+        self.go = False
+        self.worker_thread.join(timeout=2)
+        MessageSubscriberAndLiveResponseActor.on_stop(self)
 
     def consume_message(self, channel, method_frame, header_frame, body):
         if "application/protobuf" != header_frame.content_type:
@@ -96,12 +109,28 @@ class RegistryModWatcherAndValueGrabber(MessageSubscriberAndLiveResponseActor):
                 regmod_path = regmod_path.strip()
                 # TODO -- more cleanup here potentially?
 
+                self.queue.put((x, regmod_path))
+
+        except:
+            traceback.print_exc()
+
+    def _worker_thread_loop(self):
+        while self.go:
+            try:
+                try:
+                    (x, regmod_path) = self.queue.get(timeout=0.5)
+                except Queue.Empty:
+                    continue
+
                 # TODO -- could comment this out if you want CSV data to feed into something
                 print "--> Attempting for %s" % regmod_path
 
                 # Go Grab it if we think we have something!
                 sensor_id = x.env.endpoint.SensorId
                 hostname = x.env.endpoint.SensorHostName
+
+                # TODO -- this could use some concurrency and work queues because we could wait a while for
+                # each of these to get established and retrieve the value
 
                 # Establish our CBLR session if necessary!
                 lrh = self._create_lr_session_if_necessary(sensor_id)
@@ -117,8 +146,8 @@ class RegistryModWatcherAndValueGrabber(MessageSubscriberAndLiveResponseActor):
 
                 # TODO -- could *do something* here, like if it is for autoruns keys then go check the signature status
                 # of the binary at the path pointed to, and see who wrote it out, etc
-        except:
-            traceback.print_exc()
+            except:
+                traceback.print_exc()
 
 
 def main(cb, args):
@@ -156,6 +185,9 @@ def main(cb, args):
     print "Registry Mod Watcher and Grabber -- stopped."
 
 if __name__ == "__main__":
+
+    ## YOU CAN USE data/autoruns_regexes.txt to test ##
+    
     required_args =[("-i", "--username", "store", None, "username", "CB messaging username"),
                     ("-p", "--password", "store", None, "password", "CB messaging password"),
                     ("-r", "--regpaths_file", "store", None, "regpaths_file", "File of newline delimited regexes for regpaths")]
