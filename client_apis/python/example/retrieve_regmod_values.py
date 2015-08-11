@@ -36,7 +36,7 @@
 #
 #  TODO: More error handling, more performance improvements
 #
-#  last updated 2015-07-30 by Ben Johnson bjohnson@bit9.com
+#  last updated 2015-08-11 by Ben Johnson bjohnson@bit9.com (dev-support@bit9.com)
 #
 
 import re
@@ -93,7 +93,24 @@ class RegistryModWatcherAndValueGrabber(MessageSubscriberAndLiveResponseActor):
                 # well go with the one that says data has actually been written.
                 return
 
-            self.queue.put(x)
+            regmod_path = None
+
+            if x.regmod.utf8_regpath:
+                if self.verbose:
+                    print "Event arrived: |%s|" % x.regmod.utf8_regpath
+                for regmod_regex in self.regmod_regexes:
+                    if regmod_regex.match(x.regmod.utf8_regpath):
+                        regmod_path = x.regmod.utf8_regpath
+                        break
+
+            if regmod_path:
+                regmod_path = regmod_path.replace("\\registry\\machine\\", "HKLM\\")
+                regmod_path = regmod_path.replace("\\registry\\user\\", "HKEY_USERS\\")
+                regmod_path = regmod_path.strip()
+                # TODO -- more cleanup here potentially?
+
+                self.queue.put((x, regmod_path))
+
         except:
             traceback.print_exc()
 
@@ -101,53 +118,36 @@ class RegistryModWatcherAndValueGrabber(MessageSubscriberAndLiveResponseActor):
         while self.go:
             try:
                 try:
-                    x = self.queue.get(timeout=0.5)
+                    (x, regmod_path) = self.queue.get(timeout=0.5)
                 except Queue.Empty:
                     continue
 
-                regmod_path = None
+                # TODO -- could comment this out if you want CSV data to feed into something
+                print "--> Attempting for %s" % regmod_path
 
-                if x.regmod.utf8_regpath:
-                    if self.verbose:
-                        print "Event arrived: |%s|" % x.regmod.utf8_regpath
-                    for regmod_regex in self.regmod_regexes:
-                        if regmod_regex.match(x.regmod.utf8_regpath):
-                            regmod_path = x.regmod.utf8_regpath
-                            break
+                # Go Grab it if we think we have something!
+                sensor_id = x.env.endpoint.SensorId
+                hostname = x.env.endpoint.SensorHostName
 
-                if regmod_path:
-                    regmod_path = regmod_path.replace("\\registry\\machine\\", "HKLM\\")
-                    regmod_path = regmod_path.replace("\\registry\\user\\", "HKEY_USERS\\")
-                    regmod_path = regmod_path.strip()
-                    # TODO -- more cleanup here potentially?
+                # TODO -- this could use some concurrency and work queues because we could wait a while for
+                # each of these to get established and retrieve the value
 
-                    # TODO -- could comment this out if you want CSV data to feed into something
-                    print "--> Attempting for %s" % regmod_path
+                # Establish our CBLR session if necessary!
+                lrh = self._create_lr_session_if_necessary(sensor_id)
 
-                    # Go Grab it if we think we have something!
-                    sensor_id = x.env.endpoint.SensorId
-                    hostname = x.env.endpoint.SensorHostName
+                data = lrh.get_registry_value(regmod_path)
 
-                    # TODO -- this could use some concurrency and work queues because we could wait a while for
-                    # each of these to get established and retrieve the value
+                print "%s,%s,%d,%s,%s,%s" % ( time.asctime(),
+                                              hostname,
+                                              sensor_id,
+                                              x.header.process_path,
+                                              regmod_path,
+                                              data.get('value_data', "") if data else "<UNKNOWN>")
 
-                    # Establish our CBLR session if necessary!
-                    lrh = self._create_lr_session_if_necessary(sensor_id)
-
-                    data = lrh.get_registry_value(regmod_path)
-
-                    print "%s,%s,%d,%s,%s,%s" % ( time.asctime(),
-                                                  hostname,
-                                                  sensor_id,
-                                                  x.header.process_path,
-                                                  regmod_path,
-                                                  data.get('value_data', "") if data else "<UNKNOWN>")
-
-                    # TODO -- could *do something* here, like if it is for autoruns keys then go check the signature status
-                    # of the binary at the path pointed to, and see who wrote it out, etc
+                # TODO -- could *do something* here, like if it is for autoruns keys then go check the signature status
+                # of the binary at the path pointed to, and see who wrote it out, etc
             except:
                 traceback.print_exc()
-
 
 
 def main(cb, args):
@@ -185,6 +185,9 @@ def main(cb, args):
     print "Registry Mod Watcher and Grabber -- stopped."
 
 if __name__ == "__main__":
+
+    ## YOU CAN USE data/autoruns_regexes.txt to test ##
+    
     required_args =[("-i", "--username", "store", None, "username", "CB messaging username"),
                     ("-p", "--password", "store", None, "password", "CB messaging password"),
                     ("-r", "--regpaths_file", "store", None, "regpaths_file", "File of newline delimited regexes for regpaths")]
