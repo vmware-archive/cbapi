@@ -1,6 +1,6 @@
 #
 # CARBON BLACK API
-# Copyright Bit9, Inc. 2014 
+# Copyright Bit9, Inc. 2014
 # support@carbonblack.com
 #
 
@@ -15,29 +15,29 @@ except:
     pass
 
 class CbApi(object):
-    """ Python bindings for Carbon Black API 
+    """ Python bindings for Carbon Black API
     Example:
 
     import cbapi
     cb = cbapi.CbApi("http://cb.example.com", token="apitoken")
     # get metadata for all svchost.exe's not from c:\\windows
-    procs = cb.process_search(r"process_name:svchost.exe -path:c:\\windows\\")  
+    procs = cb.process_search(r"process_name:svchost.exe -path:c:\\windows\\")
     for proc in procs['results']:
         proc_detail = cb.process(proc['id'])
         print proc_detail['process']['start'], proc_detail['process']['hostname'], proc_detail['process']['path']
     """
     def __init__(self, server, ssl_verify=True, token=None):
         """ Requires:
-                server -    URL to the Carbon Black server.  Usually the same as 
+                server -    URL to the Carbon Black server.  Usually the same as
                             the web GUI.
                 ssl_verify - verify server SSL certificate
                 token - this is for CLI API interface
         """
 
-        if not server.startswith("http"): 
+        if not server.startswith("http"):
             raise TypeError("Server must be URL: e.g, http://cb.example.com")
 
-        if token is None: 
+        if token is None:
             raise TypeError("Missing required authentication token.")
 
         self.server = server.rstrip("/")
@@ -106,14 +106,14 @@ class CbApi(object):
         r.raise_for_status()
 
     def process_search(self, query_string, start=0, rows=10, sort="last_update desc", facet_enable=True):
-        """ Search for processes.  Arguments: 
+        """ Search for processes.  Arguments:
 
-            query_string -      The Cb query string; this is the same string used in the 
+            query_string -      The Cb query string; this is the same string used in the
                                 "main search box" on the process search page.  "Contains text..."
                                 See Cb Query Syntax for a description of options.
 
             start -             Defaulted to 0.  Will retrieve records starting at this offset.
-            rows -              Defaulted to 10. Will retrieve this many rows. 
+            rows -              Defaulted to 10. Will retrieve this many rows.
             sort -              Default to last_update desc.  Must include a field and a sort
                                 order; results will be sorted by this param.
             facet_enable -      Enable facets on the result set. Defaults to enable facets (True)
@@ -185,7 +185,7 @@ class CbApi(object):
         return r.content
 
     def binary_search(self, query_string, start=0, rows=10, sort="server_added_timestamp desc", facet_enable=True):
-        """ Search for binaries.  Arguments: 
+        """ Search for binaries.  Arguments:
 
 
             query_string -      The Cb query string; this is the same string used in the
@@ -194,7 +194,7 @@ class CbApi(object):
 
             start -             Defaulted to 0.  Will retrieve records starting at this offset.
 
-            rows -              Defaulted to 10. Will retrieve this many rows. 
+            rows -              Defaulted to 10. Will retrieve this many rows.
             sort -              Default to server_added_timestamp desc.  Must include a field and a sort
                                 order; results will be sorted by this param.
             facet_enable -      Enable facets on the result set. Defaults to enable facets (True)
@@ -310,8 +310,8 @@ class CbApi(object):
         
         r = self.session.get(url, headers=self.token_header, verify=self.ssl_verify)
         r.raise_for_status()
-       
-        return r.content 
+
+        return r.content
 
     def sensor_backlog(self):
         """
@@ -348,15 +348,15 @@ class CbApi(object):
 
             # ensure that the index type is either events or modules
             if "events" != type and "modules" != type:
-                raise ValueError("type must be one of events or modules") 
+                raise ValueError("type must be one of events or modules")
 
             # ensure that the query begins with q=
             if not "q=" in search_query:
                 raise ValueError("watchlist queries must be of the form: cb.urlver=1&q=<query>")
-            
+
             # ensure that a cb url version is included
             if "cb.urlver" not in search_query:
-                search_query = "cb.urlver=1&" + search_query 
+                search_query = "cb.urlver=1&" + search_query
 
             # ensure that the query itself is properly encoded
             for kvpair in search_query.split('&'):
@@ -365,7 +365,7 @@ class CbApi(object):
                     continue
                 if kvpair.split('=')[0] != 'q':
                     continue
-                
+
                 # the query itself must be percent-encoded
                 # verify there are only non-reserved characters present
                 # no logic to detect unescaped '%' characters
@@ -382,13 +382,13 @@ class CbApi(object):
 
         if id is not None:
           request['id'] = id
-        
+
         url = "%s/api/v1/watchlist" % (self.server,)
 
         r = self.session.post(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
         r.raise_for_status()
 
-        return r.json()  
+        return r.json()
 
     def watchlist_del(self, id):
         '''
@@ -401,7 +401,7 @@ class CbApi(object):
         r = self.session.delete(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
         r.raise_for_status()
 
-        return r.json() 
+        return r.json()
 
     def watchlist_modify(self, id, watchlist):
         '''
@@ -442,7 +442,7 @@ class CbApi(object):
         r.raise_for_status()
 
         return r.json()
-    
+
     def user_add_from_data(self, username, first_name, last_name, password, confirm_password, global_admin, teams, email):
         '''
         add a new user to the server
@@ -461,8 +461,8 @@ class CbApi(object):
        
         r = self.session.post(url, headers=self.token_header, data = json.dumps(request), verify=self.ssl_verify)
         r.raise_for_status()
-        
-        return r.json()        
+
+        return r.json()
 
     def feed_get_id_by_name(self, name):
         '''
@@ -489,7 +489,7 @@ class CbApi(object):
         # did not find it
         #
         return None
-	
+
     def feed_enum(self):
         '''
         enumerate all configured feeds
@@ -513,124 +513,124 @@ class CbApi(object):
         r.raise_for_status()
 
         return r.json()
-    
+
     def team_enum(self):
         '''
         enumerate all teams
         '''
-        
+
         url = "%s/api/teams" % (self.server,)
         
         r = self.session.get(url, headers=self.token_header, verify=self.ssl_verify)
         r.raise_for_status()
-        
-        return r.json() 
-    
+
+        return r.json()
+
     def group_enum(self):
-        return 
-        
+        return
+
     def feed_info(self, id):
         '''
-        retrieve information about an existing feed, as specified by id 
-        
+        retrieve information about an existing feed, as specified by id
+
         note: the endpoint /api/v1/feed/<id> is not supported as of CB server 5.0
         '''
         feeds = self.feed_enum()
         for feed in feeds:
           if str(feed['id']) == str(id):
-              return feed 
+              return feed
 
     def user_info(self, username):
         '''
-        retrieve information about an existing user, as specified by username 
-        
+        retrieve information about an existing user, as specified by username
+
         note: the endpoint /api/users/<id> is not supported as of CB server 5.0
         '''
         users = self.user_enum()
         for user in users:
           if user['username'] == username:
-              return user 
-          
+              return user
+
     def team_get_id_by_name(self, name):
         '''
         retrieve information about an existing team, specified by name
         '''
-        
+
         teams = self.team_enum()
         for team in teams:
             if team['name'] == name:
                 return team['id']
-    
+
     def team_info(self, id):
         '''
         retrieve information about an existing team, specified by id
         '''
-        
+
         teams = self.team_enum()
         for team in teams:
             print type(id)
             print type(team['id'])
             if team['id'] == id:
                 return team
-        
+
     def output_user_activity(self):
         '''
         retrieve all user activity from server
         '''
-        
+
         url = "%s/api/useractivity" % (self.server,)
     
         r = self.session.get(url, headers=self.token_header, verify=self.ssl_verify)
         r.raise_for_status()
-    
+
         useractivity = r.json()
-        
+
         print "%-12s| %-14s | %-12s | %-5s | %-20s" %("Username", "Timestamp", "Remote Ip", "Result", "Description")
         for attempt in useractivity:
             print "%-12s| %-14s | %-12s | %-5s | %-20s" % (attempt['username'], attempt['timestamp'], attempt['ip_address'], attempt['http_status'], attempt['http_description'])
-    
+
     def output_user_activity_success(self):
         '''
         retrieve all user activity from server and filter out successful attempts
         '''
-        
+
         url = "%s/api/useractivity" % (self.server,)
         
         r = self.session.get(url, headers=self.token_header, verify=self.ssl_verify)
         r.raise_for_status()
-        
+
         useractivity = r.json()
-        
+
         successes = []
         for attempt in useractivity:
             if attempt['http_status'] == 200:
                 successes.append(attempt)
-            
+
         print "%-12s| %-14s | %-12s | %-5s | %-20s" %("Username", "Timestamp", "Remote Ip", "Result", "Description")
         for attempt in successes:
-            print "%-12s| %-14s | %-12s | %-5s | %-20s" % (attempt['username'], attempt['timestamp'], attempt['ip_address'], attempt['http_status'], attempt['http_description'])  
-    
+            print "%-12s| %-14s | %-12s | %-5s | %-20s" % (attempt['username'], attempt['timestamp'], attempt['ip_address'], attempt['http_status'], attempt['http_description'])
+
     def output_user_activity_failure(self):
         '''
         retrieve all user activity from server and filter out successful attempts
         '''
-        
+
         url = "%s/api/useractivity" % (self.server,)
         
         r = self.session.get(url, headers=self.token_header, verify=self.ssl_verify)
         r.raise_for_status()
-        
+
         useractivity = r.json()
-        
+
         failures = []
         for attempt in useractivity:
             if attempt['http_status'] == 403:
                 failures.append(attempt)
-        
+
         print "%-12s| %-14s | %-12s | %-5s | %-20s" %("Username", "Timestamp", "Remote Ip", "Result", "Description")
         for attempt in failures:
-            print "%-12s| %-14s | %-12s | %-5s | %-20s" % (attempt['username'], attempt['timestamp'], attempt['ip_address'], attempt['http_status'], attempt['http_description'])      
-    
+            print "%-12s| %-14s | %-12s | %-5s | %-20s" % (attempt['username'], attempt['timestamp'], attempt['ip_address'], attempt['http_status'], attempt['http_description'])
+
     def feed_del(self, id):
         '''
         delete a feed, as specified by id
@@ -641,17 +641,17 @@ class CbApi(object):
         r.raise_for_status()
 
         return r.json()
-    
+
     def user_del(self,username):
-        
-        
+
+
         url = "%s/api/user/%s" % (self.server, username)
         
         r = self.session.delete(url, headers=self.token_header, verify=self.ssl_verify)
         r.raise_for_status()
-        
-        return r.json()        
-        
+
+        return r.json()
+
     def feed_modify(self, id, feed):
         '''
         updates a watchlist
@@ -666,7 +666,7 @@ class CbApi(object):
     def feed_synchronize(self, name, full_sync=True):
         '''
         force the synchronization of a feed
-        
+
         this triggers the CB server to refresh the feed.  it does not result in immediate
         tagging of any existing process or binary documents that match the feed.  it does result
         in any new incoming data from sensors being tagged on ingress.
@@ -690,16 +690,16 @@ class CbApi(object):
                                     % (feed['id'], sync_request.status_code))
 
         return {"result": False, "reason": "feed not found"}
-    
-    def threat_report_search(self, query_string, start=0, rows=10, sort="severity_score desc"):
-        """ Search for threat reports.  Arguments: 
 
-            query_string -      The Cb query string; this is the same string used in the 
+    def threat_report_search(self, query_string, start=0, rows=10, sort="severity_score desc"):
+        """ Search for threat reports.  Arguments:
+
+            query_string -      The Cb query string; this is the same string used in the
                                 "main search box" on the process search page.  "Contains text..."
                                 See Cb Query Syntax for a description of options.
 
             start -             Defaulted to 0.  Will retrieve records starting at this offset.
-            rows -              Defaulted to 10. Will retrieve this many rows. 
+            rows -              Defaulted to 10. Will retrieve this many rows.
             sort -              Default to last_update desc.  Must include a field and a sort
                                 order; results will be sorted by this param.
 
@@ -849,12 +849,12 @@ class CbApi(object):
     def alert_search(self, query_string, sort="created_time desc", rows=10, start=0, facet_enable=True):
         """ Search for processes.  Arguments: 
 
-            query_string -      The Alert query string; this is the same string used in the 
+            query_string -      The Alert query string; this is the same string used in the
                                 "main search box" on the alert search page.  "Contains text..."
                                 See Cb Query Syntax for a description of options.
 
             start -             Defaulted to 0.  Will retrieve records starting at this offset.
-            rows -              Defaulted to 10. Will retrieve this many rows. 
+            rows -              Defaulted to 10. Will retrieve this many rows.
             sort -              Default to created_time desc.  Must include a field and a sort
                                 order; results will be sorted by this param.
 
@@ -886,7 +886,7 @@ class CbApi(object):
         r.raise_for_status()
         return r.json()
 
-    def alert_update(self, alert): 
+    def alert_update(self, alert):
         r = self.session.post("%s/api/v1/alert/%s" % (self.server, alert['unique_id']), headers=self.token_header,
                           data=json.dumps(alert), verify=self.ssl_verify)
         r.raise_for_status()
@@ -1007,7 +1007,10 @@ class CbApi(object):
     def live_response_session_command_post(self, session_id, command, command_object=None):
         url = "%s/api/v1/cblr/session/%d/command" % (self.server, session_id)
         data = {"session_id": session_id, "name": command}
-        if command_object:
+        if type(command_object) is list:
+            data['object'] = command_object[0]
+            data.update(command_object[1])
+        else:
             data['object'] = command_object
         r = self.session.post(url, headers=self.token_header, data=json.dumps(data), verify=self.ssl_verify, timeout=120)
         r.raise_for_status()
@@ -1028,6 +1031,26 @@ class CbApi(object):
         r = self.session.get(url, headers=self.token_header, params={}, verify=self.ssl_verify, timeout=120)
         r.raise_for_status()
         return r.content
+
+
+    def live_response_session_command_put_file(self, session_id, filepath):
+        fin = open(filepath, "rb")
+        fpost = {'file': fin}
+
+        url = '%s/api/v1/cblr/session/%d/file' % (self.server, session_id)
+
+        headers = {'X-Auth-Token': self.token}
+
+        r = self.session.post(url,
+                               headers=headers,
+                               files=fpost,
+                               verify=False,
+                               timeout=120)
+
+        r.raise_for_status()
+        ret = json.loads(r.content)
+        fileid = ret["id"]
+        return fileid
 
 
     def live_response_session_keep_alive(self, session_id):
@@ -1262,10 +1285,3 @@ class CbApi(object):
         r.raise_for_status()
 
         return r.json()
-
-
-
-
-
-
-
