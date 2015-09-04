@@ -1,0 +1,3 @@
+[submodule "PHP-Api"]
+	path = client_apis/php
+	url = https://github.com/javabudd/CbApi.git
