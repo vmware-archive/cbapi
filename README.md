@@ -53,3 +53,12 @@ The CBFAPI is a collection of documentation, example scripts, and a helper libra
 The Carbon Black API is versioned.  A new API revision is released in lockstep with each release of the Carbon Black Enterprise Server.
 
 Previous version documentation can be found using git tags.
+
+## Submodules
+
+To clone this repository with its submodules, run git clone with the --recursive flag.
+
+To initialize submodules in an already cloned repository run the following command:
+```
+git submodule update --init --recursive
+```
