@@ -1,5 +1,5 @@
 ## CarbonBlack PHP API
-[![Build Status](https://travis-ci.org/javabudd/CbApi.svg?branch=master)](https://travis-ci.org/javabudd/CbApi)
+[![Build Status](https://travis-ci.org/javabudd/cbapi-1.svg?branch=Client-Api-Php)](https://travis-ci.org/javabudd/cbapi-1)
 
 ```php
 $api = new \CBApi\Api('https://localhost', 'XXXXXXXXXXXXXXXXXXXXXXXXXX');
