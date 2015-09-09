@@ -26,7 +26,8 @@ class CbApi(object):
         proc_detail = cb.process(proc['id'])
         print proc_detail['process']['start'], proc_detail['process']['hostname'], proc_detail['process']['path']
     """
-    def __init__(self, server, ssl_verify=True, token=None):
+    def __init__(self, server, ssl_verify=True, token=None, ignore_system_proxy=False,
+                 use_https_proxy=None, use_http_proxy=None):
         """ Requires:
                 server -    URL to the Carbon Black server.  Usually the same as
                             the web GUI.
@@ -46,6 +47,17 @@ class CbApi(object):
         self.token_header = {'X-Auth-Token': self.token}
         self.session = requests.Session()
 
+        self.proxies = {}
+        if ignore_system_proxy:         # see https://github.com/kennethreitz/requests/issues/879
+            self.proxies = {
+                'no': 'pass'
+            }
+        else:
+            if use_http_proxy:
+                self.proxies['http'] = use_http_proxy
+            if use_https_proxy:
+                self.proxies['https'] = use_https_proxy
+
     def info(self):
         """ Provide high-level information about the Carbon Black Enterprise Server.
 
@@ -55,23 +67,22 @@ class CbApi(object):
             Returns a python dictionary with the following field:
                 - version - version of the Carbon Black Enterprise Server
         """
-        r = self.session.get("%s/api/info" % self.server, headers=self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get("%s/api/info" % self.server)
         r.raise_for_status()
         return json.loads(r.content)
 
     def license_status(self):
         """ Provide a summary of the current applied license
         """
-        r = self.session.get("%s/api/v1/license" % (self.server,),  headers=self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get("%s/api/v1/license" % (self.server,))
         r.raise_for_status()
         return json.loads(r.content)
 
     def apply_license(self, license):
         """ Apply a new license to the server
         """
-        r = self.session.post("%s/api/v1/license" % (self.server,), headers=self.token_header, \
-                data=json.dumps({'license': license}), \
-                verify=self.ssl_verify)
+        r = self.cbapi_post("%s/api/v1/license" % (self.server,),
+                            data=json.dumps({'license': license}))
         r.raise_for_status()
 
     def get_platform_server_config(self):
@@ -83,9 +94,7 @@ class CbApi(object):
             Note: the secret is never available (via query) for remote callers, although
                   it can be applied
         """
-        r = self.session.get("%s/api/v1/settings/global/platformserver" % (self.server,), \
-                                                                       headers=self.token_header, \
-                                                                       verify=self.ssl_verify)
+        r = self.cbapi_get("%s/api/v1/settings/global/platformserver" % (self.server,))
         r.raise_for_status()
         return json.loads(r.content)
 
@@ -100,9 +109,8 @@ class CbApi(object):
                 password : password for authentication
                 server   : server address
         """
-        r = self.session.post("%s/api/v1/settings/global/platformserver" % (self.server,), \
-                                                                        headers=self.token_header, \
-                                                                        data = json.dumps(platform_server_config))
+        r = self.cbapi_post("%s/api/v1/settings/global/platformserver" % (self.server,),
+                            data=json.dumps(platform_server_config))
         r.raise_for_status()
 
     def process_search(self, query_string, start=0, rows=10, sort="last_update desc", facet_enable=True):
@@ -150,8 +158,7 @@ class CbApi(object):
         # HTTP POST and HTTP GET are both supported for process search
         # HTTP POST allows for longer query strings
         #
-        r = self.session.post("%s/api/v1/process" % self.server, headers=self.token_header,
-                          data=json.dumps(params), verify=self.ssl_verify)
+        r = self.cbapi_post("%s/api/v1/process" % self.server, data=json.dumps(params))
         r.raise_for_status()
         return r.json()
 
@@ -166,21 +173,21 @@ class CbApi(object):
                 - children - a list of metadata structures for child processes
                 - siblings - a list of metadata structures for sibling processes
         """
-        r = self.session.get("%s/api/v1/process/%s/%s?children=%d" % (self.server, id, segment, children_count), headers=self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get("%s/api/v1/process/%s/%s?children=%d" % (self.server, id, segment, children_count))
         r.raise_for_status()
         return r.json()
 
     def process_events(self, id, segment):
         """ get all the events (filemods, regmods, etc) for a process.  Requires the 'id' and 'segment_id' fields
             from a process search result"""
-        r = self.session.get("%s/api/v1/process/%s/%s/event" % (self.server, id, segment), headers=self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get("%s/api/v1/process/%s/%s/event" % (self.server, id, segment))
         r.raise_for_status()
         return r.json()
 
     def process_report(self, id, segment=0):
         """ download a "report" package describing the process
             the format of this report is subject to change"""
-        r = self.session.get("%s/api/v1/process/%s/%s/report" % (self.server, id, segment), headers=self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get("%s/api/v1/process/%s/%s/report" % (self.server, id, segment))
         r.raise_for_status() 
         return r.content
 
@@ -227,8 +234,7 @@ class CbApi(object):
 
         # do a post request since the URL can get long
         # @note GET is also supported through the use of a query string
-        r = self.session.post("%s/api/v1/binary" % self.server, headers=self.token_header,
-                          data=json.dumps(params), verify=self.ssl_verify)
+        r = self.cbapi_post("%s/api/v1/binary" % self.server, data=json.dumps(params))
         r.raise_for_status()
         return r.json()
 
@@ -236,34 +242,31 @@ class CbApi(object):
         """ get the metadata for a binary.  Requires the md5 of the binary.
 
             Returns a python dictionary with the binary metadata. """
-        r = self.session.get("%s/api/v1/binary/%s/summary" % (self.server, md5),
-                             headers=self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get("%s/api/v1/binary/%s/summary" % (self.server, md5))
         r.raise_for_status()
         return r.json()
 
     def binary(self, md5hash):
-        '''
+        """
         download binary based on md5hash
-        '''
+        """
 
-        r = self.session.get("%s/api/v1/binary/%s" % (self.server, md5hash),
-                         headers=self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get("%s/api/v1/binary/%s" % (self.server, md5hash))
 
         r.raise_for_status()
         return r._content
 
     def sensor(self, sensor_id):
-        '''
+        """
         get information about a single sensor, as specified by sensor id
-        '''
+        """
 
-        r = self.session.get("%s/api/v1/sensor/%s" % (self.server, sensor_id),
-                         headers=self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get("%s/api/v1/sensor/%s" % (self.server, sensor_id))
         r.raise_for_status()
         return r.json()
 
     def sensors(self, query_parameters={}):
-        '''
+        """
         get sensors, optionally specifying search criteria
 
         as of this writing, supported search criteria are:
@@ -272,13 +275,13 @@ class CbApi(object):
           groupid - the sensor group id; must be numeric
 
         returns a list of 0 or more matching sensors
-        '''
+        """
 
         url = "%s/api/v1/sensor?" % (self.server,)
         for query_parameter in query_parameters.keys():
             url += "%s=%s&" % (query_parameter, query_parameters[query_parameter])
 
-        r = self.session.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get(url)
         r.raise_for_status()
         return r.json()
 
@@ -308,7 +311,7 @@ class CbApi(object):
         #
         url = "%s%s" % (self.server, mapping[type])
         
-        r = self.session.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get(url)
         r.raise_for_status()
 
         return r.content
@@ -320,28 +323,28 @@ class CbApi(object):
 
         url = "%s/api/v1/sensor/statistics" % (self.server,)
 
-        r = self.session.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get(url)
         r.raise_for_status()
 
         return r.json()
 
     def watchlist(self, id=None):
-        '''
+        """
         get all watchlists or a single watchlist
-        '''
+        """
 
         url = "%s/api/v1/watchlist" % (self.server)
         if id is not None:
             url = url + "/%s" % (id,)
 
-        r = self.session.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get(url)
         r.raise_for_status()
         return r.json()
 
     def watchlist_add(self, type, name, search_query, id=None, readonly=False, basic_query_validation=True):
-        '''
+        """
         adds a new watchlist
-        '''
+        """
 
         # as directed by the caller, provide basic parameter validation
         if basic_query_validation:
@@ -385,40 +388,40 @@ class CbApi(object):
 
         url = "%s/api/v1/watchlist" % (self.server,)
 
-        r = self.session.post(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
+        r = self.cbapi_post(url, data=json.dumps(request))
         r.raise_for_status()
 
         return r.json()
 
     def watchlist_del(self, id):
-        '''
+        """
         deletes a watchlist
-        '''
+        """
         request = {'id': id}
 
         url = "%s/api/v1/watchlist/%s" % (self.server, id)
         
-        r = self.session.delete(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
+        r = self.cbapi_delete(url, data=json.dumps(request))
         r.raise_for_status()
 
         return r.json()
 
     def watchlist_modify(self, id, watchlist):
-        '''
+        """
         updates a watchlist
-        '''
+        """
         url = "%s/api/v1/watchlist/%s" % (self.server, id)
 
-        r = self.session.put(url, headers=self.token_header, data=json.dumps(watchlist), verify=self.ssl_verify)
+        r = self.cbapi_put(url, data=json.dumps(watchlist))
         r.raise_for_status()
 
         return r.json()
 
     def feed_add_from_url(self, feed_url, enabled=True, validate_server_cert=False, use_proxy=False,
                           feed_username=None, feed_password=None, ssl_client_crt=None, ssl_client_key=None):
-        '''
+        """
         add a new feed to the Carbon Black server, as specified by URL
-        '''
+        """
         request = {
                       'use_proxy': use_proxy,
                       'validate_server_cert': validate_server_cert,
@@ -438,36 +441,36 @@ class CbApi(object):
 
         url = "%s/api/v1/feed" % (self.server,)
         
-        r = self.session.post(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
+        r = self.cbapi_post(url, data=json.dumps(request))
         r.raise_for_status()
 
         return r.json()
 
     def user_add_from_data(self, username, first_name, last_name, password, confirm_password, global_admin, teams, email):
-        '''
+        """
         add a new user to the server
-        '''
-        request = {\
-                    'username' : username,\
-                    'first_name' : first_name,\
-                    'last_name' : last_name,\
-                    'password' : password,\
-                    'confirm_password' : confirm_password,\
-                    'global_admin' : global_admin,\
-                    'teams' : teams,\
-                    'email' : email,\
-                  }
+        """
+        request = {
+            'username': username,
+            'first_name': first_name,
+            'last_name': last_name,
+            'password': password,
+            'confirm_password': confirm_password,
+            'global_admin': global_admin,
+            'teams': teams,
+            'email': email,
+        }
         url = "%s/api/user" % (self.server,)
        
-        r = self.session.post(url, headers=self.token_header, data = json.dumps(request), verify=self.ssl_verify)
+        r = self.cbapi_post(url, data = json.dumps(request))
         r.raise_for_status()
 
         return r.json()
 
     def feed_get_id_by_name(self, name):
-        '''
+        """
         helper function to find the feed id given the feed name
-        '''
+        """
 
         for feed in self.feed_enum():
             if feed['name'].lower() == name.lower():
@@ -478,9 +481,9 @@ class CbApi(object):
         return None
 
     def user_get_username_by_name(self, first_name, last_name):
-        '''
+        """
         helper function to find the username given a user's first and last name
-        '''
+        """
 
         for user in self.user_enum():
             if user['first_name'].lower() == first_name.lower() and user['last_name'].lower() == last_name.lower():
@@ -491,37 +494,37 @@ class CbApi(object):
         return None
 
     def feed_enum(self):
-        '''
+        """
         enumerate all configured feeds
-        '''
+        """
 
         url = "%s/api/v1/feed" % (self.server,)
 
-        r = self.session.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get(url)
         r.raise_for_status()
 
         return r.json()
 
     def user_enum(self):
-        '''
+        """
         enumerate all users
-        '''
+        """
 
         url = "%s/api/users" % (self.server,)
 
-        r = self.session.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get(url)
         r.raise_for_status()
 
         return r.json()
 
     def team_enum(self):
-        '''
+        """
         enumerate all teams
-        '''
+        """
 
         url = "%s/api/teams" % (self.server,)
         
-        r = self.session.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get(url)
         r.raise_for_status()
 
         return r.json()
@@ -530,31 +533,31 @@ class CbApi(object):
         return
 
     def feed_info(self, id):
-        '''
+        """
         retrieve information about an existing feed, as specified by id
 
         note: the endpoint /api/v1/feed/<id> is not supported as of CB server 5.0
-        '''
+        """
         feeds = self.feed_enum()
         for feed in feeds:
           if str(feed['id']) == str(id):
               return feed
 
     def user_info(self, username):
-        '''
+        """
         retrieve information about an existing user, as specified by username
 
         note: the endpoint /api/users/<id> is not supported as of CB server 5.0
-        '''
+        """
         users = self.user_enum()
         for user in users:
           if user['username'] == username:
               return user
 
     def team_get_id_by_name(self, name):
-        '''
+        """
         retrieve information about an existing team, specified by name
-        '''
+        """
 
         teams = self.team_enum()
         for team in teams:
@@ -562,9 +565,9 @@ class CbApi(object):
                 return team['id']
 
     def team_info(self, id):
-        '''
+        """
         retrieve information about an existing team, specified by id
-        '''
+        """
 
         teams = self.team_enum()
         for team in teams:
@@ -574,13 +577,13 @@ class CbApi(object):
                 return team
 
     def output_user_activity(self):
-        '''
+        """
         retrieve all user activity from server
-        '''
+        """
 
         url = "%s/api/useractivity" % (self.server,)
     
-        r = self.session.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get(url)
         r.raise_for_status()
 
         useractivity = r.json()
@@ -590,13 +593,13 @@ class CbApi(object):
             print "%-12s| %-14s | %-12s | %-5s | %-20s" % (attempt['username'], attempt['timestamp'], attempt['ip_address'], attempt['http_status'], attempt['http_description'])
 
     def output_user_activity_success(self):
-        '''
+        """
         retrieve all user activity from server and filter out successful attempts
-        '''
+        """
 
         url = "%s/api/useractivity" % (self.server,)
         
-        r = self.session.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get(url)
         r.raise_for_status()
 
         useractivity = r.json()
@@ -611,13 +614,13 @@ class CbApi(object):
             print "%-12s| %-14s | %-12s | %-5s | %-20s" % (attempt['username'], attempt['timestamp'], attempt['ip_address'], attempt['http_status'], attempt['http_description'])
 
     def output_user_activity_failure(self):
-        '''
+        """
         retrieve all user activity from server and filter out successful attempts
-        '''
+        """
 
         url = "%s/api/useractivity" % (self.server,)
         
-        r = self.session.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get(url)
         r.raise_for_status()
 
         useractivity = r.json()
@@ -632,12 +635,12 @@ class CbApi(object):
             print "%-12s| %-14s | %-12s | %-5s | %-20s" % (attempt['username'], attempt['timestamp'], attempt['ip_address'], attempt['http_status'], attempt['http_description'])
 
     def feed_del(self, id):
-        '''
+        """
         delete a feed, as specified by id
-        '''
+        """
         url = "%s/api/v1/feed/%s" % (self.server, id)
 
-        r = self.session.delete(url, headers=self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_delete(url)
         r.raise_for_status()
 
         return r.json()
@@ -647,40 +650,38 @@ class CbApi(object):
 
         url = "%s/api/user/%s" % (self.server, username)
         
-        r = self.session.delete(url, headers=self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_delete(url)
         r.raise_for_status()
 
         return r.json()
 
     def feed_modify(self, id, feed):
-        '''
+        """
         updates a watchlist
-        '''
+        """
         url = "%s/api/v1/feed/%s" % (self.server, id)
 
-        r = self.session.put(url, headers=self.token_header, data=json.dumps(feed), verify=self.ssl_verify)
+        r = self.cbapi_put(url, data=json.dumps(feed))
         r.raise_for_status()
 
         return r.json()
 
     def feed_synchronize(self, name, full_sync=True):
-        '''
+        """
         force the synchronization of a feed
 
         this triggers the CB server to refresh the feed.  it does not result in immediate
         tagging of any existing process or binary documents that match the feed.  it does result
         in any new incoming data from sensors being tagged on ingress.
-        '''
+        """
 
-        feed_request = self.session.get("%s/api/v1/feed" % self.server, headers=self.token_header, verify=self.ssl_verify)
+        feed_request = self.cbapi_get("%s/api/v1/feed" % self.server)
         feed_request.raise_for_status()
 
         for feed in feed_request.json():
             if feed['name'] == name:
-                sync_request = self.session.post("%s/api/v1/feed/%s/synchronize" % (self.server, feed["id"]),
-                                             headers=self.token_header,
-                                             verify=self.ssl_verify,
-                                             data=json.dumps({"full_sync": full_sync}))
+                sync_request = self.cbapi_post("%s/api/v1/feed/%s/synchronize" % (self.server, feed["id"]),
+                                               data=json.dumps({"full_sync": full_sync}))
                 if sync_request.status_code == 200:
                     return {"result": True}
                 elif sync_request.status_code == 409:
@@ -729,58 +730,57 @@ class CbApi(object):
         # HTTP POST and HTTP GET are both supported for process search
         # HTTP POST allows for longer query strings
         #
-        r = self.session.get("%s/api/v1/threat_report" % self.server, headers=self.token_header,
-                          params=params, verify=self.ssl_verify)
+        r = self.cbapi_get("%s/api/v1/threat_report" % self.server, params=params)
         r.raise_for_status()
         return r.json()
 
     def feed_report_info(self, feedid, reportid):
-        '''
+        """
         retrieve a single report from a feed
-        '''
+        """
 
         url = "%s/api/v1/feed/%s/report/%s" % (self.server, feedid, reportid,)
 
-        r = self.session.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get(url)
         r.raise_for_status()
 
         return r.json()
 
     def feed_report_stats(self, feed_id, report_id):
-        '''
+        """
         Get feed report stats
-        '''
+        """
 
         url = "%s/api/v1/feed/%s/report/%s/stats" % (self.server, feed_id, report_id)
 
-        r = self.session.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get(url)
         r.raise_for_status()
 
         return r.json()
 
     def feed_action_enum(self,id):
-        '''
+        """
         Gets the actions for a certain feed from the Carbon Black Server
         :param id: the id of the feed
         :return: the actions associated with that feed
-        '''
+        """
 
         url = "%s/api/v1/feed/%s/action" % (self.server, id)
 
-        r = self.session.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get(url)
         r.raise_for_status()
 
         return r.json()
 
     def feed_action_add(self, id, action_type_id, email_recipient_user_ids):
-        '''
+        """
         enables one of the three pre-determined actions to be performed
         upon hits for feeds: email, create alert, and write to syslog
         :param id: the id of the feed
         :param action_type_id: the id for the type of action
         :param email_recipient_user_ids: ids of users who will be emailed upon a hit
         :return: the added action
-        '''
+        """
         url = "%s/api/v1/feed/%s/action" % (self.server, id)
 
         request = {
@@ -790,18 +790,18 @@ class CbApi(object):
             "watchlist_id": None
         }
 
-        r = self.session.post(url, headers = self.token_header, data = json.dumps(request), verify = self.ssl_verify)
+        r = self.cbapi_post(url, data=json.dumps(request))
         r.raise_for_status()
         return r.json()
 
     def feed_action_update(self, id , action_id, action_type_id):
-        '''
+        """
         updates a feed action
         :param id: the feed id
         :param action_id: the action id
         :param action_type_id: the action type id
         :return: the updated feed
-        '''
+        """
         url = "%s/api/v1/feed/%s/action/%s" % (self.server, id, action_id)
 
         old_actions = self.feed_action_enum(id)
@@ -817,31 +817,31 @@ class CbApi(object):
             "watchlist_id": curr_action['watchlist_id']
         }
 
-        r = self.session.put(url, headers = self.token_header, data = json.dumps(request), verify = self.ssl_verify)
+        r = self.cbapi_put(url, data=json.dumps(request))
         r.raise_for_status()
         return r.json()
 
     def feed_action_del(self, id, action_id):
-        '''
+        """
         Deletes a feed action
         :param id: the id of the feed
         :param action_id: the id of the action
         :return: whether successful or not
-        '''
+        """
         url =  "%s/api/v1/feed/%s/action/%s" % (self.server, id, action_id)
-        r = self.session.delete(url, headers=self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_delete(url)
         r.raise_for_status()
 
         return r.json()
 
     def feed_requirements(self, id):
-        '''
+        """
         Get feed requirements
-        '''
+        """
 
         url = "%s/api/v1/feed/%s/requirements" % (self.server, id)
 
-        r = self.session.get(url, headers=self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get(url)
         r.raise_for_status()
 
         return r.json()
@@ -881,14 +881,12 @@ class CbApi(object):
         if len(query_string) > 0:
             params['q'] = [query_string]
 
-        r = self.session.get("%s/api/v1/alert" % self.server, headers=self.token_header,
-                          params=params, verify=self.ssl_verify)
+        r = self.cbapi_get("%s/api/v1/alert" % self.server, params=params)
         r.raise_for_status()
         return r.json()
 
     def alert_update(self, alert):
-        r = self.session.post("%s/api/v1/alert/%s" % (self.server, alert['unique_id']), headers=self.token_header,
-                          data=json.dumps(alert), verify=self.ssl_verify)
+        r = self.cbapi_post("%s/api/v1/alert/%s" % (self.server, alert['unique_id']), data=json.dumps(alert))
         r.raise_for_status()
         return r.json()
 
@@ -972,14 +970,14 @@ class CbApi(object):
             data['watchlist_id'] = watchlist_id
 
         url = "%s/util/v1/watchlist/%d/action" % (self.server, watchlist_id)
-        r = self.session.post(url, headers=self.token_header, data=json.dumps(data), verify=self.ssl_verify, timeout=120)
+        r = self.cbapi_post(url, data=json.dumps(data), timeout=120)
         r.raise_for_status()
 
         return r.json()
 
     def live_response_session_list(self):
         url = "%s/api/v1/cblr/session" % (self.server)
-        r = self.session.get(url, headers=self.token_header, verify=self.ssl_verify, timeout=120)
+        r = self.cbapi_get(url, timeout=120)
         r.raise_for_status()
         return r.json()
 
@@ -993,14 +991,14 @@ class CbApi(object):
         if not target_session:
             url = "%s/api/v1/cblr/session" % (self.server)
             data = {"sensor_id": sensor_id}
-            r = self.session.post(url, headers=self.token_header, data=json.dumps(data), verify=self.ssl_verify, timeout=120)
+            r = self.cbapi_post(url, data=json.dumps(data), timeout=120)
             r.raise_for_status()
             target_session = r.json()
         return target_session
 
     def live_response_session_status(self, session_id):
         url = "%s/api/v1/cblr/session/%d" % (self.server, session_id)
-        r = self.session.get(url, headers=self.token_header, verify=self.ssl_verify, timeout=120)
+        r = self.cbapi_get(url, timeout=120)
         r.raise_for_status()
         return r.json()
 
@@ -1012,7 +1010,7 @@ class CbApi(object):
             data.update(command_object[1])
         else:
             data['object'] = command_object
-        r = self.session.post(url, headers=self.token_header, data=json.dumps(data), verify=self.ssl_verify, timeout=120)
+        r = self.cbapi_post(url, data=json.dumps(data), timeout=120)
         r.raise_for_status()
         return r.json()
 
@@ -1022,13 +1020,13 @@ class CbApi(object):
             params = {'wait':'true'}
         else:
             params = {}
-        r = self.session.get(url, headers=self.token_header, params=params, verify=self.ssl_verify, timeout=120)
+        r = self.cbapi_get(url, params=params, timeout=120)
         r.raise_for_status()
         return r.json()
 
     def live_response_session_command_get_file(self, session_id, file_id):
         url = "%s/api/v1/cblr/session/%d/file/%d/content" % (self.server, session_id, file_id)
-        r = self.session.get(url, headers=self.token_header, params={}, verify=self.ssl_verify, timeout=120)
+        r = self.cbapi_get(url, params={}, timeout=120)
         r.raise_for_status()
         return r.content
 
@@ -1041,11 +1039,7 @@ class CbApi(object):
 
         headers = {'X-Auth-Token': self.token}
 
-        r = self.session.post(url,
-                               headers=headers,
-                               files=fpost,
-                               verify=False,
-                               timeout=120)
+        r = self.cbapi_post(url, files=fpost, timeout=120)
 
         r.raise_for_status()
         ret = json.loads(r.content)
@@ -1055,7 +1049,7 @@ class CbApi(object):
 
     def live_response_session_keep_alive(self, session_id):
         url = '%s/api/v1/cblr/session/%d/keepalive' % (self.server, session_id)
-        r = self.session.get(url, headers=self.token_header, verify=self.ssl_verify, timeout=120)
+        r = self.cbapi_get(url, timeout=120)
         r.raise_for_status()
         return r.json()
 
@@ -1064,11 +1058,8 @@ class CbApi(object):
 
         data["network_isolation_enabled"] = do_isolation
 
-        r = self.session.put("%s/api/v1/sensor/%s" % (self.server, sensor_id),
-                        data=json.dumps(data),
-                        headers=self.token_header,
-                        verify=self.ssl_verify,
-                        timeout=120)
+        r = self.cbapi_put("%s/api/v1/sensor/%s" % (self.server, sensor_id),
+                           data=json.dumps(data), timeout=120)
         r.raise_for_status()
         return r.status_code == 200
 
@@ -1081,11 +1072,8 @@ class CbApi(object):
         data = self.sensor(sensor_id)
         data["event_log_flush_time"] = flush_time #"Wed, 01 Jan 2020 00:00:00 GMT"
 
-        r = self.session.put("%s/api/v1/sensor/%s" % (self.server, sensor_id),
-                        data=json.dumps(data),
-                        headers=self.token_header,
-                        verify=self.ssl_verify,
-                        timeout=120)
+        r = self.cbapi_put("%s/api/v1/sensor/%s" % (self.server, sensor_id),
+                           data=json.dumps(data), timeout=120)
         r.raise_for_status()
         return r.status_code == 200
 
@@ -1093,55 +1081,52 @@ class CbApi(object):
         data = self.sensor(sensor_id)
         data["group_id"] = new_group_id
 
-        r = self.session.put("%s/api/v1/sensor/%s" % (self.server, sensor_id),
-                        data=json.dumps(data),
-                        headers=self.token_header,
-                        verify=self.ssl_verify,
-                        timeout=120)
+        r = self.cbapi_put("%s/api/v1/sensor/%s" % (self.server, sensor_id),
+                           data=json.dumps(data), timeout=120)
         r.raise_for_status()
         return r.status_code == 200
 
     def event_add(self, investigation_id, description, start_date):
-        '''
+        """
         Adds a tagged_event to an investigation on the server
         :investigation_id: the id of the investigation to add the event to
         :param description: description of the event
         :param start_date: start date of the event
         :return: the added event
-        '''
-        event_data = {\
-            'description' : description,\
-            }
+        """
+        event_data = {
+            'description': description,
+        }
 
-        request = {\
-           'investigation_id' : investigation_id,\
-           'event_data' : event_data,\
-           'start_date' : start_date,\
-                  }
+        request = {
+            'investigation_id': investigation_id,
+            'event_data': event_data,
+            'start_date': start_date
+        }
 
         url = "%s/api/tagged_event" % self.server
 
-        r = self.session.post(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
+        r = self.cbapi_post(url, data=json.dumps(request))
         r.raise_for_status()
 
         return r.json()
 
     def event_info(self, investigation_id):
-        '''
+        """
         Enumerates the tagged_events for a certain investigation and gives their information
         :param id: the id of the investigation this tagged_event is for
-        '''
+        """
         url = "%s/api/tagged_event/%s" % (self.server, investigation_id)
-        r = self.session.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get(url)
         r.raise_for_status()
         return r.json()
 
     def event_update(self, id, new_description):
-        '''
+        """
         Updates the description of an event on the server
         :param id: the updated event's investigation id
         :return: the updated event
-        '''
+        """
 
         #be able to target a single event
         old_event_as_list = self.event_info(id)
@@ -1162,65 +1147,65 @@ class CbApi(object):
 
         url = "%s/api/tagged_event/%s" % (self.server, id)
 
-        r = self.session.put(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
+        r = self.cbapi_put(url, data=json.dumps(request))
         r.raise_for_status()
 
         return r.json()
 
     def event_del(self, id):
-        '''
+        """
         Deletes a tagged_event from the server
         :param id: id of the event to be deleted
         :return: success or failure
-        '''
+        """
         # Way to deal with selecting boxes on the UI
         url = "%s/api/tagged_event/%s" % (self.server, id)
-        r = self.session.delete(url, headers = self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_delete(url)
         r.raise_for_status()
 
         return r.json()
 
 
     def event_by_process_id(self, proc_id):
-        '''
+        """
         Retrieves a tagged_event specified by its process_id
         :param proc_id: the process_id of the event
         :return: the tagged_event
-        '''
+        """
 
         url = "%s/api/tagged_events/%s" % (self.server, proc_id)
-        r = self.session.get(url, headers = self.token_header, verify = self.ssl_verify)
+        r = self.cbapi_get(url)
         r.raise_for_status()
 
         return r.json()
 
     def get_builds(self):
-        '''
+        """
         Gets the build versions from the Carbon Black server
-        '''
+        """
         url = "%s/api/builds" % self.server
-        r = self.session.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get(url)
         r.raise_for_status()
 
         return r.json()
 
     def get_login_caps(self):
-        '''
+        """
         Gets login-caps from Carbon Black server
-        '''
+        """
         url = "%s/api/login-caps" % self.server
-        r = self.session.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get(url)
         r.raise_for_status()
 
         return r.json()
 
     def group_datasharing_enum(self, group_id):
-        '''
+        """
         Enumerates the datasharing settings for the group with id "group_id"
         from Carbon Black server
-        '''
+        """
         url = "%s/api/v1/group/%s/datasharing" % (self.server, group_id)
-        r = self.session.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get(url)
         r.raise_for_status()
 
         return r.json()
@@ -1228,60 +1213,88 @@ class CbApi(object):
     # this probably needs something like add_from_data, also look at line
     # that Jeremiah sent you that updated the datasharing settings
     def group_datasharing_add(self, group_id, who, what):
-        '''
+        """
         Add a new datasharing configuration to a sensor group in the CB server
         :param group_id: the sensor group id
         :param what: the type of data being shared i.e. "binaries" or "hashes" etc.
         :param who: What company the data is being shared with
         :return: the added configuration
-        '''
-        request = {\
-            'group_id' : group_id,\
-            'who' : who,\
-            'what' : what,\
-                  }
+        """
+        request = {
+            'group_id': group_id,
+            'who': who,
+            'what': what,
+        }
 
         url = "%s/api/v1/group/%s/datasharing" % (self.server, group_id)
 
-        r = self.session.post(url, headers=self.token_header, data=json.dumps(request), verify=self.ssl_verify)
+        r = self.cbapi_post(url, data=json.dumps(request))
         r.raise_for_status()
 
         return r.json()
 
     def group_datasharing_del_all(self, group_id):
-        '''
+        """
         Deletes all datasharing configurations for the group with id "group_id"
         from the Carbon Black server
-        '''
+        """
         url = "%s/api/v1/group/%s/datasharing" % (self.server, group_id)
-        r = self.session.delete(url, headers = self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_delete(url)
         r.raise_for_status()
 
         return r.json()
 
     def group_datasharing_info(self, group_id, config_id):
-        '''
+        """
         Retrieves a specific datasharing configuration of a sensor group
         :param group_id: id of sensor group
         :param config_id: id of specific datasharing configuration
         :return: the datasharing info for one configuration of a group
-        '''
+        """
         url = "%s/api/v1/group/%s/datasharing/%s" % (self.server,group_id,config_id)
-        r = self.session.get(url, headers = self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_get(url)
         r.raise_for_status()
 
         return r.json()
 
     def group_datasharing_del(self, group_id, config_id):
-        '''
+        """
         Deletes a specific datasharing configuration of a sensor group from the
         Carbon Black server
         :param group_id: id of sensor group
         :param config_id: id of specific datasharing configuration
         :return: the deleted configuration
-        '''
+        """
         url = "%s/api/v1/group/%s/datasharing/%s" % (self.server,group_id,config_id)
-        r = self.session.delete(url, headers = self.token_header, verify=self.ssl_verify)
+        r = self.cbapi_delete(url)
         r.raise_for_status()
 
         return r.json()
+
+    def cbapi_get(self, url, **kwargs):
+        headers = kwargs.pop('headers', None) or self.token_header
+        verify_ssl = kwargs.pop('verify', None) or self.ssl_verify
+        proxies = kwargs.pop('proxies', None) or self.proxies
+
+        return self.session.get(url, headers=headers, verify=verify_ssl, proxies=proxies, **kwargs)
+
+    def cbapi_post(self, url, **kwargs):
+        headers = kwargs.pop('headers', None) or self.token_header
+        verify_ssl = kwargs.pop('verify', None) or self.ssl_verify
+        proxies = kwargs.pop('proxies', None) or self.proxies
+
+        return self.session.post(url, headers=headers, verify=verify_ssl, proxies=proxies, **kwargs)
+
+    def cbapi_put(self, url, **kwargs):
+        headers = kwargs.pop('headers', None) or self.token_header
+        verify_ssl = kwargs.pop('verify', None) or self.ssl_verify
+        proxies = kwargs.pop('proxies', None) or self.proxies
+
+        return self.session.put(url, headers=headers, verify=verify_ssl, proxies=proxies, **kwargs)
+
+    def cbapi_delete(self, url, **kwargs):
+        headers = kwargs.pop('headers', None) or self.token_header
+        verify_ssl = kwargs.pop('verify', None) or self.ssl_verify
+        proxies = kwargs.pop('proxies', None) or self.proxies
+
+        return self.session.delete(url, headers=headers, verify=verify_ssl, proxies=proxies, **kwargs)
