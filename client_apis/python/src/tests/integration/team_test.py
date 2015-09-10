@@ -8,7 +8,7 @@
     as parameters.
 """
 
-import unittest
+import unittest2
 import sys
 import os
 import requests
@@ -296,4 +296,4 @@ if __name__ == '__main__':
     CbApiTeamTest.SERVER_URL = sys.argv.pop()
 
     # run the unit tests
-    unittest.main()
+    unittest2.main()

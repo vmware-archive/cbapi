@@ -8,7 +8,7 @@
     as parameters.
 """
 
-import unittest
+import unittest2
 import sys
 import os
 
@@ -17,7 +17,7 @@ if __name__ == '__main__':
 
 from cbapi.cbapi import CbApi
 
-class CbApiIntegrationTest(unittest.TestCase):
+class CbApiIntegrationTest(unittest2.TestCase):
     SERVER_URL = None
     API_TOKEN = None
 

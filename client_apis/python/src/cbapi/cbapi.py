@@ -75,7 +75,7 @@ class CbApi(object):
         :param start_date: the start date
         :param end_date: the end date
         """
-        url = "{}/api/concurrent_license_info/{:%Y%m%d}/{:%Y%m%d}".format(self.server, start_date, end_date)
+        url = "{0}/api/concurrent_license_info/{1:%Y%m%d}/{2:%Y%m%d}".format(self.server, start_date, end_date)
         r = requests.get(url=url, headers=self.token_header, verify=self.ssl_verify)
         r.raise_for_status()
         return r.json()
@@ -924,7 +924,7 @@ class CbApi(object):
 
         return r.json()
 
-    def user_add_from_data(self, username, first_name, last_name, password, global_admin, team_ids, email):
+    def user_add_from_data(self, username, first_name, last_name, password, confirm_password, global_admin, teams, email):
         '''
         add a new user to the Carbon Black server
         '''
@@ -933,8 +933,9 @@ class CbApi(object):
                     'first_name' : first_name,\
                     'last_name' : last_name,\
                     'password' : password,\
+                    'confirm_password' : password,\
                     'global_admin' : global_admin,\
-                    'teams' : team_ids,\
+                    'teams' : teams,\
                     'email' : email
                   }
         url = "%s/api/user" % (self.server,)

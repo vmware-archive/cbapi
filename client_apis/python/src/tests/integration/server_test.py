@@ -8,7 +8,7 @@
     as parameters.
 """
 
-import unittest
+import unittest2
 import sys
 import os
 import requests
@@ -22,7 +22,7 @@ from cbapi.cbapi import CbApi
 cb = None
 
 
-class CbApiServerTest(unittest.TestCase):
+class CbApiServerTest(unittest2.TestCase):
 
     def test_get_servers(self):
         servers = cb.server_enum()
@@ -105,4 +105,4 @@ if __name__ == '__main__':
 
     # run the unit tests
     #
-    unittest.main()
+    unittest2.main()

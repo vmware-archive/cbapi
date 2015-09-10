@@ -8,12 +8,13 @@
     as parameters.
 """
 
-import unittest
+import unittest2
 import sys
 import os
 import json
 import requests
 import time
+import socket
 
 
 if __name__ == '__main__':
@@ -25,7 +26,7 @@ from helpers.ssh_helper import SSHHelper
 
 cb = None
 
-class CbApiAlertTestCase(unittest.TestCase):
+class CbApiAlertTestCase(unittest2.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.watchlist_name = "alerts_watchlist_%s" % datetime.now().strftime('%m%d%Y%H%M%S')
@@ -53,8 +54,10 @@ class CbApiAlertTestCase(unittest.TestCase):
     def test_first_set_get_all_alerts(self):
         # Get All Alerts
         alerts = cb.alert_search('')
-        self.assertIsNotNone(alerts)
-        self.assertIsNotNone(alerts['results'])
+        # replaced by Issam self.assertIsNotNone(alerts)
+        self.assertTrue(alerts is not None)
+        # replaced by Issam self.assertIsNotNone(alerts['results'])
+        self.assertTrue(alerts['results'] is not None)
         self.assertNotEqual(len(alerts['results']), 0)
 
     def test_first_set_search_for_specific(self):
@@ -68,8 +71,10 @@ class CbApiAlertTestCase(unittest.TestCase):
     def test_first_set_search_for_nonexisting(self):
         # "Search For A Non Existing Alert
         alerts = cb.alert_search('watch_list_non')
-        self.assertIsNotNone(alerts)
-        self.assertEqual(len(alerts['results']), 0)
+        # replaced by Issam self.assertIsNotNone(alerts)
+        self.assertTrue(alerts is not None)
+        # replaced by Issam self.assertIsNotNone(alerts['results'])
+        self.assertTrue(alerts['results'] is not None)
 
     def test_first_set_update_alert(self):
 
@@ -175,21 +180,17 @@ if __name__ == '__main__':
     # instantiate a global CbApi object
     # all unit tests will use this object
     #
-    server = sys.argv[1]
-    token = sys.argv[2]
-    ssh_user = sys.argv[3]
-    ssh_password = sys.argv[4]
-    url = "https://"+server
-    cb = CbApi(url, ssl_verify=False, token=token)
+    ssh_password = sys.argv.pop()
+    ssh_user = sys.argv.pop()
+    token = sys.argv.pop()
+    url = sys.argv.pop()
+    #TODO, add some logic to verify that https is being passed and we are truncating the proper string
+    server = url[8:len(url)]  #remove https:// from url
 
-    # remove the server url and api token arguments, as unittest
-    # itself will try to interpret them
-    #
-    del sys.argv[4]
-    del sys.argv[3]
-    del sys.argv[2]
-    del sys.argv[1]
+    
+    cb = CbApi(url, ssl_verify=False, token=token)
 
     # run the unit tests
     #
-    unittest.main()
+    
+    unittest2.main()

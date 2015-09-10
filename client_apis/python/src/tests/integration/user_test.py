@@ -8,7 +8,7 @@
     as parameters.
 """
 
-import unittest
+import unittest2
 import sys
 import os
 import requests
@@ -45,6 +45,7 @@ class CbApiUserTest(CbApiIntegrationTest):
     def test_list_users_as_non_ga_admin(self):
         # create a different version of CbApi using the new user's token
         user_data = TestDataGen.gen_user()
+        user_data['confirm_password'] = user_data['password']
         non_ga_cb = self._create_user_and_get_api(user_data)
 
         users = non_ga_cb.user_enum()
@@ -94,7 +95,7 @@ class CbApiUserTest(CbApiIntegrationTest):
 
         user_add_params = self._convert_user_data_to_user_add_params(user_data)
         user_add_params['username'] = None
-
+        user_add_params['confirm_password'] = user_data['password']
         # should not be able to create user with no username
         with self.assertRaises(requests.HTTPError) as cm:
             self.cb.user_add_from_data(**user_add_params)
@@ -106,7 +107,7 @@ class CbApiUserTest(CbApiIntegrationTest):
 
         user_add_params = self._convert_user_data_to_user_add_params(user_data)
         user_add_params['username'] = "testuser " + TestDataGen.gen_uid_hex()
-
+        user_add_params['confirm_password'] = user_data['password']
         # should not be able to create user with a space in the username
         with self.assertRaises(requests.HTTPError) as cm:
             self.cb.user_add_from_data(**user_add_params)
@@ -199,6 +200,8 @@ class CbApiUserTest(CbApiIntegrationTest):
     def test_get_user_activity_as_non_ga_admin(self):
         user_data = TestDataGen.gen_user()
 
+        user_data['confirm_password'] = user_data['password']
+
         # create a different version of CbApi using the new user's token
         non_ga_cb = self._create_user_and_get_api(user_data)
 
@@ -279,10 +282,9 @@ class CbApiUserTest(CbApiIntegrationTest):
 
     def _convert_user_data_to_user_add_params(self, user_data):
         self.assertIn('password', user_data);
-
         user_add_params = user_data.copy();
         del user_add_params['teams']
-        user_add_params['team_ids'] = user_data['teams']
+        user_add_params['teams'] = user_data['teams']
         return user_add_params;
 
     def _verify_retrieved_user(self, user):
@@ -306,4 +308,4 @@ if __name__ == '__main__':
     CbApiUserTest.SERVER_URL = sys.argv.pop()
 
     # run the unit tests
-    unittest.main()
+    unittest2.main()

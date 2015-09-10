@@ -8,7 +8,7 @@
     as parameters.
 """
 
-import unittest
+import unittest2
 import sys
 import os
 import requests
@@ -23,7 +23,7 @@ cb = None
 name_prefix = "Test Watchlist"
 
 
-class CbApiWatchlistTest(unittest.TestCase):
+class CbApiWatchlistTest(unittest2.TestCase):
     def create_watchlist(self):
         add_result = cb.watchlist_add(
             type="modules",
@@ -372,4 +372,4 @@ if __name__ == '__main__':
 
     # run the unit tests
     #
-    unittest.main()
+    unittest2.main()

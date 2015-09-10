@@ -11,7 +11,7 @@
 import os
 import requests
 import sys
-import unittest
+import unittest2
 
 if __name__ == '__main__':
     sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../")))
@@ -23,30 +23,31 @@ from helpers.auth_helper import Creds4Token
 cb = None
 
 
-class CbApiAuthTest(unittest.TestCase):
+class CbApiAuthTest(unittest2.TestCase):
 
     def test_get_token(self):
         user = TestDataGen.gen_user()
         cb.user_add_from_data(
             username=user["username"],
-            password=user["password"],
-            confirm_password=user["password"],
             first_name=user["first_name"],
             last_name=user["last_name"],
+            password=user["password"],
+            confirm_password=user["password"],
+            global_admin=False,
             teams=user["teams"],
-            email=user["email"],
-            global_admin=False
+            email=user["email"]
         )
 
         auth_token = Creds4Token.get_token(url, user["username"], user["password"])
-        self.assertIsNotNone(auth_token)
+        self.assertTrue(auth_token is not None)     #Replaced self.assertIsNotNone(auth_token) since it isn't python 2.6 compatible
         return
 
     def test_get_token_invalid_username(self):
         with self.assertRaises(requests.HTTPError) as err:
             Creds4Token.get_token(url, "nowaythisusernameexists", "thisismypassword")
-
-        self.assertEqual(err.exception.response.status_code, 403)
+        
+            self.assertEqual(err.exception.response.status_code, 403)
+            
         return
 
 if __name__ == '__main__':
@@ -65,4 +66,4 @@ if __name__ == '__main__':
 
     # run the unit tests
     #
-    unittest.main()
+    unittest2.main()

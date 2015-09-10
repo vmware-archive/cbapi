@@ -8,7 +8,7 @@
     as parameters.
 """
 
-import unittest
+import unittest2
 import sys
 import os
 import requests
@@ -25,7 +25,7 @@ from helpers.testdata_gen import TestDataGen
 cb = None
 
 
-class CbApiSettingsTest(unittest.TestCase):
+class CbApiSettingsTest(unittest2.TestCase):
     initial_settings = None
 
     def setUp(self):
@@ -209,6 +209,9 @@ class CbApiSettingsTest(unittest.TestCase):
     def test_concurrent_license_info(self):
         end = datetime.now()
         start = end - timedelta(days=30)
+        print (start)
+        print (end)
+        
         result = cb.concurrent_license_info(start, end)
         self.assertIsNotNone(result)
         return
@@ -271,5 +274,5 @@ if __name__ == '__main__':
 
     # run the unit tests
     #
-    unittest.main()
+    unittest2.main()
 

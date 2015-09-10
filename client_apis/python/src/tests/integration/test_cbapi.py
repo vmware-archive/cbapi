@@ -8,7 +8,7 @@
     as parameters.
 """
 
-import unittest
+import unittest2
 import sys
 import os
 
@@ -19,7 +19,7 @@ from cbapi.cbapi import CbApi
 
 cb = None
 
-class CbApiTestCase(unittest.TestCase):
+class CbApiTestCase(unittest2.TestCase):
     def test_info(self):
         cb.info()
 
@@ -82,18 +82,17 @@ if __name__ == '__main__':
         print "example : python cbapi.py https://cb.my.org 3ab23b1bdhjj3jdjcjhh2kl\n"
         sys.exit(0)
 
+
     # instantiate a global CbApi object
     # all unit tests will use this object
     #
-    cb = CbApi(sys.argv[1], ssl_verify=False, token=sys.argv[2])
+    token = sys.argv.pop()
+    url = sys.argv.pop()
 
-    # remove the server url and api token arguments, as unittest
-    # itself will try to interpret them
-    #
-    del sys.argv[2]
-    del sys.argv[1]
+    cb = CbApi(url, ssl_verify=False, token=token, client_validation_enabled=False)
+
 
     # run the unit tests
     #
-    unittest.main()
+    unittest2.main()
 

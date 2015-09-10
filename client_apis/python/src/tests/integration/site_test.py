@@ -8,7 +8,7 @@
     as parameters.
 """
 
-import unittest
+import unittest2
 import sys
 import os
 import requests
@@ -23,7 +23,7 @@ cb = None
 name_prefix = "Test Site"
 
 
-class CbApiSiteTest(unittest.TestCase):
+class CbApiSiteTest(unittest2.TestCase):
     def create_site(self, group_ids=[]):
         add_result = cb.site_add(
             name="%s %s" % (name_prefix, datetime.now().isoformat(' ')),
@@ -84,6 +84,7 @@ class CbApiSiteTest(unittest.TestCase):
         for site in sites:
             result = cb.site_info(site_id=site["id"])
             self.assertIsNotNone(result)
+            print (result)
             self.assertEqual(result["id"], site["id"])
         return
 
@@ -178,7 +179,7 @@ class CbApiSiteTest(unittest.TestCase):
                     del_count += 1
                 except Exception as ex:
                     print "Unable to delete site with ID %s" % site["id"]
-                    print ex.message
+                    print ex.args[0]
                     fail_count += 1
 
         print "\n%s test sites deleted" % del_count
@@ -203,4 +204,4 @@ if __name__ == '__main__':
 
     # run the unit tests
     #
-    unittest.main()
+    unittest2.main()
