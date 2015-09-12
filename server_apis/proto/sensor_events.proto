@@ -138,7 +138,7 @@ message CbRegModMsg
     optional    CbRegModAction      action              = 2;  // CbRegModAction enum
     optional    bool                have_seen_before    = 3;  // deprecated
     optional    bytes               utf8_regpath        = 4;  // value name appended to key for DeleteValue and WriteValue action types
-    optional    bool                tamper              = 5 [default=false]
+    optional    bool                tamper              = 5 [default=false];
 }
 
 
