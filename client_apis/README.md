@@ -1,4 +1,4 @@
-Carbon Black Enterprise Server Client API 
+Carbon Black Client API 
 =========================
 
 https://www.bit9.com/solutions/carbon-black/
@@ -26,9 +26,9 @@ The following APIs are versioned.
 
 #### Process Data 
 - [`/api/v1/process`](#apiv1process) - Process search
-- [`/api/v1/process/(id)/(segment)`](#apiv1processidsegment) - Process summary data
-- [`/api/v1/process/(id)/(segment)/event`](#apiv1processidsegmentevent) - Events for the selected process
-- [`/api/v1/process/(id)/(segment)/preview`](#apiv1processidsegmentpreviewqquery) - Preview for the selected process
+- [`/api/v1/process/(process_id)/(segment_id)`](#apiv1processidsegment) - Process summary data
+- [`/api/v1/process/(process_id)/(segment_id)/event`](#apiv1processidsegmentevent) - Events for the selected process
+- [`/api/v1/process/(process_id)/(segment_id)/preview`](#apiv1processidsegmentpreviewqquery) - Preview for the selected process
 
 #### Binary Data
 - [`/api/v1/binary`](#apiv1binary) - Binary search
@@ -38,8 +38,8 @@ The following APIs are versioned.
  
 #### Sensors & Sensor Groups 
 - [`/api/v1/sensor`](#apiv1sensoridhostnamehostnameipipaddr) - Sensor details
-- [`/api/v1/group/<groupid>/installer/windows/exe`](#windowsexeinstaller) - Signed EXE Sensor Installer for Windows
-- [`/api/v1/group/<groupid>/installer/windows/msi`](#windowsmsiinstaller) - Signed MSI Sensor Installer for Windows
+- [`/api/v1/group/<groupid>/installer/windows/exe`](#windowsexeinstaller) - Signed EXE Sensor Installer for Windows (zip archive)
+- [`/api/v1/group/<groupid>/installer/windows/msi`](#windowsmsiinstaller) - Signed MSI Sensor Installer for Windows (zip archive)
 - [`/api/v1/group/<groupid>/installer/osx`](#osxinstaller) - PKG Sensor Installer for OSX
 - [`/api/v1/group/<groupid>/installer/linux`](#linuxinstaller) - Sensor Installer for Linux
 - [`/api/v1/sensor/statistics`](#sensorstatistics) - Global sensor status, including aggregate sensor data backlog
@@ -170,9 +170,9 @@ A process contains the following fields:
 - `crossproc_count`: the count of cross process events launched by this process
 - `group`: the CB Host group this sensor is assigned to 
 - `sensor_id`: the internal CB id for the sensor on which the process executed
-- `id`: the internal CB process GUID for this process (processes are identified by this GUID and their segment id)
+- `id`: the internal CB process id for this process (processes are identified by this id and their segment id)
 - `segment_id`: the process segment id (processes are identified by this segment id and their process ID id)
-- `unique_id`: internal CB process id combining of the process GUID and segment GUID
+- `unique_id`: internal CB process id combining of the process id and segment id 
 - `os_type`: operating system type of the computer for this process; one of windows, linux, osx
 
 *Event Object*
@@ -250,14 +250,14 @@ GET http://192.168.206.151/api/v1/process?q=notepad.exe
 ```
 
 -----
-####  `/api/v1/process/(id)/(segment)`
-Gets basic process information for segment (segment) of process (guid)
+####  `/api/v1/process/(process_id)/(segment_id)`
+Gets basic process information for segment (segment_id) of process (process_id)
 
 *Supports*: `GET`
 
 ##### Parameters:
-- `id`: REQUIRED the internal CB process guid, the `id` field in search results
-- `segment`: REQUIRED the process segment, the `segment_id` field in search results.
+- `process_id`: REQUIRED the internal CB process id; this is the `id` field in search results
+- `segment_id`: REQUIRED the process segment id, the `segment_id` field in search results.
 
 ##### Returns:
 A JSON object with the following structure:
@@ -272,13 +272,13 @@ Each process summary object contains the following structure:
 - `process_md5`: the MD5 of the executable backing this process 
 - `sensor_id`: the sensor id of the host this process executed on
 - `group`: the sensor group the sensor was assigned to
-- `parent_id`: the process guid of the parent process
+- `parent_id`: the Carbon Black process id of the parent process
 - `process_name`: the name of this process, e.g., svchost.exe
 - `path`: the full path of the executable backing this process, e.g., c:\windows\system32\svchost.exe
 - `last_update`: the time of the last event received from this process, as recorded by the remote host
 - `start`: the start time of this process, as recorded by the remote host
 - `hostname`: the hostname of the computer this process executed on
-- `id`: the internal CB process guid of this process
+- `id`: the internal CB process id of this process
 - `segment_id`: the segment id of this process
 - `os_type`: operating system type of the computer for this process; one of windows, linux, osx
 
@@ -337,14 +337,14 @@ GET http://192.168.206.154/api/v1/process/2032659773721368929/1
 }
 ```
 -----
-#### `/api/v1/process/(id)/(segment)/event`
-Gets the events for the process with id (id) and segment (segment)
+#### `/api/v1/process/(process_id)/(segment_id)/event`
+Gets the events for the process with CB process id (process_id) and segment id (segment_id)
 
 *Supports*:: `GET`
 
 ##### Parameters
-- `id`: REQUIRED the internal CB process guid, the `id` field in search results
-- `segment`: REQUIRED the process segment, the `segment_id` field in search results.
+- `process_id`: REQUIRED the internal CB process id; this is the `id` field in search results
+- `segment_id`: REQUIRED the process segment id; this is the `segment_id` field in search results.
 
 
 ##### Returns:
@@ -358,14 +358,14 @@ The process object may contain the following entries.
 - `process_md5`: the MD5 of the executable backing this process 
 - `sensor_id`: the sensor id of the host this process executed on
 - `group`: the sensor group the sensor was assigned to
-- `parent_id`: the process guid of the parent process
+- `parent_id`: the Carbon Black process id of the parent process
 - `process_name`: the name of this process, e.g., svchost.exe
 - `path`: the full path of the executable backing this process, e.g., c:\windows\system32\svchost.exe
 - `cmdline`: the command line of the process
 - `last_update`: the time of the last event received from this process, as recorded by the remote host
 - `start`: the start time of this process, as recorded by the remote host
 - `hostname`: the hostname of the computer this process executed on
-- `id`: the internal CB process guid of this process
+- `id`: the internal CB process id of this process
 - `segment_id`: the segment id of this process
 - `regmod_complete`: a pipe-delimited list of regmod strings
 - `filemod_complete`: a pipe-delimited list of filemod strings
@@ -436,7 +436,7 @@ The pipe character (`|`) delimits the fields.
 "2013-09-16 07:11:59.000000|-1979811809|80|6|dl.javafx.com|true"
 ```
 - field 0: event time
-- field 1: remote IP address as a 32-bit signed long
+- field 1: remote IP address as a 32-bit signed long (host byte order)
 - field 2: remote port
 - field 3: protocol: 6 is TCP, 17 is UDP
 - field 4: domain name associated with the IP address, from the client's perspective at the time of the network connection
@@ -520,14 +520,14 @@ GET http://192.168.206.154/api/v1/process/2032659773721368929/1/event
 }
 ```
 -----
-#### `/api/v1/process/(id)/(segment)/preview?q=(query)`
-Process preview.  Requires id and segment id.
+#### `/api/v1/process/(process_id)/(segment_id)/preview?q=(query)`
+Process preview.  Requires process_id and segment id.
 
 *Supports*: `GET`
 
 ##### Parameters: 
-- `id`: REQUIRED the internal CB process guid, the `id` field in search results
-- `segment`: REQUIRED the process segment, the `segment_id` field in search results.
+- `process_id`: REQUIRED the internal CB process id, the `id` field in search results
+- `segment_id`: REQUIRED the process segment id; this is the `segment_id` field in search results.
 - `query`: OPTIONAL a process query string.  If present, preview results will highlight matching terms
  
 ##### Returns: 
@@ -542,7 +542,7 @@ A process preview structure with the following fields:
 - `last_update`: the time of the last event received from this process, as recorded by the remote host
 - `start`: the start time of this process, as recorded by the remote host
 - `hostname`: the hostname of the computer this process executed on
-- `id`: the internal CB process guid of this process
+- `id`: the internal CB process id of this process
 - `segment_id`: the segment id of this process
 - `regmod_complete`: a pipe-delimited **summary** list of regmod strings (see spec above)
 - `filemod_complete`: a pipe-delimited **summary** list of filemod strings (see spec above)
@@ -657,7 +657,8 @@ A binary object contains the following fields:
 - `digsig_issuer`: If signed and present, the issuer name
 - `digsig_subject`: If signed and present, the subject
 - `alliance_score_virustotal`: If enabled and the hit count > 1, the number of [VirusTotal](http://virustotal.com) hits for this md5
-- `os_type`: operating system type of the computer for this process; one of windows, linux, osx
+- `os_type`: operating system type of this binary; one of windows, linux, osx
+- `host_count`: count of unique endpoints which have ever reported this binary
 
  
 *Facet object* 
@@ -1057,15 +1058,16 @@ GET /api/v1/feed/6/action
 
 -----
 
-####  `/api/v1/sensor/(id)?hostname=(hostname)&ip=(ipaddr)`
+####  `/api/v1/sensor/(id)?hostname=(hostname)&ip=(ipaddr)&groupid=(groupid)`
 Sensor / remote client details
 
 *Supports*: `GET` for all variations, `PUT` for `/api/v1/sensor/(id)` to update `event_log_flush_time`
 
 ##### Parameters:
 - `id`: OPTIONAL the sensor id
-- `hostname`: OPTIONAL returns the sensor record(s) with matching hostname
-- `ipaddr`: OPTIONAL returns the sensor record(s) with specified IP address
+- `hostname`: OPTIONAL returns the sensor registration(s) with matching hostname
+- `ipaddr`: OPTIONAL returns the sensor registration(s) with specified IP address
+- `groupid`: OPTIONAL retruns the sensor registration(s) in the specified sensor group id
 
 ##### Returns:
 
@@ -1078,23 +1080,23 @@ Sensor query strings are case-sensitive substring searches, for both `hostname` 
 
 A sensor structure has the following fields:
 
-- `id`: this sensor's id
+- `id`: the sensor id of this sensor 
 - `build_id`: the sensor version installed on this endpoint.  From the `/api/builds/` endpoint
-- `build_version_string`: Human-readable string of the host's installed sensor version
-- `uptime`: Host's uptime in seconds
-- `systemvolume_total_size`: size in bytes of the computer's system volumn
+- `build_version_string`: Human-readable string of the sensor version
+- `uptime`: Endpoint uptime in seconds
+- `systemvolume_total_size`: size, in bytes, of system volume of endpoint on which sensor in installed 
 - `systemvolume_free_size`: bytes free on the system volume
 - `os_environment_display_string`: Human-readable string of the installed OS
 - `os_environment_id`: the operating system installed on this computer.  From the internal table.
 - `physical_memory_size`: size in bytes of physical memory
-- `computer_dns_name`: this computer's DNS name
+- `computer_dns_name`: the DNS name of the endpoint on which the sensor is installed
 - `computer_name`: NetBIOS name of this computer
 - `sensor_health_message`: Human-readable string indicating sensor's self-reported status
 - `computer_sid`: Machine SID of this host
 - `event_log_flush_time`: See below.
 - `last_checkin_time`: Last communication with this computer in server-local time and zone
 - `network_adapters`: A pipe-delimited list list of IP,MAC pairs for each network interface
-- `sensor_health_status`: sensor's self-reported health score, from 0 to 100.  Higher numbers better
+- `sensor_health_status`: self-reported health score, from 0 to 100.  Higher numbers better
 - `registration_time`: Time this sensor originally registered in server-local time and zone
 - `next_checkin_time`: Next expected communication from this computer in server-local time and zone
 - `boot_id`: A sequential counter of boots since the sensor was installed

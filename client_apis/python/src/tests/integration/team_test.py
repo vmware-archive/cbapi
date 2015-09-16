@@ -250,11 +250,8 @@ class CbApiTeamTest(CbApiIntegrationTest):
         return new_team
 
     def _assert_team_doesnt_exist(self, team_id):
-        with self.assertRaises(requests.HTTPError) as cm:
-            self.cb.team_info(team_id)
-
-        # TODO: 2015.06.01 (dplummer): not sure I would expect 500 as the error code
-        self.assertEqual(cm.exception.response.status_code, 500)
+        team = self.cb.team_info(team_id)
+        self.assertIsNone(team)
 
     def _create_team(self, team_data):
         # convert new team data into params for the add-team API

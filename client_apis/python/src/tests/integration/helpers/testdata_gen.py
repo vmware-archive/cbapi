@@ -24,6 +24,7 @@ class TestDataGen:
             'last_name': 'TestUser',
             'email': 'integration.testuser ' + uid_hex + '@example.com',
             'password': 'p@ssw0rd',
+            'confirm_password': 'p@ssw0rd',
             'global_admin': False,
             'teams': []
         }

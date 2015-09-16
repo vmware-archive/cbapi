@@ -23,6 +23,7 @@ def build_cli_parser():
                       help = "id of the investigation this event is for")
     parser.add_option("-e", "--tagged_event_id", default = None, dest = "tagged_event_id",
                       help = "id of the tagged_event to be deleted")
+
     return parser
 
 def main(argv):

@@ -52,7 +52,7 @@ class CbApiWatchlistTest(unittest2.TestCase):
     def test_add_invalid_watchlist(self):
         old_watchlists = cb.watchlist()
         self.assertIsNotNone(old_watchlists)
-        with self.assertRaises(requests.HTTPError):
+        with self.assertRaises(requests.HTTPError) as cm:
             cb.watchlist_add(
                 type="bad_type",
                 name="%s %s" % (name_prefix, datetime.now().isoformat(' ')),

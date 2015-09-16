@@ -50,7 +50,6 @@ def main(argv):
 
     #Check to make sure the action isn't already enabled
     #
-
     curr_actions = cb.feed_action_enum(opts.id)
     for action in curr_actions:
         if int(action['action_type']) == int(opts.action_type_id):

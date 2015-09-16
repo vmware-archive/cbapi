@@ -35,8 +35,25 @@ class CbApiTestCase(unittest2.TestCase):
     def test_sensors_hostname_query(self):
         cb.sensors({'hostname':'unlikely_host_name'})
 
+    def test_sensors_groupid(self):
+        """
+        verify that the count of sensors for a "bogus" group id is 0
+        verify that the count of sensors for the default group (id=1) is <= total sensor count
+        """
+        unfiltered_count = cb.sensors()
+        bogus_count = cb.sensors({'groupid': 1111111})
+        default_group_count = cb.sensors({'groupid': 1})
+ 
+        if bogus_count > 0:
+            # group id filtering not enforced until CB 5.1 (see CBAPI-8)
+            raise Exception("count of sensors in bogus group unexpectedly non-zero")
+
+        if default_group_count > unfiltered_count or \
+           bogus_count > unfiltered_count:
+            raise Exception("count mismatch in sensors listing")
+
     def test_binary_stuff(self):
-        binaries = cb.binary_search("")
+        binaries = cb.binary_search("", rows=5)
         num_binaries_downloaded = 0
         last_exception = None
         for binary in binaries['results']:

@@ -117,4 +117,35 @@ class LiveResponseHelper(threading.Thread):
         fileid = ret["file_id"]
         return self.cb.live_response_session_command_get_file(self.session_id, fileid)
 
+    def put_file(self, rfile, lfile):
+        """
+        Uploads file data from <lfile> to <rfile> on sensor
+        """
+        self.ready_event.wait()
+        fileid = {'file_id':self.cb.live_response_session_command_put_file(self.session_id, lfile)}
+        return self.__post_and_wait("put file", [rfile, fileid])
+    
 
+    def del_file(self, filepath):
+        """
+        Deletes file from target
+        """
+        self.ready_event.wait()
+        return self.__post_and_wait("delete file", filepath)
+
+
+    def execute(self, procpath, wait_opt=None):
+        """
+        Creates process on target
+        """
+        self.ready_event.wait()
+        return self.__post_and_wait("create process", procpath)
+
+
+    def get_registry_value(self, registry_path):
+        """
+        Retrieve the data from a registry value.
+        """
+        self.ready_event.wait()
+        ret = self.__post_and_wait("reg query value", registry_path)
+        return ret.get('value', None)
