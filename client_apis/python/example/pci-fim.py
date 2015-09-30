@@ -63,7 +63,8 @@ class CBQuery(object):
                 # filemods are of the form:
                 #   1|2014-06-19 15:40:05.446|c:\dir\filename||
                 #
-                action, ts, filename, filemd5, filetype = filemod.split('|')
+                parts = filemod.split('|')
+                action, ts, filename, filemd5, filetype = parts[:5]
 
                 # the _document as a whole_ matched the query
                 # that doesn't mean each _indvidual filemod_ within the document matched

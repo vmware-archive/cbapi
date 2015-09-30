@@ -80,7 +80,7 @@ The 'subscribe_all.py' example script is found at:
 
 ## Notification Architecture
 
-The Carbon Black server uses the Advanced Message Queuing Protocol (AMQP) to publish events of interest.  Any AMQP compliant client can subscribe to these notifications. 
+The Carbon Black server uses the Advanced Message Queuing Protocol (AMQP) to publish events of interest.  Any AMQP compliant client can subscribe to these notifications.
 
 ## Notification Format 
 
@@ -324,7 +324,7 @@ Ingress feed events are published as the matching endpoint data arrives from the
 
 Storage feed events are published as the data is committed to the backend data store (SOLR).  As compared to ingress feed events, storage feed events happen later in time, but when all data is fully indexed and searchable via SOLR and therefore the CB client API. 
 
-Query feed events are published when a query string provided by a query feed matches comitted data.
+Query feed events are published when a query string provided by a query feed matches committed data.
 
 #### Ingress Feed Hit
 
