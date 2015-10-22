@@ -44,6 +44,9 @@ The following APIs are versioned.
 - [`/api/v1/group/<groupid>/installer/linux`](#linuxinstaller) - Sensor Installer for Linux
 - [`/api/v1/sensor/statistics`](#sensorstatistics) - Global sensor status, including aggregate sensor data backlog
 
+#### Blacklist
+- [`/api/v1/banning/blacklist`](#apiv1banningblack) - Blacklist (ban) hash enumeration and addition
+
 #### Watchlists
 - [`/api/v1/watchlist`](#apiv1watchlist) - Watchlist enumeration, addition, modification, and deletion
 
@@ -911,6 +914,73 @@ Get and set the configuration details of the Bit9 Platform Server.  These detail
 - `auth_token`: OPTIONAL authorization token used by the Carbon Black server to authenticate against the Platform Server.
 
 The `auth_token` field is never returned via HTTP GET for security purposes.
+
+-----
+#### `/api/v1/banning/blacklist`
+Blacklist (Ban) a specified md5 hash
+
+*Supports*: 'GET', 'POST'
+
+##### Notes
+
+- Provides a method to get all blacklisted hashes or allows for creation of new blacklisted hashes.
+
+##### Returns
+
+- (`GET /api/v1/banning/blacklist`) returns a list of blacklisted hashes, with each list entry describing one blacklisted hash
+- (`POST /api/v1/banning/blacklist`) 
+
+A blacklist record contains the following structure
+
+- `username`: username which created the blacklist
+- `text`: text description of blacklist
+- `md5hash`: the blacklisted hash
+- `block_count`: total number of blocks on this blacklist
+- `last_block_sensor_id`: the last sensor id which prevented the hash from executing
+- `last_block_time`: the last time the hash was blocked or prevented from being executed
+- `timestamp`: date and time of blacklist creation
+- `last_block_hostname`: last hostname to block this hash
+
+A GET response example:
+```
+GET /api/v1/banning/blacklist
+
+[
+  {
+    "username": "cb",
+    "audit": [
+      {
+        "username": "cb",
+        "timestamp": "2015-10-21 00:10:10.369349-07:00",
+        "text": "Auto-Blacklist From Watchlist",
+        "enabled": true,
+        "user_id": 1
+      }
+    ],
+    "text": "Auto-Blacklist From Watchlist",
+    "md5hash": "35e664e41174ce70e910b85bcd685136",
+    "block_count": 0,
+    "user_id": 1,
+    "last_block_sensor_id": null,
+    "enabled": true,
+    "last_block_time": null,
+    "timestamp": "2015-10-21 00:10:10.369349-07:00",
+    "last_block_hostname": null
+  }
+]
+```
+
+A POST request body example:
+```
+{
+  "md5hash": "f41d8cd98f00b214e9800998ecf8427e",
+  "text": "autoban from watchlist",
+  "last_ban_time": "0",
+  "ban_count": "0",
+  "last_ban_host": "0",
+  "enabled": "True"
+}
+```
 
 -----
 
