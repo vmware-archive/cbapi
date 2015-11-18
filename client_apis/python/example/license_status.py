@@ -30,6 +30,7 @@
 #  last updated 2015-06-28 by Ben Johnson bjohnson@bit9.com
 #
 
+import sys
 import optparse
 import cbapi 
 
