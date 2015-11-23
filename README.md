@@ -1,5 +1,9 @@
 # Carbon Black API 
 
+## Support
+
+If you have questions on the Carbon Black API or these API Bindings, please contact us at dev-support@bit9.com
+
 ## License
 
 Use of the Carbon Black API is governed by the license found in LICENSE.md.
