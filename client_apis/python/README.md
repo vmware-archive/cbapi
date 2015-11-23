@@ -2,6 +2,10 @@
 
 https://www.bit9.com/solutions/carbon-black/
 
+## Support
+
+If you have questions on the Carbon Black API or these API Bindings, please contact us at dev-support@bit9.com
+
 ## Requirements
 
 * Python 2.6+
