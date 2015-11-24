@@ -43,7 +43,7 @@ from cbapi import CbApi
 pagesize=20
 
 def build_cli_parser():
-    parser = OptionParser(usage="%prog [options]", description="Allows for the ability to check the frequency of child processes based on a given parent process")
+    parser = OptionParser(usage="%prog [options]", description="Allows for the ability to check the frequency of child process based on a given parent process")
 
     # for each supported output type, add an option
     parser.add_option("-c", "--cburl", action="store", default=None, dest="server",
