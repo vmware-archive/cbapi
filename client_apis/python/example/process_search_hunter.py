@@ -60,7 +60,7 @@ def build_cli_parser():
 
 def processsearchlist(procnamefile):
     with open(procnamefile) as tmp:
-        lines = [line.rstrip('\n') for line in tmp]
+        lines = filter(None, [line.strip() for line in tmp])
     return lines
 
 parser = build_cli_parser()
@@ -80,5 +80,5 @@ for search in searchprocess:
         facet=data['facets']
         hosts =[]
         for term in facet['hostname']:
-            hosts.append("%s (%s)" % (term['name'], term['ratio']))
+            hosts.append("%s (%s%%)" % (term['name'], term['ratio']))
         print "Resulting Hosts | "+"|".join(hosts)
