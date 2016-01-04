@@ -7,12 +7,25 @@
 import json
 import time
 import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.poolmanager import PoolManager
 
 try:
     from requests.packages.urllib3.exceptions import InsecureRequestWarning
     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 except:
     pass
+
+
+# Provide the ability to validate a Carbon Black server's SSL certificate without validating the hostname
+# (by default Carbon Black certificates are "issued" as CN=Self-signed Carbon Black Enterprise Server HTTPS Certificate)
+class HostNameIgnoringAdapter(HTTPAdapter):
+    def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
+        self.poolmanager = PoolManager(num_pools=connections,
+                                       maxsize=maxsize,
+                                       block=block,
+                                       assert_hostname=False, **pool_kwargs)
+
 
 class CbApi(object):
     """ Python bindings for Carbon Black API
@@ -27,7 +40,7 @@ class CbApi(object):
         print proc_detail['process']['start'], proc_detail['process']['hostname'], proc_detail['process']['path']
     """
     def __init__(self, server, ssl_verify=True, token=None, ignore_system_proxy=False,
-                 use_https_proxy=None, use_http_proxy=None):
+                 use_https_proxy=None, ssl_verify_hostname=True, use_http_proxy=None):
         """ Requires:
                 server -    URL to the Carbon Black server.  Usually the same as
                             the web GUI.
@@ -46,6 +59,9 @@ class CbApi(object):
         self.token = token
         self.token_header = {'X-Auth-Token': self.token}
         self.session = requests.Session()
+
+        if not ssl_verify_hostname:
+            self.session.mount("https://", HostNameIgnoringAdapter())
 
         self.proxies = {}
         if ignore_system_proxy:         # see https://github.com/kennethreitz/requests/issues/879
