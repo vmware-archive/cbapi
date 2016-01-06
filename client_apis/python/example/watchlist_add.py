@@ -46,7 +46,7 @@ def build_cli_parser():
     parser.add_option("-n", "--no-ssl-verify", action="store_false", default=True, dest="ssl_verify",
                       help="Do not verify server SSL certificate.")
     parser.add_option("-q", "--query", action="store", default=None, dest="query",
-                      help="Watchlist query string, start with q=  e.g. q=process_name:notepad.exe")
+                      help="Watchlist query string, e.g. process_name:notepad.exe")
     parser.add_option("-t", "--type", action="store", default=None, dest="type",
                       help="Watchlist type 'events' or 'modules'")
     parser.add_option("-N", "--name", action="store", default=None, dest="name",
@@ -88,10 +88,6 @@ def main(argv):
     if opts.type != "events" and opts.type != "modules":
         print "Watchlist type must be one of 'events' or 'modules'"
         sys.exit(-1)
-    if not opts.query.startswith("q="):
-        print "Query must begin with q="
-        print opts.query
-        sys.exit(-1)
 
     # build a cbapi object
     #
@@ -101,7 +97,12 @@ def main(argv):
     # for the purposes of this test script, hardcode the watchlist type, name, and query string
     #
     print "-> Adding watchlist..."
-    watchlist = cb.watchlist_add(opts.type, opts.name, opts.query, id=opts.id, readonly=opts.readonly)
+    watchlist = cb.watchlist_add(
+        opts.type,
+        opts.name,
+        opts.query,
+        id=opts.id,
+        readonly=opts.readonly)
     print "-> Watchlist added [id=%s]" % (watchlist['id'])
 
     # get record describing this watchlist  
