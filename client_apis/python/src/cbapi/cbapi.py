@@ -373,8 +373,12 @@ class CbApi(object):
             # urlencode the query
             search_query = urllib.quote(search_query)
 
+            # be backwards compatable with people still submitting
+            # queries with q= at the beginning and just add cb.urlver=1&
+            if search_query.startswith("q=") and "cb.urlver" not in search_query::
+                search_query = "cb.urlver=1&" + search_query
             # ensure that it starts with the proper url parameters
-            if not search_query.startswith("cb.urlver=1&q="):
+            elif not search_query.startswith("cb.urlver=1&q="):
                 search_query = "cb.urlver=1&q=" + search_query
 
             # ensure that the query itself is properly encoded
