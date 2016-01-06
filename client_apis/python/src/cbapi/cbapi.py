@@ -383,7 +383,6 @@ class CbApi(object):
 
             # ensure that the query itself is properly encoded
             for kvpair in search_query.split('&'):
-                print kvpair
                 if len(kvpair.split('=')) != 2:
                     continue
                 if kvpair.split('=')[0] != 'q':
