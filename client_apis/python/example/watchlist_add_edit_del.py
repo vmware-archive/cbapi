@@ -80,7 +80,10 @@ def main(argv):
     # for the purposes of this test script, hardcode the watchlist type, name, and query string
     #
     print "-> Adding watchlist..."
-    watchlist = cb.watchlist_add('events', 'test watchlist', 'q=process_name:notepad.exe')
+    watchlist = cb.watchlist_add(
+        'events',
+        'test watchlist',
+        'process_name:notepad.exe')
     print "-> Watchlist added [id=%s]" % (watchlist['id'])
 
     # get record describing this watchlist  
@@ -93,7 +96,7 @@ def main(argv):
     # edit the search query of the just-added watchlist
     #
     print "-> Modifying the watchlist query..."
-    watchlist['search_query'] = 'q=process_name:calc.exe'
+    watchlist['search_query'] = 'process_name:calc.exe'
     cb.watchlist_modify(watchlist['id'], watchlist)
     print "-> Watchlist modified" 
 

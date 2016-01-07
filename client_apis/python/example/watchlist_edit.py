@@ -48,7 +48,7 @@ def build_cli_parser():
     parser.add_option("-i", "--id", action="store", default=None, dest="id",
                       help="Watchlist ID to modify")
     parser.add_option("-q", "--query", action="store", default=None, dest="query",
-                      help="New search query")
+                      help="New search query, e.g. process_name:notepad.exe")
     return parser
 
 def watchlist_output(watchlist):
@@ -72,14 +72,6 @@ def main(argv):
     if not opts.url or not opts.token or not opts.id or not opts.query:
         print "Missing required param; run with --help for usage"
         sys.exit(-1)
-
-    # ensure the query string is minimally valid
-    #
-    if not opts.query.startswith("q="):
-        print "Query must start with 'q='.  Examples;"
-        print "  q=process_name:notepad.exe"
-        print "  q=-modload:kernel32.dll"
-        sys.exit(0)
 
     # build a cbapi object
     #

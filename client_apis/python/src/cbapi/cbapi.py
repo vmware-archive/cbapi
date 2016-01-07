@@ -7,6 +7,7 @@
 import json
 import time
 import requests
+import urllib
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.poolmanager import PoolManager
 
@@ -369,17 +370,19 @@ class CbApi(object):
             if "events" != type and "modules" != type:
                 raise ValueError("type must be one of events or modules")
 
-            # ensure that the query begins with q=
-            if not "q=" in search_query:
-                raise ValueError("watchlist queries must be of the form: cb.urlver=1&q=<query>")
+            # urlencode the query
+            search_query = urllib.quote(search_query)
 
-            # ensure that a cb url version is included
-            if "cb.urlver" not in search_query:
+            # be backwards compatable with people still submitting
+            # queries with q= at the beginning and just add cb.urlver=1&
+            if search_query.startswith("q=") and "cb.urlver" not in search_query:
                 search_query = "cb.urlver=1&" + search_query
+            # ensure that it starts with the proper url parameters
+            elif not search_query.startswith("cb.urlver=1&q="):
+                search_query = "cb.urlver=1&q=" + search_query
 
             # ensure that the query itself is properly encoded
             for kvpair in search_query.split('&'):
-                print kvpair
                 if len(kvpair.split('=')) != 2:
                     continue
                 if kvpair.split('=')[0] != 'q':
@@ -427,7 +430,10 @@ class CbApi(object):
         updates a watchlist
         """
         url = "%s/api/v1/watchlist/%s" % (self.server, id)
-
+        watchlist['search_query'] = urllib.quote(watchlist['search_query'])
+        # ensure that it starts with the proper url parameters
+        if not watchlist['search_query'].startswith("cb.urlver=1&q="):
+            watchlist['search_query'] = "cb.urlver=1&q=" + watchlist['search_query']
         r = self.cbapi_put(url, data=json.dumps(watchlist))
         r.raise_for_status()
 
