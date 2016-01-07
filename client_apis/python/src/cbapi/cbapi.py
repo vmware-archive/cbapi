@@ -375,7 +375,7 @@ class CbApi(object):
 
             # be backwards compatable with people still submitting
             # queries with q= at the beginning and just add cb.urlver=1&
-            if search_query.startswith("q=") and "cb.urlver" not in search_query::
+            if search_query.startswith("q=") and "cb.urlver" not in search_query:
                 search_query = "cb.urlver=1&" + search_query
             # ensure that it starts with the proper url parameters
             elif not search_query.startswith("cb.urlver=1&q="):
