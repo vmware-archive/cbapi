@@ -370,22 +370,45 @@ class CbApi(object):
             if "events" != type and "modules" != type:
                 raise ValueError("type must be one of events or modules")
 
-            # urlencode the query
-            search_query = urllib.quote(search_query)
+            # To maintain backwards compatibility, we must not urlencode queries that were submitted using the
+            # "old" interface. The "old" interface was determined by searching for "q=" anywhere in the search_query
+            # so we will retain that here. We are changing that condition slightly here and instead assuming that
+            # either "q=" or "cb.urlver=" is the first parameter in a "preformatted" search_query.
 
-            # be backwards compatable with people still submitting
+            # Therefore there are two ways that someone could format search_query:
+            # 1. Copy the query from an existing watchlist/URL exactly, which should be passed in to the API
+            #    unchanged. This is equivalent to the "old" interface and will be referred to as a "preformatted"
+            #    search_query. "preformatted" queries do not require url encoding.
+            # 2. Copy the query from the query text box of the Web UI/API. In this case, the query must be url encoded
+            #    then placed into a query string under the "q" key. Additionally, the cb.urlver key should be set
+            #    to "1".
+
+            encode_query = True
+
+            # be backwards compatible with people still submitting
             # queries with q= at the beginning and just add cb.urlver=1&
+            # This handles the "preformatted" case.
             if search_query.startswith("q=") and "cb.urlver" not in search_query:
                 search_query = "cb.urlver=1&" + search_query
+                encode_query = False
             # ensure that it starts with the proper url parameters
-            elif not search_query.startswith("cb.urlver=1&q="):
-                search_query = "cb.urlver=1&q=" + search_query
+            elif search_query.startswith("cb.urlver=1&q="):
+                encode_query = False
+
+            # urlencode the query if necessary
+            if encode_query:
+                search_query = urllib.urlencode({
+                    "q":         search_query,
+                })
+                # change all "+" to "%20" (percent-encoding)
+                search_query = search_query.replace("+", "%20")
+                # ensure that "cb.urlver=1" is the first parameter
+                search_query = "cb.urlver=1&{}".format(search_query)
 
             # ensure that the query itself is properly encoded
+            # This is now strengthened to enforce url encoding on all parameters
             for kvpair in search_query.split('&'):
                 if len(kvpair.split('=')) != 2:
-                    continue
-                if kvpair.split('=')[0] != 'q':
                     continue
 
                 # the query itself must be percent-encoded
@@ -393,17 +416,18 @@ class CbApi(object):
                 # no logic to detect unescaped '%' characters
                 for c in kvpair.split('=')[1]:
                     if c not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.~%":
-                        raise ValueError("Unescaped non-reserved character '%s' found in query; use percent-encoding" % c)
+                        raise ValueError("Unescaped non-reserved character '%s' found in query; use percent-encoding"
+                                         % c)
 
-        request = {\
-                      'index_type': type,\
-                      'name': name,\
-                      'search_query': search_query,\
-                      'readonly': readonly\
+        request = {
+                      'index_type': type,
+                      'name': name,
+                      'search_query': search_query,
+                      'readonly': readonly
                   }
 
         if id is not None:
-          request['id'] = id
+            request['id'] = id
 
         url = "%s/api/v1/watchlist" % (self.server,)
 
