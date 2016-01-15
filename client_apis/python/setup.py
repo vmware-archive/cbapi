@@ -7,14 +7,13 @@ import os
 import sys
 
 setup(
-    name='python-cbapi',
-    version='0.5.0',
-    url='http://www.carbonblack.com/',
+    name='cbapi',
+    version='0.8.0',
+    url='https://github.com/carbonblack/cbapi',
     license='MIT',
     author='Carbon Black',
-    author_email='support@carbonblack.com',
-    description='CB API Python Bindings',
-    long_description=__doc__,
+    author_email='dev-support@bit9.com',
+    description='CB REST API Python Bindings',
     packages=['cbapi', 'cbapi.util'],
     include_package_data=True,
     package_dir = {'': 'src'},
@@ -29,7 +28,6 @@ setup(
     classifiers=[
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
-        'License :: MIT',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Topic :: Software Development :: Libraries :: Python Modules'
