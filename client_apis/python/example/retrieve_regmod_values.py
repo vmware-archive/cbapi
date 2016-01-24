@@ -23,20 +23,21 @@
 # SOFTWARE.
 #
 # -----------------------------------------------------------------------------
-#  Extension file watcher and grabber
+#  Extension regmod watcher and grabber
 #
-#  This script listens to the CB messaging bus for file modification events, and
-#  when a modification is seen that ends in a specified extension, it goes and
-#  grabs the file using CB Live Response.
+#  This script listens to the CB messaging bus for registry modification events, 
+#  and when a modification is seen that matches a regular expression from a file 
+#  of registry path regular expressions, it goes and grabs the registry value 
+# using CB Live Response.
 #
 #  You need to make sure rabbitmq is enabled in cb.conf, and you might need to
-#  open a firewall rule for port 5004.  You also will need to enable filemod
+#  open a firewall rule for port 5004.  You also will need to enable regmod
 #  in the DatastoreBroadcastEventTypes=<values> entry.  If anything is changed
 #  here, you'll have to do service cb-enterprise restart.
 #
 #  TODO: More error handling, more performance improvements
 #
-#  last updated 2015-08-11 by Ben Johnson bjohnson@bit9.com (dev-support@bit9.com)
+#  last updated 2016-01-23 by Ben Johnson bjohnson@bit9.com (dev-support@bit9.com)
 #
 
 import re
