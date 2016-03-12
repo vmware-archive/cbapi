@@ -106,9 +106,6 @@ def on_message(channel, method_frame, header_frame, body):
         if "application/protobuf" == header_frame.content_type:
             if method_frame. routing_key == 'ingress.event.process':
                 (sensor, message)  = pbuf.protobuf_to_obj_and_host(body)
-#                if re.search('powershell.exe$',message['path']) and re.search("iex.+?downloadstring\('http", message['command_line'].lower()):
-#                  move_policy(sensor)
-#                  print "ingress.event.process consume"
                 (hit,policy) = check_triggers(message)
 		if hit:
                   move_policy(sensor,policy)
