@@ -23,8 +23,10 @@
 # SOFTWARE.
 #
 # -----------------------------------------------------------------------------
-#
-#  last updated 2016-02-10 by Jon Ross jross@carbonblack.com
+#  
+#  last updated 2016-03-13 by Jon Ross jross@carbonblack.com
+#    -vastly improved base64 decoding and encoded command detection
+#  updated 2016-02-10 by Jon Ross jross@carbonblack.com
 #
 
 
@@ -38,18 +40,22 @@ def main (cb, args):
   powershells=cb.process_search_iter('process_name:powershell.exe')
   for s in powershells:
     if s['cmdline']:
-      encoded = re.search('\-[eE][nN][cC]{0,1}', s['cmdline'])
-      if encoded:
-        origCommand = s['cmdline'].split()
-        for i in origCommand:
-          b = re.search('[a-fA-F0-9]+==$', i)
-          if b:
-            decodedCommand = base64.standard_b64decode(i)
-            try:
-              a = decodedCommand.encode('ascii','replace')
-              print "Powershell Decoded Command\n%s/#analyze/%s/1\n%s\n\n" % (args['server_url'],s['id'], a.replace('\0',""))
-            except UnicodeError:
-              pass
+      encoded = re.search('\-[eE][nN][cC][oOdDeEcCmMaAnN]*\s([A-Za-z0-9\+/=]+)', s['cmdline'])
+      if encoded != None:
+        i = encoded.group(1)
+        if not re.search('[a-zA-Z0-9\+/]+={1,2}$', i):
+          trailingBytes = len(i) % 4
+          if trailingBytes == 3:
+            i = i + '='
+          elif trailingBytes == 2:
+            i = i + '=='
+        decodedCommand = base64.standard_b64decode(i)
+        try:
+          a = decodedCommand.encode('ascii','replace')
+          print "Powershell Decoded Command\n%s/#analyze/%s/1\n%s\n\n" % (args['server_url'],s['id'], a.replace('\0',""))
+        except UnicodeError:
+          print "Powershell Decoded Command\n%s/#analyze/%s/1\nNon-ASCII decoding, encoded form printed to assist more research\n%s\n" % (args['server_url'],s['id'], s['cmdline'])
+          pass
             
 
 
