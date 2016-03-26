@@ -130,6 +130,12 @@ class CbApi(object):
                             data=json.dumps(platform_server_config))
         r.raise_for_status()
 
+    def get_dashboard_stats(self):
+        url = "%s/api/v1/dashboard/statistics" % (self.server)
+        r = self.cbapi_get(url, timeout=120)
+        r.raise_for_status()
+        return r.json()
+
     def process_search(self, query_string, start=0, rows=10, sort="last_update desc", facet_enable=True):
         """ Search for processes.  Arguments:
 
