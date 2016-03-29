@@ -130,6 +130,12 @@ class CbApi(object):
                             data=json.dumps(platform_server_config))
         r.raise_for_status()
 
+    def get_dashboard_stats(self):
+        url = "%s/api/v1/dashboard/statistics" % (self.server)
+        r = self.cbapi_get(url, timeout=120)
+        r.raise_for_status()
+        return r.json()
+
     def process_search(self, query_string, start=0, rows=10, sort="last_update desc", facet_enable=True):
         """ Search for processes.  Arguments:
 
@@ -930,6 +936,25 @@ class CbApi(object):
         r = self.cbapi_get("%s/api/v1/alert" % self.server, params=params)
         r.raise_for_status()
         return r.json()
+
+    def alert_search_iter(self, query_string, sort="created_time desc", start=0, rows=100, facet_enable=True):
+        """
+        A generator for doing an alert search so you can say for results in alert_search_iter
+        so that you can keep iterating through all the results.
+        :param query_string:
+        :param start:
+        :param rows:
+        :param sort:
+        :return:
+        """
+        while True:
+            resp = self.alert_search(query_string, sort="created_time desc", start=start, rows=rows, facet_enable=True)
+            results = resp.get('results')
+            for alert in results:
+                yield alert
+            start += len(results)
+            if len(results) < rows:
+                break
 
     def alert_update(self, alert):
         r = self.cbapi_post("%s/api/v1/alert/%s" % (self.server, alert['unique_id']), data=json.dumps(alert))
