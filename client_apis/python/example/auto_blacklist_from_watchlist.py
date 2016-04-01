@@ -42,9 +42,6 @@ def blacklist_binary(md5):
     """
     print "blacklisting md5:%s" % (md5)
 
-    global cbtoken
-    global cbserver
-
     headers = {'X-AUTH-TOKEN': cbtoken}
 
     data = {"md5hash": md5,
@@ -66,6 +63,7 @@ def blacklist_binary(md5):
     else:
         print "CarbonBlack Server API returned an error: %d" % (r.status_code)
         print "Be sure to check the Carbon Black API token"
+
 
 def on_message(channel, method_frame, header_frame, body):
     """
@@ -141,27 +139,27 @@ def validate_watchlist_dict(watchlistsdict):
         else:
             print "Watchlist: %s, ID: %d" % (key, value)
 
+
 def get_watchlist_id_by_name(watchlistsdict):
     """
     For each watchlist name specified in the config file, find the
     associated watchlist ID.
     NOTE: We trigger on watchlist IDs, and not on watchlist names
     """
-    global cbtoken
-    global cbserver
 
     headers = {'X-AUTH-TOKEN': cbtoken}
 
     r = requests.get("https://%s/api/v1/watchlist" % (cbserver),
-                      headers=headers,
-                      verify=False)
+                     headers=headers,
+                     verify=False)
 
     parsed_json = json.loads(r.text)
 
     for watchlist in parsed_json:
         for key, value in watchlistsdict.iteritems():
             if watchlist['name'].lower() == key.lower():
-                watchlistsdict[key] = watchlist['id']
+                watchlistsdict[key] = int(watchlist['id'])
+
 
 def Usage():
     return ("Usage: python auto_blacklist_from_watchlist.py <config file>")
