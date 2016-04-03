@@ -29,10 +29,16 @@ def build_cli_parser():
                       help="Do not verify server SSL certificate.")
     parser.add_option("-g", "--group", action="store", default=None, dest="groupid",
                       help="Limit sensor listing to just those specified by the sensor group id provided")
+    parser.add_option("-f", "--mailfrom", action="store", default=None, dest="mailfrom",
+                    help="Email from address.")
+    parser.add_option("-t", "--rcptto", action="store", default="bj@carbonblack.com", dest="rcptto",
+                    help="Email recipient.")
+    parser.add_option("-m", "--mailserver", action="store", default="localhost", dest="mailserver",
+                    help="Mail server to route email.")
     return parser
 
 
-def send_mail(sensor):
+def send_mail(sensor,opts):
     mail = {}
     if sensor['network_isolation_enabled'] == True: 
         if sensor['is_isolating'] == True:
@@ -55,11 +61,14 @@ def send_mail(sensor):
         msg['Subject'] = 'Host Isolation Disabled By Carbon Black'
     else:
         return
-    hostname = socket.getfqdn()
-    msg['From'] = 'sensor_isolation@%s' % (hostname)
-    msg['To'] = 'bj@carbonblack.com'
+    if opts.mailfrom == None:
+        hostname = socket.getfqdn()
+        opts.mailfrom = 'sensor_isolation@%s' % (hostname)
+
+    msg['From'] = opts.mailfrom
+    msg['To'] = opts.rcptto
     
-    s = smtplib.SMTP('localhost')
+    s = smtplib.SMTP(opts.mailserver)
     s.sendmail(msg['From'], msg['To'], msg.as_string())
     s.quit()
 
@@ -96,10 +105,10 @@ def main(argv):
             try:
                 if not sensor['is_isolating'] == former_iso_sensors[sid]['is_isolating']:
                     #state change, send email
-                    send_mail(sensor)
+                    send_mail(sensor,opts)
             except KeyError  as e:
                 #sid is not present in former_iso_sensors, new sensor isolation, send email
-                send_mail(sensor)
+                send_mail(sensor,opts)
 
     f = open("isolated_sensors.txt", "w")
     f.write(json.dumps(current_iso_sensors))
@@ -115,7 +124,7 @@ def main(argv):
         sid = str(sensor['id'])
         sensor['url'] = opts.url + "/#/host/" + sid
         #send notification of isolation removal
-        send_mail(sensor)
+        send_mail(sensor,opts)
 
 
 if __name__ == "__main__":
