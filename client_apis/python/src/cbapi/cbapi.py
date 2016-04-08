@@ -1055,7 +1055,7 @@ class CbApi(object):
     def live_response_session_create(self, sensor_id):
         target_session = None
         for session in self.live_response_session_list():
-            if session.get('sensor_id') == sensor_id and session.get('status') == "active":
+            if int(session.get('sensor_id')) == sensor_id and session.get('status') == "active":
                 target_session = session
                 break
 
