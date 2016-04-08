@@ -8,11 +8,11 @@ import sys
 
 setup(
     name='cbapi',
-    version='0.8.0',
+    version='0.8.1',
     url='https://github.com/carbonblack/cbapi',
     license='MIT',
     author='Carbon Black',
-    author_email='dev-support@bit9.com',
+    author_email='dev-support@carbonblack.com',
     description='CB REST API Python Bindings',
     packages=['cbapi', 'cbapi.util'],
     include_package_data=True,
