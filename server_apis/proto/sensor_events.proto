@@ -1,7 +1,7 @@
 //
 // Google Protobuf Definition for Carbon Black Sensor Events
 //
-// Copyright 2015 Bit9, Inc.
+// Copyright 2015-2016 Carbon Black, Inc.
 //
 
 message CbHeaderMsg
@@ -18,6 +18,7 @@ message CbHeaderMsg
     optional int32  process_pid                     = 10;   // Windows Process Identifier (PID)
     optional bytes  process_md5                     = 11;
     optional string process_path                    = 12;
+    optional int32  fork_pid                        = 13;
 }
 
 message CbStringMsg
@@ -55,6 +56,19 @@ message CbProcessMsg
     optional    string  username                = 15;   // username of process security context
     repeated    CbEmetMitigationAction actions  = 16;
     optional    bool    actionsAreFromGPO       = 17 [default=false];   // tells us where "actions" came from
+    optional    bool    bFilteringKnownDlls     = 18 [default=false];
+}
+
+message CbSuppressedInfo
+{
+    enum CbSuppressedProcessState
+    {
+        suppressedEventlessModloads  = 1; // proc with no events except modloads
+        suppressedEventlessWithXproc = 2; // proc with only modloads and xproc
+    }
+
+    optional  bool    bIsSuppressed           = 1 [default=false];
+    optional  CbSuppressedProcessState state  = 2;
 }
 
 //
@@ -65,14 +79,25 @@ message CbProcessMsg
 //
 message CbChildProcessMsg
 {
-    optional    bool    created                 = 1;    // creation:true::term:false
-    optional    int64   parent_guid             = 2;    // deprecated; only provided for backwards compatibility
-    optional    bytes   md5hash                 = 3;    // md5 hash of child process
-    optional    int64   child_guid              = 4;    // guid of child process (for link)
-    optional    string  path                    = 5;    // path of child process (c:\a.exe)
-    optional    int64   pid                     = 6;    // Windows Process Identifier (PID)
-    optional    int64   create_time             = 7;    // FILETIME format
-    optional    bool    tamper                  = 8 [default=false];
+    enum CbChildProcType
+    {
+        childProcExec = 0; // default (only type supported on WIN)
+        childProcFork = 1;
+        childProcOtherExec = 2; // when a posix process calls exec() then exec()
+    }
+
+    optional    bool    created                 =  1;   // creation:true::term:false
+    optional    int64   parent_guid             =  2;   // deprecated; only provided for backwards compatibility
+    optional    bytes   md5hash                 =  3;   // md5 hash of child process
+    optional    int64   child_guid              =  4;   // guid of child process (for link)
+    optional    string  path                    =  5;   // path of child process (c:\a.exe)
+    optional    int64   pid                     =  6;   // Process Identifier (PID) for human consumption
+    optional    int64   create_time             =  7;   // higher resolution timestamp of process creation (FILETIME format)
+    optional    bool    tamper                  =  8 [default=false];
+    optional    CbSuppressedInfo suppressed     =  9;   // if not present - not suppressed
+    optional    bytes   commandline             = 10;   // used for suppressed children
+    optional    string  username                = 11;   // used for suppressed children
+    optional    CbChildProcType childProcType   = 12 [default=childProcExec];
 }
 
 message CbModuleLoadMsg
@@ -221,6 +246,7 @@ message CbCrossProcessMsg
     optional CbCrossProcessOpenMsg      open            = 1;    // openprocess or openthread
     optional CbCreateRemoteThreadMsg    remotethread    = 2;    // createRemoteThread
     optional bool                       tamper          = 3;    // potential tamper event
+    optional bool                       isTarget        = 4;    // is process actor or target of crossproc event
 }
 
 message CbProcessBlockedMsg
@@ -446,6 +472,36 @@ message CbEmetMitigationMsg
     optional bool                   blocked      = 5 [default=false];
 }
 
+message CbProcessMetadataMsg
+{
+    optional    int64   process_guid            = 1;
+    optional    int64   process_create_time     = 2;
+    optional    int32   process_pid             = 3;
+    optional    bytes   process_md5             = 4;
+    optional    string  process_path            = 5;
+    optional    string  uid                     = 6;
+    optional    string  username                = 7;
+    optional    bytes   commandline             = 8;
+// parent info
+    optional    int32   parent_pid              = 9;
+    optional    int64   parent_create_time      = 10;
+    optional    bytes   parent_md5              = 11;
+    optional    string  parent_path             = 12;
+// Count fields contain cumulative event counts for this process
+    optional    int32   modload_count           = 13;
+    optional    int32   filemod_count           = 14;
+    optional    int32   netconn_count           = 15;
+    optional    int32   regmod_count            = 16;
+    optional    int32   childproc_count         = 17;
+    optional    int32   crossproc_count         = 18;
+    optional    int32   emet_count              = 19;
+    optional    int32   processblock_count      = 20;
+// segment type tracking
+    optional    int64   sensor_start_time       = 21;
+    optional    int64   sensor_segment          = 22;  // a per sensor-start segment id.  sensor_start_time.sensor_segment is unique
+    optional    bool    creationobserved        = 23 [default=false];  // was the creation of this process observed, or
+}
+
 message CbEventMsg
 {
     required CbHeaderMsg            	header      	= 1;
@@ -466,4 +522,5 @@ message CbEventMsg
     optional CbProcessBlockedMsg    	blocked     	= 16;
     optional CbEmetMitigationMsg    	emet        	= 17;
     optional CbNetConnBlockedMsg    	netconnBlocked	= 18;
+    optional CbProcessMetadataMsg    	processMeta	    = 19;
 }
