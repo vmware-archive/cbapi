@@ -1,0 +1,3 @@
+[submodule "client_apis/python"]
+	path = client_apis/python
+	url = https://github.com/carbonblack/cbapi-python
