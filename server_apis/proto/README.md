@@ -9,7 +9,7 @@ the underlying sensors.   The two changes are:
 * The re-mapping of POSIX processes into the SOLR document store. 
 These changes result in new and additional protobuffer messages being sent under specific conditions.  
 
-### Data supperession for eventless processes
+### Data Suppression for eventless processes
 
 In CarbonBlack Response a new optional feature was introduced that reduces the storage requirements on the back-end 
 data server by eliminating process documents for processes which are "uninteresting".   "Uninteresting" processes are 
@@ -180,8 +180,8 @@ message contains the extra meta-data about the suppressed process:
 
 Begining with 5.2, changes were made to how Posix (linux/OS X) processes are mapped into process documents within CarbonBlack
 Enterprise Response.    When Cb Response was first developed, the focus was on the Windows OS where processes are relatively
-expensive and process creation occurs infrequently.   This it made sense to map a single process to a single back-end SOLR 
-document.   In a Posix world, the model does not work as well.   In Posix there are two system calls are used to control how 
+expensive and process creation occurs infrequently.   Thus it made sense to map a single process to a single back-end SOLR 
+document.   In a Posix world, the model does not work as well.   In Posix there are two system calls which are used to control how 
 processes are created they are:
 
 * fork() - which causes the process to copy itself into a new process id, but maintian the same image and open handles as the parent. 
@@ -190,7 +190,7 @@ processes are created they are:
 Note: There is also the posix_spawn() system call which can function like fork(), exec(), or both depending on how it's called.  For 
 the purpose of keeping discussion here simple, we will treat it logically like a fork() and then an exec().  
 
-Typically a Posix process will create a child process by first performing an fork(), which creates a new process id, then 
+Typically a Posix process will create a child process by first performing a fork(), which creates a new process id, then 
 the process will perform an exec() from within the new child process.  This causes the process to adopt a new image and
 execute as a new process.   
 
@@ -239,7 +239,7 @@ is described as:
 While generally speaking the other meta-data in the CbChildProcessMsg will be the same as the parent, the process id will
 contain the process id of the fork-ed child.    
 
-Secondly, whenever a Posix process performs an fork(), all the events that occur for that process will be recorded by the
+Secondly, whenever a Posix process performs a fork(), all the events that occur for that process will be recorded by the
 sensor within the context of the originating ancestor.   We have, however, added a new field to the CbEventMsg to track events
 and associate them with their given process id.   The CbEventMsg header now contains a fork_pid field that will contain the 
 actual process id that performed the event, while the process_id will represent the originating ancestor.   An example
@@ -266,7 +266,7 @@ Process boundaries on Posix systems are now defined as an exec().   Whenever a p
 an exec() (for the first time), the sensor starts tracking the process as a new logical process.  It creates the CbChildProcessMsg 
 and CbProcessMsg associated with the new process and starts reporting the events for that process within the new process.   One 
 important thing to note is that the process create time reported by the new process is the create time as reported by the underlying
-OS.  This means that a process make fork(), wait a while, then exec().  The new process reported by the sensor at exec() time
+OS.  This means that a process may fork(), wait a while, then exec().  The new process reported by the sensor at exec() time
 will be reported with the create time of when the process id was created, which is actually the time of the fork().   
 
 If a process (a pid) performs any exec()s after the first one, those do not result in a new Cb process being created, but instead
