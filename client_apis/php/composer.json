@@ -1,0 +1,23 @@
+{
+  "authors": [
+    {
+      "name": "Andy O'Brien",
+      "email": "andy@1bg.com",
+      "homepage": "http://lowend.fm",
+      "role": "Developer"
+    }
+  ],
+  "require-dev": {
+    "phpunit/phpunit": "4.8.*"
+  },
+  "autoload": {
+    "psr-4": {
+      "CBApi\\": "src/CBApi"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "CBApi\\Tests\\": "tests/CBApi/Tests"
+    }
+  }
+}
