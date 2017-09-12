@@ -14,7 +14,7 @@ These changes result in new and additional protobuffer messages being sent under
 In CarbonBlack Response a new optional feature was introduced that reduces the storage requirements on the back-end 
 data server by eliminating process documents for processes which are "uninteresting".   "Uninteresting" processes are 
 processes that do not make a network connection, do not write to the registry, do not have child processes, and do 
- not write files.    (Cross process events can be considered intersting or unintersting depending on the level of
+ not write files.    (Cross process events can be considered interesting or uninteresting depending on the level of
  data suppresion configured.)   When a process is deemed uninteresting the sensor will not report a process event
  for the process, but instead will report a special child process event, CbChildProcessMsg, within the context of 
  the parent.   Extra meta-data for the process will be reported.    This extra meta-data includes:
